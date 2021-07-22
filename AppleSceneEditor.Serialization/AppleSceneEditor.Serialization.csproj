@@ -6,4 +6,11 @@
         <LangVersion>9</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="DefaultEcs" Version="0.16.0" />
+      <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.3" />
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.1986-develop" />
+        <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
+    </ItemGroup>
+
 </Project>
