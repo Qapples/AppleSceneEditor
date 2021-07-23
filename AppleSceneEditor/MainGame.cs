@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Text.Json;
+using AppleSceneEditor.Serialization.Info;
 using AssetManagementBase;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -78,6 +80,23 @@ namespace AppleSceneEditor
             {
                 Root = _project.Root
             };
+            
+            //serialization testing
+            string scenePath = Path.Combine("..", "..", "..", "Content", "TestScene.scene");
+            
+            JsonReaderOptions readerOptions = new()
+            {
+                AllowTrailingCommas = true,
+                CommentHandling = JsonCommentHandling.Skip
+            };
+
+            Utf8JsonReader testReader = new(File.ReadAllBytes(scenePath), readerOptions);
+
+            EntityInfo? info = EntityInfo.Deserialize(ref testReader, new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true,
+                ReadCommentHandling = JsonCommentHandling.Skip
+            });
         }
 
         protected override void UnloadContent()

@@ -14,4 +14,8 @@
         <PackageReference Include="System.CodeDom" Version="6.0.0-preview.6.21352.12" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\AppleSceneEditor.Serialization\AppleSceneEditor.Serialization.csproj" />
+    </ItemGroup>
+
 </Project>

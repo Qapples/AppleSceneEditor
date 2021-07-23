@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppleSceneEditor.Serialization.Converters;
+using AppleSceneEditor.Serialization.Info;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -51,9 +52,35 @@ namespace AppleSceneEditor.Serialization
         };
 
         /// <summary>
-        /// Delegate used in ExcludedTypes
+        /// A dictionary of value types and a string parser (if they have one).
+        /// </summary>
+        private static readonly Dictionary<Type, ConvertDelegate> StringConverters = new()
+        {
+            {typeof(Boolean), (string value) => Boolean.TryParse(value, out var val) ? val : null},
+            {typeof(Byte), (string value) => Byte.TryParse(value, out var val) ? val : null},
+            {typeof(DateTime), (string value) => DateTime.TryParse(value, out var val) ? val : null},
+            {typeof(Decimal), (string value) => Decimal.TryParse(value, out var val) ? val : null},
+            {typeof(Double), (string value) => Double.TryParse(value, out var val) ? val : null},
+            {typeof(Guid), (string value) => Guid.TryParse(value, out var val) ? val : null},
+            {typeof(Int16), (string value) => Int16.TryParse(value, out var val) ? val : null},
+            {typeof(Int32), (string value) => Int32.TryParse(value, out var val) ? val : null},
+            {typeof(Int64), (string value) => Int64.TryParse(value, out var val) ? val : null},
+            {typeof(SByte), (string value) => SByte.TryParse(value, out var val) ? val : null},
+            {typeof(Single), (string value) => Single.TryParse(value, out var val) ? val : null},
+            {typeof(UInt16), (string value) => UInt16.TryParse(value, out var val) ? val : null},
+            {typeof(UInt32), (string value) => UInt32.TryParse(value, out var val) ? val : null},
+            {typeof(UInt64), (string value) => UInt64.TryParse(value, out var val) ? val : null},
+        };
+
+        /// <summary>
+        /// Delegate used in <see cref="ConverterHelper.ExcludedTypes"/>.
         /// </summary>
         private delegate object? GetDelegate(ref Utf8JsonReader reader);
+
+        /// <summary>
+        /// Delegate used in <see cref="ConverterHelper.StringConverters"/>.
+        /// </summary>
+        private delegate object? ConvertDelegate(string value);
 
         /// <summary>
         /// Returns an instance of data defined by a single value (ex: a string, an integer, a vector, a color, etc).
@@ -125,7 +152,14 @@ namespace AppleSceneEditor.Serialization
                 Type? valueType = GetTypeFromObject(ref reader);
                 if (valueType is null)
                 {
-                    Debug.WriteLine($"Type is null (GetArrayFromReader). Skipping...");
+                    Debug.WriteLine($"Type is null (GetArrayFromReader). Skipping object ...");
+
+                    while (reader.TokenType != JsonTokenType.EndObject && reader.TokenType != JsonTokenType.EndArray)
+                    {
+                        reader.Read();
+                    }
+
+                    reader.Read();
                     continue;
                 }
 
@@ -135,7 +169,49 @@ namespace AppleSceneEditor.Serialization
                 if (Activator.CreateInstance(deserializeHelperType) is DeserializeHelper
                     deserializeHelperInstance)
                 {
-                    outputList.Add(deserializeHelperInstance.Deserialize(ref reader, options));
+                    //There's a lot of checks we have to do here because a lot cannot go wrong. 
+                    if (valueType == typeof(ValueInfo))
+                    {
+                        ValueInfo? valueInfoNullable =
+                            (ValueInfo?) deserializeHelperInstance.Deserialize(ref reader, options);
+
+                        if (valueInfoNullable is null)
+                        {
+                            Debug.WriteLine("Error parsing ValueInfo instance! (GetArrayFromReader) Skipping...");
+
+                            reader.Read();
+                            continue;
+                        }
+
+                        ValueInfo valueInfo = valueInfoNullable.Value;
+                        Type? valueInfoType = Type.GetType(valueInfo.ValueType);
+
+                        if (valueInfoType is null)
+                        {
+                            Debug.WriteLine($"Cannot find type with name {valueInfo.Value} in ValueInfo instance " +
+                                            "in GetArrayFromReader method. Skipping...");
+
+                            reader.Read();
+                            continue;
+                        }
+
+                        if (StringConverters.TryGetValue(valueInfoType, out var getDelegate))
+                        {
+                            outputList.Add(getDelegate(valueInfo.Value));
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"Type {valueInfoType} cannot be converted in ValueInfo instance in " +
+                                            $"GetArrayFromReader method. Skipping...");
+
+                            reader.Read();
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        outputList.Add(deserializeHelperInstance.Deserialize(ref reader, options));
+                    }
                 }
 
                 reader.Read();
@@ -159,18 +235,19 @@ namespace AppleSceneEditor.Serialization
             {
                 Debug.WriteLine($"$type specifier was not found in the object and the type could not be " +
                                 $"determined!. GetTypeFromObject (private) returning null.");
+
                 return null;
             }
 
             reader.Read();
 
-            //TODO: chance project name might change. account for that later 
             string? typeStr = reader.GetString();
-            Type? valueType = Type.GetType($"{typeStr!}, GrappleFightNET5");
+            Type? valueType = Type.GetType(typeStr!);
 
             if (typeStr is null)
             {
                 Debug.WriteLine($"Can't find type of name {typeStr!}! GetTypeFromObject (private) returning null.");
+
                 return null;
             }
 
