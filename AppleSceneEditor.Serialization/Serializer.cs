@@ -18,13 +18,15 @@ namespace AppleSceneEditor.Serialization
     public abstract class Serializer<T>
     {
         /// <summary>
-        /// Given a Utf8JsonReader, deserializes an object in Json and returns an instance of type T 
+        /// Given a <see cref="Utf8JsonReader"/>, deserializes an object in Json and returns an instance of type T 
         /// </summary>
-        /// <param name="reader">Utf8JsonReader instance responsible for providing Json data to deserialize</param>
-        /// <param name="options">Serialization options that changes how the data is deserialized</param>
-        /// <returns>If deserialization is successful, an instance of type T is returned. If unsuccesful, null is
+        /// <param name="reader"><see cref="Utf8JsonReader"/> instance responsible for providing Json data to
+        /// deserialize.</param>
+        /// <param name="options">Serialization options that changes how the data is deserialized. If null, a default
+        /// value (<see cref="GlobalVars.DefaultSerializerOptions"/>) will be used instead.</param>
+        /// <returns>If deserialization is successful, an instance of type T is returned. If unsuccessful, null is
         /// returned and a debug message is displayed to the debug console</returns>
-        public static T? Deserialize(ref Utf8JsonReader reader, JsonSerializerOptions options)
+        public static T? Deserialize(ref Utf8JsonReader reader, JsonSerializerOptions? options = null)
         {
             //this is a bit complicated, but what we are doing here is that we are using the constructor marked with
             //the JsonSerializer attribute to create an instance of T. 
@@ -32,6 +34,8 @@ namespace AppleSceneEditor.Serialization
                 from attribute in elm.GetCustomAttributes(true)
                 where attribute is JsonConstructorAttribute
                 select elm).First();
+            
+            options ??= GlobalVars.DefaultSerializerOptions;
 
             ParameterInfo[] jsonParameters = jsonConstructor.GetParameters();
             object?[]? inParameters = new object?[jsonParameters.Length]; //parameters we are going to send to the constructor
@@ -91,10 +95,12 @@ namespace AppleSceneEditor.Serialization
         /// <summary>
         /// Serializes the current object to a string value that is representative of the object in json format.
         /// </summary>
+        /// <param name="options"><see cref="JsonWriterOptions"/> instance that determine how the object is serialized.
+        /// If null, a default value will be used (<see cref="GlobalVars.DefaultWriterOptions"/>) </param>
         /// <exception cref="NotImplementedException">This exception is thrown when this type does not override
         /// <see cref="Serialize"/>.</exception>
         /// <returns>A a string value that is representative of the object in json format.</returns>
-        public virtual string Serialize()
+        public virtual string Serialize(in JsonWriterOptions? options = null)
         {
             throw new NotImplementedException($"{typeof(T)} does not implement Serialize()!");
         }
