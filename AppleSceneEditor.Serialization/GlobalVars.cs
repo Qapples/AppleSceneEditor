@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -36,6 +37,22 @@ namespace AppleSceneEditor.Serialization
         /// </summary>
         // This is a very hacky and stupid solution and there may or may not be a better solution, but it works.
         public static Vector2? CurrentDeserializingObjectSize { get; set; } 
+        
+        /// <summary>
+        /// Default <see cref="JsonSerializerOptions"/> instance for use in any serialization methods that accepts such
+        /// a parameter.
+        /// </summary>
+        public static readonly JsonSerializerOptions DefaultSerializerOptions = new()
+        {
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip
+        };
+
+        /// <summary>
+        /// Default <see cref="JsonWriterOptions"/> instance that is for use in any serialization methods that accepts
+        /// such a parameter.
+        /// </summary>
+        public static readonly JsonWriterOptions DefaultWriterOptions = new() {Indented = true};
 #nullable enable
     }
 }

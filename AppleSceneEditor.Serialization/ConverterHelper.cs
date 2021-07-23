@@ -54,7 +54,7 @@ namespace AppleSceneEditor.Serialization
         /// <summary>
         /// A dictionary of value types and a string parser (if they have one).
         /// </summary>
-        private static readonly Dictionary<Type, ConvertDelegate> StringConverters = new()
+        private static readonly Dictionary<Type, ConvertDelegate> StringToValueDict = new()
         {
             {typeof(Boolean), (string value) => Boolean.TryParse(value, out var val) ? val : null},
             {typeof(Byte), (string value) => Byte.TryParse(value, out var val) ? val : null},
@@ -71,14 +71,14 @@ namespace AppleSceneEditor.Serialization
             {typeof(UInt32), (string value) => UInt32.TryParse(value, out var val) ? val : null},
             {typeof(UInt64), (string value) => UInt64.TryParse(value, out var val) ? val : null},
         };
-
+        
         /// <summary>
         /// Delegate used in <see cref="ConverterHelper.ExcludedTypes"/>.
         /// </summary>
         private delegate object? GetDelegate(ref Utf8JsonReader reader);
 
         /// <summary>
-        /// Delegate used in <see cref="ConverterHelper.StringConverters"/>.
+        /// Delegate used in <see cref="ConverterHelper.StringToValueDict"/>.
         /// </summary>
         private delegate object? ConvertDelegate(string value);
 
@@ -195,7 +195,7 @@ namespace AppleSceneEditor.Serialization
                             continue;
                         }
 
-                        if (StringConverters.TryGetValue(valueInfoType, out var getDelegate))
+                        if (StringToValueDict.TryGetValue(valueInfoType, out var getDelegate))
                         {
                             outputList.Add(getDelegate(valueInfo.Value));
                         }
@@ -275,7 +275,6 @@ namespace AppleSceneEditor.Serialization
 
             return null;
         }
-
 
         //we can't pass values by reference using reflection, so we use this hacky solution to do so
         //(https://stackoverflow.com/questions/60830084/how-to-pass-an-argument-by-reference-using-reflection)
