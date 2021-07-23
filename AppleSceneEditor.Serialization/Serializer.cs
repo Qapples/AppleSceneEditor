@@ -89,12 +89,12 @@ namespace AppleSceneEditor.Serialization
         }
 
         /// <summary>
-        /// Serializes the current object to a specified Utf8JsonWriter instance
+        /// Serializes the current object to a string value that is representative of the object in json format.
         /// </summary>
-        /// <param name="writer">Utf8JsonWriter instance to write with and o</param>
         /// <exception cref="NotImplementedException">This exception is thrown when this type does not override
-        /// Serialize</exception>
-        public virtual void Serialize(Utf8JsonWriter writer)
+        /// <see cref="Serialize"/>.</exception>
+        /// <returns>A a string value that is representative of the object in json format.</returns>
+        public virtual string Serialize()
         {
             throw new NotImplementedException($"{typeof(T)} does not implement Serialize()!");
         }
