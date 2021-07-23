@@ -30,7 +30,7 @@ namespace AppleSceneEditor
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             
-            _uiPath = Path.Combine("..", "..", "..", "UI", "Menu.xmmp");
+            _uiPath = Path.Combine("..", "..", "..", "Content", "Menu.xmmp");
 
             foreach (string arg in args)
             {
