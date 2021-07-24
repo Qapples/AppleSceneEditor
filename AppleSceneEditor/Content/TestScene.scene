@@ -1,0 +1,10 @@
+{
+  "components": [
+    {
+      "$type": "AppleSceneEditor.Serialization.Info.ValueInfo, AppleSceneEditor.Serialization",
+      "valueType": "System.Int32",
+      "value": "3"
+    }
+  ],
+  "id": "Base"
+}

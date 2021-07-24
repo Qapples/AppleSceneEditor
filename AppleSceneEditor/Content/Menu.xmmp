@@ -6,9 +6,9 @@
       <Proportion Type="Auto" />
       <Proportion Type="Fill" />
     </VerticalStackPanel.Proportions>
-    <HorizontalMenu Id="_mainMenu">
-      <MenuItem Text="&amp;File" Id="_menuFile">
-        <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="_menuFileOpen" />
+    <HorizontalMenu Id="MainMenu">
+      <MenuItem Text="&amp;File" Id="MenuFile">
+        <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen" />
       </MenuItem>
     </HorizontalMenu>
   </VerticalStackPanel>
