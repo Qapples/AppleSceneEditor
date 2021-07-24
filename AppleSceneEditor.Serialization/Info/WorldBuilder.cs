@@ -81,10 +81,11 @@ namespace AppleSceneEditor.Serialization.Info
         /// <summary>
         /// Creates an instance of <see cref="World"/> using the entity data provided by <see cref="Entities"/>.
         /// </summary>
+        /// <param name="maxCapacity">The max amount of entities the world should contain.</param>
         /// <returns>A <see cref="World"/> instance with the entities described by <see cref="EntityInfo"/>.</returns>
-        public World CreateWorld()
+        public World CreateWorld(int maxCapacity)
         {
-            World outputWorld = new();
+            World outputWorld = new(maxCapacity);
             MethodInfo setMethod =
                 typeof(Entity).GetMethods().First(e => e.Name == "Set" && e.GetParameters().Length > 0);
 
