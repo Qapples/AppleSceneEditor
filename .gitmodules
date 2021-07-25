@@ -1,0 +1,3 @@
+[submodule "AppleSerialization"]
+	path = AppleSerialization
+	url = https://github.com/Qapples/AppleSerialization.git

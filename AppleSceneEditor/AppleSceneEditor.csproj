@@ -15,7 +15,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
       <ProjectReference Include="..\AppleSceneEditor.Serialization\AppleSceneEditor.Serialization.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Examples\BasicWorld\Content" />
     </ItemGroup>
 
 </Project>
