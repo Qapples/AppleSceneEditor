@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="DefaultEcs" Version="0.16.0" />
+        <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.5" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.1986-develop" />
         <PackageReference Include="Myra" Version="1.3.0" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
@@ -20,7 +21,18 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Examples\BasicWorld\Content" />
+      <Reference Include="GrappleFightNET5.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5\bin\Debug\net5.0\GrappleFightNET5.Components.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFightNET5.Scenes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5\bin\Debug\net5.0\GrappleFightNET5.Scenes.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFightScripts, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightBuilder\GrappleFightBuilder\bin\Debug\net5.0\GrappleFightScripts.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFightSystems, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightBuilder\GrappleFightBuilder\bin\Debug\net5.0\GrappleFightSystems.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

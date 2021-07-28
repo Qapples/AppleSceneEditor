@@ -9,6 +9,7 @@
     <HorizontalMenu Id="MainMenu">
       <MenuItem Text="&amp;File" Id="MenuFile">
         <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen" />
+        <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew" />
       </MenuItem>
     </HorizontalMenu>
   </VerticalStackPanel>

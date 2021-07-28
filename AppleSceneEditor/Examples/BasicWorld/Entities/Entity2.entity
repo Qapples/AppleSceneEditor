@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "$type": "AppleSceneEditor.Serialization.Info.ValueInfo, AppleSceneEditor.Serialization",
+      "$type": "AppleSerialization.Info.ValueInfo, AppleSerialization",
       "valueType": "System.Int32",
       "value": "4"
     }

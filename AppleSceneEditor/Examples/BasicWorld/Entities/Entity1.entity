@@ -1,9 +1,16 @@
 {
   "components": [
     {
-      "$type": "AppleSceneEditor.Serialization.Info.ValueInfo, AppleSceneEditor.Serialization",
+      "$type": "AppleSerialization.Info.ValueInfo, AppleSerialization",
       "valueType": "System.Int32",
       "value": "3"
+    },
+    {
+      "$type": "GrappleFightNET5.Scenes.Info.TextureInfo, GrappleFightNET5.Scenes",
+      "texturePath": {
+        "path": "Textures/TestTexture.png",
+        "isContentPath": true
+      }
     }
   ],
   "id": "Base"
