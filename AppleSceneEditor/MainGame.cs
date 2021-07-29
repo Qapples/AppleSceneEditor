@@ -68,7 +68,11 @@ namespace AppleSceneEditor
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
                 new FontSystem(), "Default");
-            
+
+            _graphics.PreferredBackBufferWidth = 1600;
+            _graphics.PreferredBackBufferHeight = 900;
+            _graphics.ApplyChanges();
+
             base.Initialize();
         }
 

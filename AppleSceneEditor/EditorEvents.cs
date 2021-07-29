@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using AppleSerialization.Info;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
+using Myra.Utility;
 
 namespace AppleSceneEditor
 {
@@ -30,6 +32,8 @@ namespace AppleSceneEditor
                 if (string.IsNullOrEmpty(filePath)) return;
         
                 _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch);
+                
+                if (_currentScene is not null) InitUIFromScene(_currentScene);
             };
         
             fileDialog.ShowModal(_desktop);
@@ -47,15 +51,17 @@ namespace AppleSceneEditor
                 if (string.IsNullOrEmpty(folderPath)) return;
         
                 InitNewProject(folderPath);
+                
+                if (_currentScene is not null) InitUIFromScene(_currentScene);
             };
         
             fileDialog.ShowModal(_desktop);
         }
         
         
-        //--------------
-        // HELPER METHODS
-        //--------------
+        //-----------------------
+        // ADDITIONAL METHODS
+        //-----------------------
 
         private const string BaseEntityContents = @"{
     ""components"": [
@@ -91,6 +97,50 @@ namespace AppleSceneEditor
             
 
             _currentScene = new Scene(folderPath, GraphicsDevice, null, _spriteBatch);
+        }
+
+        private void InitUIFromScene(Scene scene)
+        {
+            //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
+            //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.
+            _desktop.Root.ProcessWidgets(widget =>
+            {
+                if (widget.Id == "MainGrid")
+                {
+                    if (widget is not Grid grid) return false;
+
+                    VerticalStackPanel? stackPanel;
+
+                    try
+                    {
+                        stackPanel = grid.FindWidgetById("EntityStackPanel") as VerticalStackPanel;
+
+                        if (stackPanel is null)
+                        {
+                            Debug.WriteLine("EntityStackPanel cannot be casted into an instance of VerticalStackPanel");
+                            return false;
+                        }
+                    }
+                    catch
+                    {
+                        Debug.WriteLine("VerticalStackPanel of ID \"EntityStackPanel\" cannot be found.");
+                        return false;
+                    }
+
+                    foreach (Entity entity in scene.Entities.GetEntities())
+                    {
+                        if (!entity.Has<string>()) continue;
+                        
+                        ref var id = ref entity.Get<string>();
+                        stackPanel.Widgets.Add(new TextButton
+                        {
+                            Text = id, Id = "EntityButton_" + id
+                        });
+                    }
+                }
+
+                return true;
+            });
         }
     }
 }
