@@ -25,12 +25,14 @@
       
       <!--List of entities. The "holder" label is there to ensure that the entities go past the toolbar and are visible.
       -->
-      <ScrollViewer>
+      <ScrollViewer Id="EntityScrollViewer">
         <VerticalStackPanel Id="EntityStackPanel">
           <Label Text="Holder"/>
           <!--ENTITIES-->
         </VerticalStackPanel>
       </ScrollViewer>
+      
+      
     </Grid>
     
     <VerticalStackPanel>

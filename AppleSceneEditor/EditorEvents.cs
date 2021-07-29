@@ -1,16 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using AppleSerialization.Info;
+using AssetManagementBase;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
+using Myra.Graphics2D;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
+using Myra.Graphics2D.UI.Properties;
 using Myra.Utility;
+using Container = Myra.Graphics2D.UI.Container;
 
 namespace AppleSceneEditor
 {
@@ -95,7 +100,6 @@ namespace AppleSceneEditor
                 writer.Flush();
             }
             
-
             _currentScene = new Scene(folderPath, GraphicsDevice, null, _spriteBatch);
         }
 
@@ -103,44 +107,123 @@ namespace AppleSceneEditor
         {
             //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
             //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.
-            _desktop.Root.ProcessWidgets(widget =>
+            bool result = _desktop.Root.ProcessWidgets(widget =>
             {
                 if (widget.Id == "MainGrid")
                 {
                     if (widget is not Grid grid) return false;
 
-                    VerticalStackPanel? stackPanel;
-
-                    try
+                    ScrollViewer? scrollViewer = TryFindWidgetById<ScrollViewer>(grid, "EntityScrollViewer");
+                    if (scrollViewer is null)
                     {
-                        stackPanel = grid.FindWidgetById("EntityStackPanel") as VerticalStackPanel;
-
-                        if (stackPanel is null)
-                        {
-                            Debug.WriteLine("EntityStackPanel cannot be casted into an instance of VerticalStackPanel");
-                            return false;
-                        }
-                    }
-                    catch
-                    {
-                        Debug.WriteLine("VerticalStackPanel of ID \"EntityStackPanel\" cannot be found.");
+                        Debug.WriteLine("Can't find scrollviewer of ID \"EntityScrollViewer\"");
                         return false;
                     }
 
+                    VerticalStackPanel? stackPanel =
+                        TryFindWidgetById<VerticalStackPanel>(scrollViewer, "EntityStackPanel");
+                    if (stackPanel is null)
+                    {
+                        Debug.WriteLine("Can't find VerticalStackPanel with ID of \"EntityStackPanel\".");
+                        return false;
+                    }
+ 
                     foreach (Entity entity in scene.Entities.GetEntities())
                     {
                         if (!entity.Has<string>()) continue;
                         
-                        ref var id = ref entity.Get<string>();
-                        stackPanel.Widgets.Add(new TextButton
-                        {
-                            Text = id, Id = "EntityButton_" + id
-                        });
+                        //can't use ref due to closure
+                        var id = entity.Get<string>();
+                        
+                        TextButton button = new() {Text = id, Id = "EntityButton_" + id};
+                        button.TouchDown += (o, e) => UpdatePropertyGridWithEntity(scene, id);
+
+                        stackPanel.AddChild(button);
                     }
                 }
 
                 return true;
             });
+
+            if (!result)
+            {
+                Debug.WriteLine("Error was encountered in InitUIFromScene. Use debugger.");
+            }
+        }
+
+        private PropertyGrid? _propertyGrid;
+        private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
+        {
+            _desktop.Root.ProcessWidgets(widget =>
+            {
+                if (widget.Id == "MainGrid")
+                {
+                    if (widget is not Grid grid) return false;
+                    if (!TryGetEntityById(scene, entityId, out var entity)) return false;
+
+                    //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
+                    //so we're gonna have to make a new PropertyGrid on the spot 
+                    if (_propertyGrid is null)
+                    {
+                        _propertyGrid = new PropertyGrid
+                        {
+                            Object = entity,
+                            Id = "EntityPropertyGrid",
+                            GridColumn = 2,
+                            Padding = new Thickness(0, 20, 0, 0)
+                        };
+
+                        grid.AddChild(_propertyGrid);
+                    }
+                    else
+                    {
+                        _propertyGrid.Object = entity;
+                    }
+                }
+
+                return true;
+            });
+        }
+
+        private T? TryFindWidgetById<T>(Container container, string id) where T : class
+        {
+            T? output;
+            
+            try
+            {
+                output = container.FindWidgetById(id) as T;
+
+                if (output is null)
+                {
+                    Debug.WriteLine($"{id} cannot be casted into an instance of {typeof(T)}");
+                    return null;
+                }
+            }
+            catch
+            {
+                Debug.WriteLine($"{typeof(T)} of ID {id} cannot be found.");
+                return null;
+            }
+
+            return output;
+        }
+        
+        //We're using the "retrun bool and out" version of the "Try" method instead of using nullable because nullables
+        //on value types tend to cause extra copies to be made since they're boxed in a special type for nullable value
+        //types. tbh i dunno why i care so much about this LOL this project doesn't need any """optimization""" whatever
+        //it's okay
+        private bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
+        {
+            try
+            {
+                entity = scene.EntityMap[entityId];
+                return true;
+            }
+            catch
+            {
+                entity = new Entity();
+                return false;
+            }
         }
     }
 }
