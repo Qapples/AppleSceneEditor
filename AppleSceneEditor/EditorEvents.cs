@@ -46,7 +46,7 @@ namespace AppleSceneEditor
                 string folderPath = fileDialog.Folder;
                 if (string.IsNullOrEmpty(folderPath)) return;
         
-                //_currentScene = GetWorldFromFile(File.ReadAllText(folderPath), folderPath);
+                InitNewProject(folderPath);
             };
         
             fileDialog.ShowModal(_desktop);
@@ -57,12 +57,40 @@ namespace AppleSceneEditor
         // HELPER METHODS
         //--------------
 
-        // private World InitNewProject(string folderPath, int maxCapacity = 128)
-        // {
-        //     string worldPath = Path.Combine(folderPath, new DirectoryInfo(folderPath).Name + ".world");
-        //     
-        //
-        //     File.CreateText(folderPath)
-        // }
+        private const string BaseEntityContents = @"{
+    ""components"": [
+        {
+        }
+    ],
+    ""id"" : ""Base""
+}";
+        
+        private void InitNewProject(string folderPath, int maxCapacity = 128)
+        {
+            string worldPath = Path.Combine(folderPath, new DirectoryInfo(folderPath).Name + ".world");
+
+            //create paths
+            string entitiesPath = Path.Combine(folderPath, "Entities");
+            Directory.CreateDirectory(Path.Combine(folderPath, "Systems"));
+            Directory.CreateDirectory(Path.Combine(folderPath, "Entities"));
+            Directory.CreateDirectory(Path.Combine(folderPath, "Content"));
+            
+            //create world file
+            using (StreamWriter writer = File.CreateText(worldPath))
+            {
+                writer.WriteLine("WorldMaxCapacity " + maxCapacity);
+                writer.Flush();
+            }
+            
+            //add base entity
+            using (StreamWriter writer = File.CreateText(Path.Combine(entitiesPath, "BaseEntity")))
+            {
+                writer.WriteLine(BaseEntityContents);
+                writer.Flush();
+            }
+            
+
+            _currentScene = new Scene(folderPath, GraphicsDevice, null, _spriteBatch);
+        }
     }
 }
