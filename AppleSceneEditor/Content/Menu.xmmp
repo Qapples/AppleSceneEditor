@@ -1,16 +1,43 @@
 <Project>
-  <Project.ExportOptions Namespace="MyraPad.UI" Class="StudioWidget" OutputPath="C:/Projects/Myra/src/MyraPad/UI" />
+  <Project.ExportOptions Namespace="MyraPad.UI" Class="StudioWidget" OutputPath="C:/Projects/Myra/src/MyraPad/UI"/>
   <VerticalStackPanel>
     <VerticalStackPanel.Proportions>
-      <Proportion Type="Auto" />
-      <Proportion Type="Auto" />
-      <Proportion Type="Fill" />
+      <Proportion Type="Auto"/>
+      <Proportion Type="Auto"/>
+      <Proportion Type="Fill"/>
     </VerticalStackPanel.Proportions>
     <HorizontalMenu Id="MainMenu">
       <MenuItem Text="&amp;File" Id="MenuFile">
-        <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen" />
-        <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew" />
+        <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen"/>
+        <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew"/>
       </MenuItem>
     </HorizontalMenu>
   </VerticalStackPanel>
+
+  <HorizontalSeparator/>
+  
+  <Panel>
+    <Grid ShowGridLines="True" ColumnSpacing="1" RowSpacing="1" Id="MainGrid">
+      <Grid.RowsProportions>
+        <!--File viewer proportion-->
+        <Proportion Type="Part" Value="2"/>
+      </Grid.RowsProportions>
+      
+      <Grid.ColumnsProportions>
+        <!--Entity viewer proportion-->
+        <Proportion Type="Pixels" Value="200"/>
+
+        <!--Scene viewer proportion-->
+        <Proportion Type="Pixels" Value="900"/>
+
+        <!--Property viewer proportion-->
+        <Proportion Type="Pixels" Value="300"/>
+      </Grid.ColumnsProportions>
+      
+      <Label Text="Entity Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5" />
+      <Label Text="Scene Viewer"  HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" Opacity="0.5" />
+      <Label Text="Properties Viewer"  HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="2" Opacity="0.5" />
+      <Label Text="File Viewer"  HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" GridRow="1" Opacity="0.5" />
+    </Grid>
+  </Panel>
 </Project>
