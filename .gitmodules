@@ -1,3 +1,6 @@
 [submodule "AppleSerialization"]
 	path = AppleSerialization
 	url = https://github.com/Qapples/AppleSerialization.git
+[submodule "Myra"]
+	path = Myra
+	url = https://github.com/Qapples/Myra.git

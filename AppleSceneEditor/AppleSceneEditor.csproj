@@ -10,7 +10,6 @@
         <PackageReference Include="DefaultEcs" Version="0.16.0" />
         <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.5" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.1986-develop" />
-        <PackageReference Include="Myra" Version="1.3.0" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
         <PackageReference Include="System.CodeDom" Version="6.0.0-preview.6.21352.12" />
     </ItemGroup>
@@ -18,6 +17,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
       <ProjectReference Include="..\AppleSceneEditor.Serialization\AppleSceneEditor.Serialization.csproj" />
+      <ProjectReference Include="..\Myra\src\Myra\Myra.MonoGame.csproj" />
     </ItemGroup>
 
     <ItemGroup>

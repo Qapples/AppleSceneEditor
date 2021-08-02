@@ -1,13 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text.RegularExpressions;
-using AppleSerialization.Info;
-using AssetManagementBase;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
 using Myra.Graphics2D;
@@ -35,23 +28,24 @@ namespace AppleSceneEditor
 
                 string filePath = fileDialog.FilePath;
                 if (string.IsNullOrEmpty(filePath)) return;
-        
-                _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch);
-                
+
+                _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
+                    true);
+
                 if (_currentScene is not null) InitUIFromScene(_currentScene);
             };
-        
+
             fileDialog.ShowModal(_desktop);
         }
-        
+
         private void MenuFileNew(object? sender, EventArgs eventArgs)
         {
             FileDialog fileDialog = new(FileDialogMode.ChooseFolder) {Visible = true, Enabled = true};
-        
+
             fileDialog.Closed += (o, e) =>
             {
                 if (!fileDialog.Result) return;
-        
+
                 string folderPath = fileDialog.Folder;
                 if (string.IsNullOrEmpty(folderPath)) return;
         
@@ -100,7 +94,7 @@ namespace AppleSceneEditor
                 writer.Flush();
             }
             
-            _currentScene = new Scene(folderPath, GraphicsDevice, null, _spriteBatch);
+            _currentScene = new Scene(folderPath, GraphicsDevice, null, _spriteBatch, true);
         }
 
         private void InitUIFromScene(Scene scene)
@@ -163,21 +157,24 @@ namespace AppleSceneEditor
 
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
                     //so we're gonna have to make a new PropertyGrid on the spot 
+                    ComponentReader reader = new();
+                    entity.ReadAllComponents(reader);
+                    
                     if (_propertyGrid is null)
                     {
                         _propertyGrid = new PropertyGrid
                         {
-                            Object = entity,
+                            Object = reader,
                             Id = "EntityPropertyGrid",
                             GridColumn = 2,
                             Padding = new Thickness(0, 20, 0, 0)
                         };
-
+                        
                         grid.AddChild(_propertyGrid);
                     }
                     else
                     {
-                        _propertyGrid.Object = entity;
+                        _propertyGrid.Object = reader;
                     }
                 }
 
