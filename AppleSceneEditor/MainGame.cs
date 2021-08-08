@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using AppleSerialization;
+using AppleSerialization.Json;
 using AssetManagementBase;
-using DefaultEcs;
 using FontStashSharp;
-using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,6 +16,7 @@ using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
 using Myra.Utility;
 using Environment = AppleSerialization.Environment;
+using Scene = GrappleFightNET5.Scenes.Scene;
 
 namespace AppleSceneEditor
 {
@@ -29,8 +32,13 @@ namespace AppleSceneEditor
         private readonly string _uiPath;
 #nullable enable
         private readonly string? _stylesheetPath;
-        private Scene? _currentScene;
+        private readonly string? _defaultWorldPath;
         
+        private Scene? _currentScene;
+
+        private List<JsonObject> _jsonObjects;
+        private JsonObject _currentJsonObject;
+
         public MainGame(string[] args)
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -50,6 +58,11 @@ namespace AppleSceneEditor
                 {
                     _stylesheetPath = arg[(arg.IndexOf('=') + 1)..];
                 }
+
+                if (arg.StartsWith("--default_world=", StringComparison.Ordinal))
+                {
+                    _defaultWorldPath = Path.GetFullPath(arg[(arg.IndexOf('=') + 1)..]);
+                }
             }
 
             _uiPath = Path.GetFullPath(_uiPath);
@@ -68,6 +81,8 @@ namespace AppleSceneEditor
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
                 new FontSystem(), "Default");
+
+            _jsonObjects = new List<JsonObject>();
 
             _graphics.PreferredBackBufferWidth = 1600;
             _graphics.PreferredBackBufferHeight = 900;
@@ -114,6 +129,25 @@ namespace AppleSceneEditor
 
                 return true;
             });
+
+            if (_defaultWorldPath is not null)
+            {
+                DirectoryInfo? parentDirectory = Directory.GetParent(_defaultWorldPath);
+                
+                if (parentDirectory is null)
+                {
+                    Debug.WriteLine($"Cant get parent directory from path when getting _defaultWorldPath: " +
+                                    $"{_defaultWorldPath}.");
+                }
+                else
+                {
+                    _currentScene = new Scene(parentDirectory.FullName, GraphicsDevice, null,
+                        _spriteBatch, true);
+                    GetJsonObjectsFromScene(parentDirectory.FullName);
+                    
+                    InitUIFromScene(_currentScene);
+                }
+            }
         }
 
         protected override void UnloadContent()
