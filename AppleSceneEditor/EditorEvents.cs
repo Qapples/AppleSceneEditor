@@ -33,7 +33,8 @@ namespace AppleSceneEditor
 
                 _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
                     true);
-
+                GetJsonObjectsFromScene(Directory.GetParent(filePath)!.FullName);
+                
                 if (_currentScene is not null) InitUIFromScene(_currentScene);
             };
 
@@ -50,14 +51,14 @@ namespace AppleSceneEditor
 
                 string folderPath = fileDialog.Folder;
                 if (string.IsNullOrEmpty(folderPath)) return;
-        
+
                 InitNewProject(folderPath);
-                
+                GetJsonObjectsFromScene(folderPath);
+
                 if (_currentScene is not null) InitUIFromScene(_currentScene);
             };
-        
+
             fileDialog.ShowModal(_desktop);
         }
-        
     }
 }

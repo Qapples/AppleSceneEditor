@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DefaultEcs" Version="0.16.0" />
+        <PackageReference Include="DefaultEcs" Version="0.16.1" />
         <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.5" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.1986-develop" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
@@ -33,6 +33,10 @@
       <Reference Include="GrappleFightSystems, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\GrappleFightBuilder\GrappleFightBuilder\bin\Debug\net5.0\GrappleFightSystems.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Content\Fonts\Default\Inter-Regular.ttf" />
     </ItemGroup>
 
 </Project>

@@ -30,6 +30,8 @@ namespace AppleSceneEditor
         private Desktop _desktop;
         
         private readonly string _uiPath;
+        
+        private FontSystem _currentFontSystem;
 #nullable enable
         private readonly string? _stylesheetPath;
         private readonly string? _defaultWorldPath;

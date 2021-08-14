@@ -11,6 +11,16 @@
         "path": "Textures/TestTexture.png",
         "isContentPath": true
       }
+    },
+    {
+      "$type": "GrappleFightNET5.Scenes.Info.MeshInfo, GrappleFightNET5.Scenes",
+      "meshPath": {
+        "path": "Textures/TestTexture.png",
+        "isContentPath": true
+      },
+      "effect": null,
+      "meshIndex": 0,
+      "skinIndex": 0
     }
   ],
   "id": "Base"

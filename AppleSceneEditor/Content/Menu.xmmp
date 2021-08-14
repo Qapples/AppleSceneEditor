@@ -14,15 +14,17 @@
         <!--Scene viewer proportion-->
         <Proportion Type="Part" Value="2"/>
 
-        <!--Property viewer proportion-->
+        <!--Property viewer proportions-->
         <Proportion Type="Part" Value="0.6"/>
       </Grid.ColumnsProportions>
-      
+
       <Label Text="Entity Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5"/>
-      <Label Text="Scene Viewer"  HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" Opacity="0.5" />
-      <Label Text="Properties Viewer"  HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="2" Opacity="0.5" />
-      <Label Text="File Viewer"  HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" GridRow="1" Opacity="0.5" />
-      
+      <Label Text="Scene Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" Opacity="0.5"/>
+      <Label Text="Properties Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="2"
+             Opacity="0.5"/>
+      <Label Text="File Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" GridRow="1"
+             Opacity="0.5"/>
+
       <!--List of entities. The "holder" label is there to ensure that the entities go past the toolbar and are visible.
       -->
       <ScrollViewer Id="EntityScrollViewer">
@@ -31,10 +33,23 @@
           <!--ENTITIES-->
         </VerticalStackPanel>
       </ScrollViewer>
-      
-      
+
+      <ScrollViewer GridColumn="2" Id="PropertyScrollViewer">
+        <HorizontalSplitPane Id="PropertySplitPane">
+          <Grid RowSpacing="8" Id="NameGrid">
+            <VerticalStackPanel Id="NameStackPanel">
+              <Label Text="Holder"/>
+            </VerticalStackPanel>
+          </Grid>
+          <Grid RowSpacing="8" Id="ValueGrid">
+            <VerticalStackPanel Id="ValueStackPanel">
+              <Label Text="Holder"/>
+            </VerticalStackPanel>
+          </Grid>
+        </HorizontalSplitPane>
+      </ScrollViewer>
     </Grid>
-    
+
     <VerticalStackPanel>
       <VerticalStackPanel.Proportions>
         <Proportion Type="Auto"/>
