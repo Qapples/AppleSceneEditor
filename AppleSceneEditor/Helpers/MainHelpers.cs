@@ -3,15 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using AppleSerialization;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
-using Myra.Graphics2D;
 using Myra.Graphics2D.UI;
-using Myra.Graphics2D.UI.Properties;
 using Myra.Utility;
 
+//has to be in the AppleSceneEditor namespace for it to be a partial class of MainGame which is in that namespace
 namespace AppleSceneEditor
 {
     public partial class MainGame
@@ -59,7 +57,7 @@ namespace AppleSceneEditor
         {
             //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
             //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.
-            bool result = _desktop.Root.ProcessWidgets(widget =>
+            bool result = UIUtils.ProcessWidgets(_desktop.Root, widget =>
             {
                 if (widget.Id == "MainGrid")
                 {
@@ -107,7 +105,7 @@ namespace AppleSceneEditor
 
         private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
         {
-            _desktop.Root.ProcessWidgets(widget =>
+            UIUtils.ProcessWidgets(_desktop.Root, widget =>
             {
                 if (widget.Id == "MainGrid")
                 {
@@ -122,12 +120,12 @@ namespace AppleSceneEditor
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
                     //so we're gonna have to make a new ComponentPanelHandler on the spot.
                     //epic linq gaming
-                    JsonObject? selectedJsonObject = (from obj in _jsonObjects
+                    JsonObject? selectedJsonObject = Enumerable.FirstOrDefault<JsonObject>((from obj in _jsonObjects
                         from prop in obj.Properties
                         where prop.Name.ToLower() == "id"
                         where prop.ValueKind == JsonValueKind.String
                         where string.Equals(prop.Value as string, entityId, StringComparison.CurrentCultureIgnoreCase)
-                        select obj).FirstOrDefault();
+                        select obj));
 
                     if (selectedJsonObject is null)
                     {
