@@ -156,11 +156,22 @@ namespace AppleSceneEditor
         {
         }
 
+        private KeyboardState _previousKeyboardState;
+        
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
                 Keys.Escape)) Exit();
+
+            if (Keyboard.GetState().IsKeyDown(Keys.LeftControl) && Keyboard.GetState().IsKeyDown(Keys.S) &&
+                _propertyGrid is not null && _currentScene is not null)
+            {
+                _propertyGrid.SaveToScene(_currentScene);
+            }
+            
             base.Update(gameTime);
+            
+            _previousKeyboardState = Keyboard.GetState();
         }
 
         protected override void Draw(GameTime gameTime)

@@ -77,7 +77,7 @@ namespace AppleSceneEditor.Helpers
             {
                 Type componentType = component.GetType();
 
-                SetMethod.MakeGenericMethod(componentType).Invoke(outEntity, new[] {componentType});
+                SetMethod.MakeGenericMethod(componentType).Invoke(outEntity, new[] {component});
             }
             
             outEntity.Set(entityInfo.Id);

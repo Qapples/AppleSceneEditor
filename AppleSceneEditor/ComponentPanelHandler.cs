@@ -1,10 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
+using AppleSceneEditor.Helpers;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
 using AssetManagementBase.Utility;
 using FontStashSharp;
+using GrappleFightNET5.Scenes;
 using Myra.Graphics2D;
 using Myra.Graphics2D.UI.Styles;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
@@ -68,6 +71,27 @@ namespace AppleSceneEditor
             _font = AppleSerialization.Environment.DefaultFontSystem.GetFont(DefaultTextBoxFontSize);
 
             BuildUI(0, rootObject);
+        }
+
+        public bool SaveToScene(Scene scene)
+        {
+            if (scene.ScenePath is null)
+            {
+                Debug.WriteLine($"{nameof(SaveToScene)}: scene does not have a ScenePath! Cannot save to scene.");
+                return false;
+            }
+
+            if (_rootObject.Name is null)
+            {
+                Debug.WriteLine($"{nameof(SaveToScene)}: the rootObject does not have a name! Cannot save to scene.");
+                return false;
+            }
+
+            _rootObject.GenerateEntity(scene, scene.ScenePath is null
+                ? null
+                : Path.Combine(scene.ScenePath, "Entities", $"{_rootObject.Name}.entity"));
+
+            return true;
         }
 
         private void BuildUI(int indentLevel, JsonObject jsonObject)
