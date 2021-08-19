@@ -4,7 +4,9 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework.Input;
+using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor
 {
@@ -14,11 +16,16 @@ namespace AppleSceneEditor
     public static class Config
     {
         /// <summary>
+        /// Contains all the possible function names that can be associated with keybindings and be .
+        /// </summary>
+        public static readonly string[] ValidFunctionNames = {"save", "new", "open"};
+
+        /// <summary>
         /// A dictionary containing user changeable keybindings for specific functions like saving, opening a new file,
         /// etc. The key in this context is the name of the function defined in a config file.
         /// </summary>
-        public static Dictionary<string, List<List<Keys>>> KeyBinds { get; set; } = new();
-        
+        public static Dictionary<string, List<List<Keys>>> Keybinds { get; set; } = new();
+
         /// <summary>
         /// Parses a file and adjusts the data stored in the static <see cref="Config"/> type accordingly.
         /// </summary>
@@ -49,13 +56,13 @@ namespace AppleSceneEditor
                         }
                     }
 
-                    if (KeyBinds.TryGetValue(functionName, out var keysList))
+                    if (Keybinds.TryGetValue(functionName, out var keysList))
                     {
                         keysList.Add(keys);
                     }
                     else
                     {
-                        KeyBinds.Add(functionName, new List<List<Keys>> {keys});
+                        Keybinds.Add(functionName, new List<List<Keys>> {keys});
                     }
                 }
                 else
