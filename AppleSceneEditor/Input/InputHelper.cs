@@ -30,9 +30,9 @@ namespace AppleSceneEditor.Input
         /// </summary>
         public static readonly Dictionary<string, KeybindDelegate> KeyFunctions = new()
         {
-            {"save", (root, scene) => { Debug.WriteLine("Save!"); }},
-            {"new", (root, scene) => { Debug.WriteLine("New!"); }},
-            {"open", (root, scene) => { Debug.WriteLine("Open!"); }},
+            {"save", KeybindMethods.Save},
+            {"new", KeybindMethods.New},
+            {"open", KeybindMethods.Open},
         };
 
         /// <summary>
