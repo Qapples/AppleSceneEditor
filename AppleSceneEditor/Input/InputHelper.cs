@@ -6,12 +6,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
 
-namespace AppleSceneEditor
+namespace AppleSceneEditor.Input
 {
     /// <summary>
     /// Provides assistance in working with keybindings and keyboard input.
     /// </summary>
-    public static class Input
+    public static class InputHelper
     {
         /// <summary>
         /// The <see cref="KeyboardState"/> from the previous update. Ensure that this value is set to at the end of
@@ -20,7 +20,7 @@ namespace AppleSceneEditor
         public static KeyboardState PreviousKeyboardState { get; set; }
 
         /// <summary>
-        /// Delegate that is used in <see cref="Input.KeyFunctions"/>
+        /// Delegate that is used in <see cref="InputHelper.KeyFunctions"/>
         /// </summary>
         public delegate void KeybindDelegate(Widget root, Scene scene);
 
@@ -53,7 +53,8 @@ namespace AppleSceneEditor
             {
                 if (!Config.Keybinds.TryGetValue(functionName, out var keyLists))
                 {
-                    Debug.WriteLine($"Input.{nameof(Update)}: cannot find keybind of function name {functionName}");
+                    Debug.WriteLine($"InputHelper.{nameof(Update)}: cannot find keybind of function name " +
+                                    $"{functionName}");
                     continue;
                 }
                 
@@ -66,7 +67,8 @@ namespace AppleSceneEditor
                     {
                         if (!KeyFunctions.TryGetValue(functionName, out var keybindDelegate))
                         {
-                            Debug.WriteLine($"Input.{nameof(Update)}: cannot find KeyFunction of name {functionName}");
+                            Debug.WriteLine($"InputHelper.{nameof(Update)}: cannot find KeyFunction of name " +
+                                            $"{functionName}");
                             continue;
                         }
 
