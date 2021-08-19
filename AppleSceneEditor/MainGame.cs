@@ -35,6 +35,7 @@ namespace AppleSceneEditor
 #nullable enable
         private readonly string? _stylesheetPath;
         private readonly string? _defaultWorldPath;
+        private readonly string? _keybindConfigPath;
         
         private Scene? _currentScene;
 
@@ -49,21 +50,27 @@ namespace AppleSceneEditor
             
             _uiPath = Path.Combine("..", "..", "..", "Content", "Menu.xmmp");
 
+            StringComparison comparison = StringComparison.Ordinal;
             foreach (string arg in args)
             {
-                if (arg.StartsWith("--ui_path=", StringComparison.Ordinal))
+                if (arg.IndexOf('=') < 0)
                 {
-                    _uiPath = arg[(arg.IndexOf('=') + 1)..];
+                    Debug.WriteLine($"MainGame constructor: argument ({arg}) does not have an equal sign.");
+                    continue;
                 }
 
-                if (arg.StartsWith("--stylesheet_path=", StringComparison.Ordinal))
+                try
                 {
-                    _stylesheetPath = arg[(arg.IndexOf('=') + 1)..];
-                }
+                    string path = Path.GetFullPath(arg[(arg.IndexOf('=') + 1)..]);
 
-                if (arg.StartsWith("--default_world=", StringComparison.Ordinal))
+                    if (arg.StartsWith("--ui_path=", comparison)) _uiPath = path;
+                    if (arg.StartsWith("--stylesheet_path=", comparison)) _stylesheetPath = path;
+                    if (arg.StartsWith("--default_world=", comparison)) _defaultWorldPath = path;
+                    if (arg.StartsWith("--keybind_config_path=", comparison)) _keybindConfigPath = path;
+                }
+                catch (Exception e)
                 {
-                    _defaultWorldPath = Path.GetFullPath(arg[(arg.IndexOf('=') + 1)..]);
+                    Debug.WriteLine($"MainGame constructor: failed parsing argument: {arg}. With exception: {e}");
                 }
             }
 
@@ -85,6 +92,8 @@ namespace AppleSceneEditor
                 new FontSystem(), "Default");
 
             _jsonObjects = new List<JsonObject>();
+
+            Config.ParseConfigFile(File.ReadAllText(Path.Combine("..", "..", "..", "Config.txt")));
 
             _graphics.PreferredBackBufferWidth = 1600;
             _graphics.PreferredBackBufferHeight = 900;
@@ -124,7 +133,7 @@ namespace AppleSceneEditor
 
                     MenuItem? fileItemOpen = menu.FindMenuItemById("MenuFileOpen");
                     MenuItem? fileItemNew = menu.FindMenuItemById("MenuFileNew");
-                    
+
                     if (fileItemOpen is not null) fileItemOpen.Selected += MenuFileOpen;
                     if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
                 }
@@ -155,8 +164,7 @@ namespace AppleSceneEditor
         protected override void UnloadContent()
         {
         }
-
-        private KeyboardState _previousKeyboardState;
+        
         
         protected override void Update(GameTime gameTime)
         {
@@ -168,10 +176,15 @@ namespace AppleSceneEditor
             {
                 _propertyGrid.SaveToScene(_currentScene);
             }
+
+            if (_currentScene is not null)
+            {
+                Input.Update(Keyboard.GetState(), _project.Root, _currentScene, gameTime);
+            }
+
+            Input.PreviousKeyboardState = Keyboard.GetState();
             
             base.Update(gameTime);
-            
-            _previousKeyboardState = Keyboard.GetState();
         }
 
         protected override void Draw(GameTime gameTime)

@@ -105,7 +105,7 @@ namespace AppleSceneEditor
 
         private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
         {
-            UIUtils.ProcessWidgets(_desktop.Root, widget =>
+            _desktop.Root.ProcessWidgets(widget =>
             {
                 if (widget.Id == "MainGrid")
                 {
@@ -120,12 +120,12 @@ namespace AppleSceneEditor
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
                     //so we're gonna have to make a new ComponentPanelHandler on the spot.
                     //epic linq gaming
-                    JsonObject? selectedJsonObject = Enumerable.FirstOrDefault<JsonObject>((from obj in _jsonObjects
+                    JsonObject? selectedJsonObject = (from obj in _jsonObjects
                         from prop in obj.Properties
                         where prop.Name.ToLower() == "id"
                         where prop.ValueKind == JsonValueKind.String
                         where string.Equals(prop.Value as string, entityId, StringComparison.CurrentCultureIgnoreCase)
-                        select obj));
+                        select obj).FirstOrDefault();
 
                     if (selectedJsonObject is null)
                     {
