@@ -29,7 +29,7 @@ namespace AppleSceneEditor.Input
 
             handler.SaveToScene(scene);
         }
-
+        
         public static void New(Widget root, Scene scene, object?[]? args)
         {
             if (args is null)

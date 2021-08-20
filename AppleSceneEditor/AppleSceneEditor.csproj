@@ -16,6 +16,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
+      <ProjectReference Include="..\..\GrappleFightNET5\AppleScene\AppleScene.Helpers\AppleScene.Helpers.csproj" />
+      <ProjectReference Include="..\..\GrappleFightNET5\AppleScene\AppleScene.Rendering\AppleScene.Rendering.csproj" />
+      <ProjectReference Include="..\..\GrappleFightNET5\AppleScene\AppleScene.Skinning\AppleScene.Skinning.csproj" />
       <ProjectReference Include="..\AppleSceneEditor.Serialization\AppleSceneEditor.Serialization.csproj" />
       <ProjectReference Include="..\Myra\src\Myra\Myra.MonoGame.csproj" />
     </ItemGroup>

@@ -1,15 +1,7 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using DefaultEcs;
-using GrappleFightNET5.Scenes;
-using Myra.Graphics2D;
-using Myra.Graphics2D.UI;
+using AppleSceneEditor.Systems;
 using Myra.Graphics2D.UI.File;
-using Myra.Graphics2D.UI.Properties;
-using Myra.Utility;
-using SharpGLTF.Schema2;
-using Container = Myra.Graphics2D.UI.Container;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
 namespace AppleSceneEditor
@@ -34,8 +26,14 @@ namespace AppleSceneEditor
                 _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
                     true);
                 GetJsonObjectsFromScene(Directory.GetParent(filePath)!.FullName);
-                
-                if (_currentScene is not null) InitUIFromScene(_currentScene);
+
+                if (_currentScene is not null)
+                {
+                    InitUIFromScene(_currentScene);
+                    
+                    _drawSystem?.Dispose();
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                }
             };
 
             fileDialog.ShowModal(_desktop);
@@ -55,7 +53,13 @@ namespace AppleSceneEditor
                 InitNewProject(folderPath);
                 GetJsonObjectsFromScene(folderPath);
 
-                if (_currentScene is not null) InitUIFromScene(_currentScene);
+                if (_currentScene is not null)
+                {
+                    InitUIFromScene(_currentScene);
+                    
+                    _drawSystem?.Dispose();
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                }
             };
 
             fileDialog.ShowModal(_desktop);

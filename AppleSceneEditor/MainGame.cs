@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using AppleSceneEditor.Systems;
 using AppleSerialization;
 using AppleSerialization.Json;
 using AssetManagementBase;
+using DefaultEcs.System;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,6 +33,7 @@ namespace AppleSceneEditor
         private readonly string _uiPath;
         
         private FontSystem _currentFontSystem;
+        
 #nullable enable
         private readonly string? _stylesheetPath;
         private readonly string? _defaultWorldPath;
@@ -40,6 +43,8 @@ namespace AppleSceneEditor
 
         private List<JsonObject> _jsonObjects;
         private JsonObject _currentJsonObject;
+        
+        private ISystem<GameTime>? _drawSystem;
 
         public MainGame(string[] args)
         {
@@ -156,6 +161,9 @@ namespace AppleSceneEditor
                     GetJsonObjectsFromScene(parentDirectory.FullName);
                     
                     InitUIFromScene(_currentScene);
+                    
+                    _drawSystem?.Dispose();
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
                 }
             }
         }
@@ -163,13 +171,12 @@ namespace AppleSceneEditor
         protected override void UnloadContent()
         {
         }
-        
-        
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
                 Keys.Escape)) Exit();
-            
+
             if (_currentScene is not null)
             {
                 Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene,
@@ -184,6 +191,17 @@ namespace AppleSceneEditor
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
+            
+            //The depth buffer is changed everytime we use the spritebatch to draw 2d objects. So, we must "reset" the
+            //by setting the depth stencil state to it's default value before drawing any 3d objects. If we don't do
+            //this, then all the models will be drawn incorrectly.
+
+            if (_drawSystem is not null)
+            {
+                GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+                _drawSystem.Update(gameTime);
+            }
+
             _desktop.Render();
             base.Draw(gameTime);
         }
