@@ -6,6 +6,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleSerialization", "..\Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myra.MonoGame", "Myra\src\Myra\Myra.MonoGame.csproj", "{9D918104-AB49-45D2-9389-40C3322CBB21}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppleScene", "AppleScene", "{0549FFC8-471B-414B-8B38-0E6B9A3CE0EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Helpers", "..\GrappleFightNET5\AppleScene\AppleScene.Helpers\AppleScene.Helpers.csproj", "{12460B5F-B738-475C-9313-1D8FE95AF0E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Rendering", "..\GrappleFightNET5\AppleScene\AppleScene.Rendering\AppleScene.Rendering.csproj", "{81703DCF-C7C3-40AC-911E-6294BCC82008}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Skinning", "..\GrappleFightNET5\AppleScene\AppleScene.Skinning\AppleScene.Skinning.csproj", "{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +32,22 @@ Global
 		{9D918104-AB49-45D2-9389-40C3322CBB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D918104-AB49-45D2-9389-40C3322CBB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D918104-AB49-45D2-9389-40C3322CBB21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12460B5F-B738-475C-9313-1D8FE95AF0E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12460B5F-B738-475C-9313-1D8FE95AF0E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12460B5F-B738-475C-9313-1D8FE95AF0E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12460B5F-B738-475C-9313-1D8FE95AF0E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81703DCF-C7C3-40AC-911E-6294BCC82008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81703DCF-C7C3-40AC-911E-6294BCC82008}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81703DCF-C7C3-40AC-911E-6294BCC82008}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81703DCF-C7C3-40AC-911E-6294BCC82008}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{12460B5F-B738-475C-9313-1D8FE95AF0E4} = {0549FFC8-471B-414B-8B38-0E6B9A3CE0EA}
+		{81703DCF-C7C3-40AC-911E-6294BCC82008} = {0549FFC8-471B-414B-8B38-0E6B9A3CE0EA}
+		{1DDCF706-C5BB-4368-9668-ED225EF7EAE4} = {0549FFC8-471B-414B-8B38-0E6B9A3CE0EA}
 	EndGlobalSection
 EndGlobal

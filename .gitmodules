@@ -4,3 +4,6 @@
 [submodule "Myra"]
 	path = Myra
 	url = https://github.com/Qapples/Myra.git
+[submodule "AppleScene"]
+	path = AppleScene
+	url = https://github.com/Qapples/AppleScene.git
