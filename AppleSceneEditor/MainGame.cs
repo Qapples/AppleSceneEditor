@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text.Json;
 using AppleSerialization;
 using AppleSerialization.Json;
 using AssetManagementBase;
@@ -170,20 +169,15 @@ namespace AppleSceneEditor
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
                 Keys.Escape)) Exit();
-
-            if (Keyboard.GetState().IsKeyDown(Keys.LeftControl) && Keyboard.GetState().IsKeyDown(Keys.S) &&
-                _propertyGrid is not null && _currentScene is not null)
-            {
-                _propertyGrid.SaveToScene(_currentScene);
-            }
-
+            
             if (_currentScene is not null)
             {
-                Input.Update(Keyboard.GetState(), _project.Root, _currentScene, gameTime);
+                Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene,
+                    new object?[] {_propertyGrid});
             }
 
-            Input.PreviousKeyboardState = Keyboard.GetState();
-            
+            Input.InputHelper.PreviousKeyboardState = Keyboard.GetState();
+
             base.Update(gameTime);
         }
 

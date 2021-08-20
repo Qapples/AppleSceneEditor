@@ -20,9 +20,9 @@ namespace AppleSceneEditor.Input
         public static KeyboardState PreviousKeyboardState { get; set; }
 
         /// <summary>
-        /// Delegate that is used in <see cref="InputHelper.KeyFunctions"/>
+        /// Delegate of methods that are activated through keybindings.
         /// </summary>
-        public delegate void KeybindDelegate(Widget root, Scene scene);
+        public delegate void KeybindDelegate(Widget root, Scene scene, object?[]? args);
 
         /// <summary>
         /// Defines the behavior of keybindings. The string key represents the name of the function and a
@@ -44,10 +44,9 @@ namespace AppleSceneEditor.Input
         /// game. This is provided so that the functions in <see cref="KeyFunctions"/> can manipulate it for purposes
         /// like saving, opening a new file, etc.</param>
         /// <param name="currentScene">The current <see cref="Scene"/> that is active in the main game.</param>
-        /// <param name="gameTime">The current <see cref="GameTime"/> provided in the
-        /// <see cref="Game.Update"/> or <see cref="Game.Draw"/> methods.</param>
+        /// <param name="args">Any additional arguments.</param>
         public static void Update(in KeyboardState currentState, Widget rootWidget, Scene currentScene,
-            GameTime gameTime)
+            object?[]? args = null)
         {
             foreach (string functionName in Config.ValidFunctionNames)
             {
@@ -72,7 +71,7 @@ namespace AppleSceneEditor.Input
                             continue;
                         }
 
-                        keybindDelegate(rootWidget, currentScene);
+                        keybindDelegate(rootWidget, currentScene, args);
                     }
                 }
             }

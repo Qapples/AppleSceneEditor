@@ -57,7 +57,7 @@ namespace AppleSceneEditor
         {
             //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
             //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.
-            bool result = UIUtils.ProcessWidgets(_desktop.Root, widget =>
+            bool result = _desktop.Root.ProcessWidgets(widget =>
             {
                 if (widget.Id == "MainGrid")
                 {
