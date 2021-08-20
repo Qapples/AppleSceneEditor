@@ -173,7 +173,7 @@ namespace AppleSceneEditor
             if (_currentScene is not null)
             {
                 Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene,
-                    new object?[] {_propertyGrid});
+                    new object?[] {_propertyGrid, this});
             }
 
             Input.InputHelper.PreviousKeyboardState = Keyboard.GetState();

@@ -20,7 +20,7 @@ namespace AppleSceneEditor
         // EVENT METHODS
         //-----------------
         
-        private void MenuFileOpen(object? sender, EventArgs eventArgs)
+        public void MenuFileOpen(object? sender, EventArgs? eventArgs)
         {
             FileDialog fileDialog = new(FileDialogMode.OpenFile) {Filter = "*.world", Visible = true, Enabled = true};
 
@@ -41,7 +41,7 @@ namespace AppleSceneEditor
             fileDialog.ShowModal(_desktop);
         }
 
-        private void MenuFileNew(object? sender, EventArgs eventArgs)
+        public void MenuFileNew(object? sender, EventArgs? eventArgs)
         {
             FileDialog fileDialog = new(FileDialogMode.ChooseFolder) {Visible = true, Enabled = true};
 

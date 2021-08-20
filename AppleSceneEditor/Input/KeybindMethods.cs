@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Linq;
 using GrappleFightNET5.Scenes;
@@ -18,12 +19,7 @@ namespace AppleSceneEditor.Input
                 return;
             }
 
-            ComponentPanelHandler? handler = null;
-            foreach (var arg in args.Where(arg => arg is not null && arg.GetType() == typeof(ComponentPanelHandler)))
-            {
-                handler = arg as ComponentPanelHandler;
-            }
-
+            ComponentPanelHandler? handler = FindArg<ComponentPanelHandler>(args);
             if (handler is null)
             {
                 Debug.WriteLine($"Input.KeybindMethods.{nameof(Save)}: cannot find parameter of type " +
@@ -36,10 +32,45 @@ namespace AppleSceneEditor.Input
 
         public static void New(Widget root, Scene scene, object?[]? args)
         {
+            if (args is null)
+            {
+                Debug.WriteLine($"Input.KeybindMethods.{nameof(New)}: args parameter is null. Cannot init new.");
+                return;
+            }
+
+            MainGame? game = FindArg<MainGame>(args);
+
+            if (game is null)
+            {
+                Debug.WriteLine($"Input.KeybindMethods.{nameof(New)}: cannot find parameter of type " +
+                                $"{typeof(MainGame)} in args! Cannot save.");
+                return;
+            }
+            
+            game.MenuFileNew(null, null);
         }
 
         public static void Open(Widget root, Scene scene, object?[]? args)
         {
+            if (args is null)
+            {
+                Debug.WriteLine($"Input.KeybindMethods.{nameof(Open)}: args parameter is null. Cannot open.");
+                return;
+            }
+
+            MainGame? game = FindArg<MainGame>(args);
+
+            if (game is null)
+            {
+                Debug.WriteLine($"Input.KeybindMethods.{nameof(Open)}: cannot find parameter of type " +
+                                $"{typeof(MainGame)} in args! Cannot open.");
+                return;
+            }
+
+            game.MenuFileOpen(null, null);
         }
+
+        private static T? FindArg<T>(object?[]? args) =>
+            (T?) args?.FirstOrDefault(arg => arg is not null && arg.GetType() == typeof(T));
     }
 }
