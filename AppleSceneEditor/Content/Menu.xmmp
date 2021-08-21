@@ -1,5 +1,6 @@
 <Project>
   <Project.ExportOptions Namespace="MyraPad.UI" Class="StudioWidget" OutputPath="C:/Projects/Myra/src/MyraPad/UI"/>
+  
   <Panel Id="MainPanel">
     <Grid ShowGridLines="True" ColumnSpacing="1" RowSpacing="1" Id="MainGrid">
       <Grid.RowsProportions>
@@ -18,12 +19,16 @@
         <Proportion Type="Part" Value="0.6"/>
       </Grid.ColumnsProportions>
 
-      <Label Text="Entity Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5"/>
-      <Label Text="Scene Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" Opacity="0.5"/>
-      <Label Text="Properties Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="2"
-             Opacity="0.5"/>
-      <Label Text="File Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" GridColumn="1" GridRow="1"
-             Opacity="0.5"/>
+      <Label Text="Entity Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" Opacity="0.5"/>
+      <Label Text="Scene Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" GridColumn="1" Opacity="0.5"/>
+
+      <!-- Properties viewer toolbar -->
+      <HorizontalStackPanel VerticalAlignment="Bottom" GridColumn="2">
+        <TextButton Id="AddEntityButton" HorizontalAlignment="Left" Text="Add" StyleName="small"/>
+      </HorizontalStackPanel>
+      <Label Text="Properties Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5" GridColumn="2" StyleName="small"/>
+
+      <Label Text="File Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" GridColumn="1" GridRow="1" Opacity="0.5"/>
 
       <!--List of entities. The "holder" label is there to ensure that the entities go past the toolbar and are visible.
       -->

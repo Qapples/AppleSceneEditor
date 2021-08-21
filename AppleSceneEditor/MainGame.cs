@@ -31,9 +31,6 @@ namespace AppleSceneEditor
         private Desktop _desktop;
         
         private readonly string _uiPath;
-        
-        private FontSystem _currentFontSystem;
-        
 #nullable enable
         private readonly string? _stylesheetPath;
         private readonly string? _defaultWorldPath;
@@ -82,6 +79,8 @@ namespace AppleSceneEditor
             if (_stylesheetPath is not null) _stylesheetPath = Path.GetFullPath(_stylesheetPath);
         }
 
+        private SpriteFontBase _font;
+        
         protected override void Initialize()
         {
             MyraEnvironment.Game = this;
@@ -94,7 +93,7 @@ namespace AppleSceneEditor
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
                 new FontSystem(), "Default");
-
+            
             _jsonObjects = new List<JsonObject>();
 
             Config.ParseConfigFile(File.ReadAllText(Path.Combine("..", "..", "..", "Config.txt")));
@@ -118,6 +117,7 @@ namespace AppleSceneEditor
                 AssetManager = new AssetManager(new FileAssetResolver(folder)),
                 BasePath = folder
             };
+            
             Stylesheet stylesheet = _stylesheetPath is null
                 ? Stylesheet.Current
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);

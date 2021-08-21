@@ -40,6 +40,9 @@
 
     <ItemGroup>
       <EmbeddedResource Include="Content\Fonts\Default\Inter-Regular.ttf" />
+      <EmbeddedResource Include="Content\Stylesheets\editor_ui_skin.png" />
+      <EmbeddedResource Include="Content\Stylesheets\editor_ui_skin.xmat" />
+      <EmbeddedResource Include="Content\Stylesheets\editor_ui_skin.xmms" />
     </ItemGroup>
 
 </Project>
