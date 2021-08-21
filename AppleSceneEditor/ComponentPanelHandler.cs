@@ -39,6 +39,10 @@ namespace AppleSceneEditor
                 //rebuild UI
                 NameStackPanel.Widgets.Clear();
                 ValueStackPanel.Widgets.Clear();
+                
+                //re-add the holder labels
+                NameStackPanel.AddChild(new Label {Text = "Holder"});
+                ValueStackPanel.AddChild(new Label {Text = "Holder"});
 
                 BuildUI(0, value);
             }
