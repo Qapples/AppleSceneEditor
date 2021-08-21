@@ -24,7 +24,7 @@
 
       <!-- Properties viewer toolbar -->
       <HorizontalStackPanel VerticalAlignment="Bottom" GridColumn="2">
-        <TextButton Id="AddEntityButton" HorizontalAlignment="Left" Text="Add" StyleName="small"/>
+        <TextButton Id="AddComponentButton" HorizontalAlignment="Left" Text="Add" StyleName="small"/>
       </HorizontalStackPanel>
       <Label Text="Properties Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5" GridColumn="2" StyleName="small"/>
 

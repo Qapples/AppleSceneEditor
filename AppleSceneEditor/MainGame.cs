@@ -29,6 +29,8 @@ namespace AppleSceneEditor
 
         private Project _project;
         private Desktop _desktop;
+
+        private Window _addComponentWindow;
         
         private readonly string _uiPath;
 #nullable enable
@@ -39,7 +41,8 @@ namespace AppleSceneEditor
         private Scene? _currentScene;
 
         private List<JsonObject> _jsonObjects;
-        private JsonObject _currentJsonObject;
+        private JsonObject? _currentJsonObject;
+        private JsonObject? _jsonObjectToEdit;
         
         private ISystem<GameTime>? _drawSystem;
 
@@ -121,9 +124,10 @@ namespace AppleSceneEditor
             Stylesheet stylesheet = _stylesheetPath is null
                 ? Stylesheet.Current
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
+            _addComponentWindow = CreateAddComponentDialog();
 
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
-
+            
             _desktop = new Desktop
             {
                 Root = _project.Root
@@ -140,6 +144,14 @@ namespace AppleSceneEditor
 
                     if (fileItemOpen is not null) fileItemOpen.Selected += MenuFileOpen;
                     if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
+                }
+
+                if (widget.Id == "MainPanel")
+                {
+                    if (widget is not Panel panel) return false;
+                    if (panel.FindWidgetById("AddComponentButton") is not TextButton addButton) return false;
+
+                    addButton.Click += AddComponentButtonClick;
                 }
 
                 return true;
@@ -180,7 +192,7 @@ namespace AppleSceneEditor
             if (_currentScene is not null)
             {
                 Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene,
-                    new object?[] {_propertyGrid, this});
+                    new object?[] {_mainPanelHandler, this});
             }
 
             Input.InputHelper.PreviousKeyboardState = Keyboard.GetState();

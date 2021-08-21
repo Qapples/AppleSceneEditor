@@ -1,7 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using AppleSceneEditor.Systems;
+using AppleSerialization.Json;
 using Myra.Graphics2D.UI.File;
+using JsonProperty = AppleSerialization.Json.JsonProperty;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
 namespace AppleSceneEditor
@@ -63,6 +69,35 @@ namespace AppleSceneEditor
             };
 
             fileDialog.ShowModal(_desktop);
+        }
+
+        private void AddComponentButtonClick(object? sender, EventArgs? eventArgs)
+        {
+            if (_currentJsonObject is null) return;
+            
+            _addComponentWindow.ShowModal(_desktop);
+        }
+
+        private void AddPropertyButtonClick(object? sender, EventArgs? eventArgs)
+        {
+            if (_jsonObjectToEdit is null) return;
+        }
+
+        private void FinishButtonClick(string typeName)
+        {
+            if (_jsonObjectToEdit is null || _currentJsonObject is null) return;
+
+            JsonArray? componentArray =
+                _currentJsonObject.Arrays.FirstOrDefault(a => a.Name is not null && a.Name.ToLower() == "components");
+            if (componentArray is null)
+            {
+                Debug.WriteLine($"{nameof(FinishButtonClick)}: cannot find array with name of \"components\" in " +
+                                $"the current json object. Cannot finish.");
+                return;
+            }
+
+            _addComponentWindow.Close();
+            componentArray.Add(new JsonObject(new List<JsonProperty> {new("$type", typeName, JsonValueKind.String)}));
         }
     }
 }

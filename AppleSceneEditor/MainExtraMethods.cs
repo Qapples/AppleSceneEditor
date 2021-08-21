@@ -101,7 +101,37 @@ namespace AppleSceneEditor
             }
         }
 
-        private ComponentPanelHandler? _propertyGrid;
+        //The component window should be pretty simple which is why we are doing it here.
+        private Window CreateAddComponentDialog()
+        {
+            Panel panel = new();
+            Window outWindow = new() {Title = "Add Component", Content = panel};
+            
+            VerticalStackPanel propertyPanel = new() {HorizontalAlignment = HorizontalAlignment.Center};
+            propertyPanel.AddChild(new Label
+            {
+                Text = "Type of new component:", StyleName = "small", HorizontalAlignment = HorizontalAlignment.Center
+            });
+
+            TextBox typeTextBox = new()
+                {Text = "Enter the type of the component...", HorizontalAlignment = HorizontalAlignment.Center};
+            propertyPanel.AddChild(typeTextBox);
+            
+            TextButton finishButton = new()
+            {
+                Text = "Finish", StyleName = "small", HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom
+            };
+            propertyPanel.AddChild(finishButton);
+
+            finishButton.Click += (o, e) => FinishButtonClick(typeTextBox.Text);
+
+            panel.AddChild(propertyPanel);
+
+            return outWindow;
+        }
+
+        private ComponentPanelHandler? _mainPanelHandler;
 
         private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
         {
@@ -137,13 +167,13 @@ namespace AppleSceneEditor
 
                     _currentJsonObject = selectedJsonObject;
                     
-                    if (_propertyGrid is null)
+                    if (_mainPanelHandler is null)
                     {
-                        _propertyGrid = new ComponentPanelHandler(selectedJsonObject, nameStackPanel, valueStackPanel);
+                        _mainPanelHandler = new ComponentPanelHandler(selectedJsonObject, nameStackPanel, valueStackPanel);
                     }
                     else
                     {
-                        _propertyGrid.RootObject = selectedJsonObject;
+                        _mainPanelHandler.RootObject = selectedJsonObject;
                     }
                 }
 
@@ -192,11 +222,6 @@ namespace AppleSceneEditor
             }
         }
         
-
-        //We're using the "retrun bool and out" version of the "Try" method instead of using nullable because nullables
-        //on value types tend to cause extra copies to be made since they're boxed in a special type for nullable value
-        //types. tbh i dunno why i care so much about this LOL this project doesn't need any """optimization""" whatever
-        //it's okay
         private static bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
         {
             try

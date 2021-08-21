@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project>
+    <Window Title="Add Component">
+        <TextButton Text="Add Property" StyleName="small" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+        <TextButton Text="Finish" StyleName="small" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+    </Window>
+</Project>
