@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Mime;
 using System.Text.Json;
 using AppleSceneEditor.Helpers;
 using AppleSerialization.Json;
@@ -25,6 +26,9 @@ namespace AppleSceneEditor
         private const int IndentationIncrement = 8;
 
         private JsonObject _rootObject;
+
+        private TextButton _addPropertyButton;
+        private Media
 
         /// <summary>
         /// The <see cref="JsonObject"/> instance whose values and components will be seen and changed.
@@ -213,7 +217,7 @@ namespace AppleSceneEditor
             property.Value ??= default(int);
             Type propertyValueType = property.Value.GetType();
             
-            SpinButton spinButton = new(_font)
+            SpinButton spinButton = new()
             {
                 Integer = propertyValueType.IsNumericInteger(),
                 Nullable = propertyValueType.IsNullablePrimitive(),
@@ -233,5 +237,7 @@ namespace AppleSceneEditor
 
             return spinButton;
         }
+        
+        private static void Create
     }
 }

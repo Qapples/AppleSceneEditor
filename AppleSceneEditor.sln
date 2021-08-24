@@ -2,17 +2,17 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleSceneEditor", "AppleSceneEditor\AppleSceneEditor.csproj", "{7F14C613-1671-42CE-BEC4-A3984204B209}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleSerialization", "..\AppleSerialization\AppleSerialization\AppleSerialization.csproj", "{614F8839-C691-4E3F-8AAA-66D706D422AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleSerialization", "AppleSerialization\AppleSerialization\AppleSerialization.csproj", "{614F8839-C691-4E3F-8AAA-66D706D422AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myra.MonoGame", "Myra\src\Myra\Myra.MonoGame.csproj", "{9D918104-AB49-45D2-9389-40C3322CBB21}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppleScene", "AppleScene", "{0549FFC8-471B-414B-8B38-0E6B9A3CE0EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Helpers", "..\GrappleFightNET5\AppleScene\AppleScene.Helpers\AppleScene.Helpers.csproj", "{12460B5F-B738-475C-9313-1D8FE95AF0E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Helpers", "AppleScene\AppleScene.Helpers\AppleScene.Helpers.csproj", "{12460B5F-B738-475C-9313-1D8FE95AF0E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Rendering", "..\GrappleFightNET5\AppleScene\AppleScene.Rendering\AppleScene.Rendering.csproj", "{81703DCF-C7C3-40AC-911E-6294BCC82008}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Rendering", "AppleScene\AppleScene.Rendering\AppleScene.Rendering.csproj", "{81703DCF-C7C3-40AC-911E-6294BCC82008}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Skinning", "..\GrappleFightNET5\AppleScene\AppleScene.Skinning\AppleScene.Skinning.csproj", "{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppleScene.Skinning", "AppleScene\AppleScene.Skinning\AppleScene.Skinning.csproj", "{1DDCF706-C5BB-4368-9668-ED225EF7EAE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

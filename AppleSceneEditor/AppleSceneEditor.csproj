@@ -9,17 +9,17 @@
     <ItemGroup>
         <PackageReference Include="DefaultEcs" Version="0.16.1" />
         <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.5" />
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.1986-develop" />
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.2000-develop" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
         <PackageReference Include="System.CodeDom" Version="6.0.0-preview.6.21352.12" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
-      <ProjectReference Include="..\..\GrappleFightNET5\AppleScene\AppleScene.Helpers\AppleScene.Helpers.csproj" />
-      <ProjectReference Include="..\..\GrappleFightNET5\AppleScene\AppleScene.Rendering\AppleScene.Rendering.csproj" />
-      <ProjectReference Include="..\..\GrappleFightNET5\AppleScene\AppleScene.Skinning\AppleScene.Skinning.csproj" />
-      <ProjectReference Include="..\AppleSceneEditor.Serialization\AppleSceneEditor.Serialization.csproj" />
+      <ProjectReference Include="..\AppleScene\AppleScene.Skinning\AppleScene.Skinning.csproj" />
+      <ProjectReference Include="..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
+      <ProjectReference Include="..\AppleScene\AppleScene.Helpers\AppleScene.Helpers.csproj" />
+      <ProjectReference Include="..\AppleScene\AppleScene.Rendering\AppleScene.Rendering.csproj" />
+      <ProjectReference Include="..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
       <ProjectReference Include="..\Myra\src\Myra\Myra.MonoGame.csproj" />
     </ItemGroup>
 
