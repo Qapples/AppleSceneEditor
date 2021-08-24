@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Mime;
@@ -84,10 +85,57 @@ namespace AppleSceneEditor
             _selectElementTypeWindow = new Window();
             BuildUI(0, rootObject);
         }
+        
+        //------------------
+        // Public methods
+        //------------------
+        
+        public bool SaveToScene(Scene scene)
+        {
+            if (scene.ScenePath is null)
+            {
+                Debug.WriteLine($"{nameof(SaveToScene)}: scene does not have a ScenePath! Cannot save to scene.");
+                return false;
+            }
 
+            if (_rootObject.Name is null)
+            {
+                Debug.WriteLine($"{nameof(SaveToScene)}: the rootObject does not have a name! Cannot save to scene.");
+                return false;
+            }
+
+            _rootObject.GenerateEntity(scene, scene.ScenePath is null
+                ? null
+                : Path.Combine(scene.ScenePath, "Entities", $"{_rootObject.Name}.entity"));
+
+            return true;
+        }
+        
+        /// <summary>
+        /// Reconstructs and rebuilds any UI elements associated with this object.
+        /// </summary>
+        /// <param name="rootObject">The <see cref="JsonObject"/> to display. If not set to, then an internal root
+        /// object will be used instead.</param>
+        public void RebuildUI(JsonObject? rootObject = null)
+        {
+            rootObject ??= _rootObject;
+            
+            NameStackPanel.Widgets.Clear();
+            ValueStackPanel.Widgets.Clear();
+
+            //re-add the holder labels
+            NameStackPanel.AddChild(new Label {Text = "Holder"});
+            ValueStackPanel.AddChild(new Label {Text = "Holder"});
+
+            BuildUI(0, rootObject);
+        }
+        
+        //--------------------------
+        // Private methods & more
+        //--------------------------
+        
         private void BuildUI(int indentLevel, JsonObject jsonObject)
         {
-
             //properties
             foreach (JsonProperty property in jsonObject.Properties)
             {
@@ -113,25 +161,10 @@ namespace AppleSceneEditor
                 }
             }
         }
-
-        /// <summary>
-        /// Reconstructs and rebuilds any UI elements associated with this object.
-        /// </summary>
-        /// <param name="rootObject">The <see cref="JsonObject"/> to display. If not set to, then an internal root
-        /// object will be used instead.</param>
-        public void RebuildUI(JsonObject? rootObject = null)
-        {
-            rootObject ??= _rootObject;
-            
-            NameStackPanel.Widgets.Clear();
-            ValueStackPanel.Widgets.Clear();
-
-            //re-add the holder labels
-            NameStackPanel.AddChild(new Label {Text = "Holder"});
-            ValueStackPanel.AddChild(new Label {Text = "Holder"});
-
-            BuildUI(0, rootObject);
-        }
+        
+        //----------------------------
+        // Create UI element methods
+        //----------------------------
 
         private TextButton CreateAddElementButton(JsonObject obj)
         {
@@ -190,27 +223,6 @@ namespace AppleSceneEditor
             }
 
             return menu;
-        }
-
-        public bool SaveToScene(Scene scene)
-        {
-            if (scene.ScenePath is null)
-            {
-                Debug.WriteLine($"{nameof(SaveToScene)}: scene does not have a ScenePath! Cannot save to scene.");
-                return false;
-            }
-
-            if (_rootObject.Name is null)
-            {
-                Debug.WriteLine($"{nameof(SaveToScene)}: the rootObject does not have a name! Cannot save to scene.");
-                return false;
-            }
-
-            _rootObject.GenerateEntity(scene, scene.ScenePath is null
-                ? null
-                : Path.Combine(scene.ScenePath, "Entities", $"{_rootObject.Name}.entity"));
-
-            return true;
         }
 
         private void AddProperty(int indentLevel, JsonProperty property)
@@ -363,7 +375,7 @@ namespace AppleSceneEditor
 
             private void CreateNewArray(object? sender, EventArgs? eventArgs)
             {
-                Object.Arrays.Add(new JsonArray {new()});
+                Object.Arrays.Add(new JsonArray {new()}); 
                 Handler.RebuildUI();
             }
 
