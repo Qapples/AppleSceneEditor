@@ -63,8 +63,6 @@ namespace AppleSceneEditor
 
         private readonly DynamicSpriteFont _font;
 
-        private JsonObject _currentBuildedObject;
-
         /// <summary>
         /// Constructs an instance of <see cref="ComponentPanelHandler"/>.
         /// </summary>
@@ -83,13 +81,12 @@ namespace AppleSceneEditor
                 (desktop, rootObject, nameStackPanel, valueStackPanel);
             _font = AppleSerialization.Environment.DefaultFontSystem.GetFont(DefaultTextBoxFontSize);
 
-            _selectElementTypeWindow = CreateSelectElementTypeWindow();
+            _selectElementTypeWindow = new Window();
             BuildUI(0, rootObject);
         }
 
         private void BuildUI(int indentLevel, JsonObject jsonObject)
         {
-            _currentBuildedObject = jsonObject;
 
             //properties
             foreach (JsonProperty property in jsonObject.Properties)
@@ -111,7 +108,7 @@ namespace AppleSceneEditor
                     BuildUI(indentLevel + IndentationIncrement, obj);
 
                     //add these to separate entries in the array
-                    NameStackPanel.AddChild(CreateAddElementButton());
+                    NameStackPanel.AddChild(CreateAddElementButton(obj));
                     ValueStackPanel.AddChild(new Label {Text = ""});
                 }
             }
@@ -136,7 +133,7 @@ namespace AppleSceneEditor
             BuildUI(0, rootObject);
         }
 
-        private TextButton CreateAddElementButton()
+        private TextButton CreateAddElementButton(JsonObject obj)
         {
             TextButton outButton = new()
             {
@@ -144,12 +141,19 @@ namespace AppleSceneEditor
                 Opacity = 0.5f,
                 HorizontalAlignment = HorizontalAlignment.Right
             };
-            outButton.Click += (o, e) => _selectElementTypeWindow.ShowModal(Desktop);
+
+            Menu selectTypeMenu = CreateSelectElementTypeMenu(obj);
+
+            outButton.Click += (o, e) =>
+            {
+                _selectElementTypeWindow.Content = selectTypeMenu;
+                _selectElementTypeWindow.ShowModal(Desktop);
+            };
 
             return outButton;
         }
 
-        private Window CreateSelectElementTypeWindow()
+        private Menu CreateSelectElementTypeMenu(JsonObject obj)
         {
             VerticalMenu menu = new()
             {
@@ -161,23 +165,31 @@ namespace AppleSceneEditor
                 }
             };
 
-            Window outWindow = new() {Content = menu};
-
             //we're using a foreach loop here and a switch statement since the order of the elements in
             //_selectElementTypeMenu are subject to change
             foreach (IMenuItem iItem in menu.Items)
             {
                 if (iItem is not MenuItem item) continue;
 
+                JsonElementTypes newElemType;
                 switch (item.Id)
                 {
-                    case "propertyMenuItem": item.Selected += CreateNewProperty; break;
-                    case "arrayMenuItem": item.Selected += CreateNewArray; break;
-                    case "childMenuItem": item.Selected += CreateNewChild; break;
+                    case "propertyMenuItem": newElemType = JsonElementTypes.Property; break;
+                    case "arrayMenuItem": newElemType = JsonElementTypes.Array; break;
+                    case "childMenuItem": newElemType = JsonElementTypes.Child; break;
+                    default:
+                        Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateSelectElementTypeMenu)}:" +
+                                        "item id is not valid!. Must be \"propertyMenuItem\", \"arrayMenuItem\", or" +
+                                        $"\"childMenuItem\". The actual id is: {item.Id}. Using JsonElementTypes." +
+                                        "Property as a replacement value.");
+                        newElemType = JsonElementTypes.Property;
+                        break;
                 }
+
+                item.Selected += new NewElementTypeMethodHolder(obj, this, in newElemType).OutEvent;
             }
 
-            return outWindow;
+            return menu;
         }
 
         public bool SaveToScene(Scene scene)
@@ -317,22 +329,56 @@ namespace AppleSceneEditor
         // Element type menu methods
         //-----------------------------
 
-        private void CreateNewProperty(object? sender, EventArgs? eventArgs)
+        private class NewElementTypeMethodHolder
         {
-            _currentBuildedObject.Properties.Add(new JsonProperty());
-            RebuildUI();
+            public EventHandler OutEvent { get; init; }
+            
+            public ComponentPanelHandler Handler { get; set; } 
+            public JsonObject Object { get; set; }
+
+            public NewElementTypeMethodHolder(JsonObject obj, ComponentPanelHandler handler,
+                in JsonElementTypes type)
+            {
+                (Object, Handler) = (obj, handler);
+
+                switch (type)
+                {
+                    case JsonElementTypes.Property: OutEvent = CreateNewProperty; break;
+                    case JsonElementTypes.Child: OutEvent = CreateNewChild; break;
+                    case JsonElementTypes.Array: OutEvent = CreateNewArray; break;
+                    default:
+                        Debug.WriteLine($"{nameof(NewElementTypeMethodHolder)}: for some reason, the type " +
+                                        "parameter value in the constructor for this type is not valid. The OutEvent " +
+                                        "property will be set to the \"CreateNewProperty\" method.");
+                        OutEvent = CreateNewProperty;
+                        break;
+                }
+            }
+            
+            private void CreateNewProperty(object? sender, EventArgs? eventArgs)
+            {
+                Object.Properties.Add(new JsonProperty());
+                Handler.RebuildUI();
+            }
+
+            private void CreateNewArray(object? sender, EventArgs? eventArgs)
+            {
+                Object.Arrays.Add(new JsonArray {new()});
+                Handler.RebuildUI();
+            }
+
+            private void CreateNewChild(object? sender, EventArgs? eventArgs)
+            {
+                Object.Children.Add(new JsonObject());
+                Handler.RebuildUI();
+            }
         }
 
-        private void CreateNewArray(object? sender, EventArgs? eventArgs)
+        private enum JsonElementTypes
         {
-            _currentBuildedObject.Arrays.Add(new JsonArray());
-            RebuildUI();
-        }
-
-        private void CreateNewChild(object? sender, EventArgs? eventArgs)
-        {
-            _currentBuildedObject.Children.Add(new JsonObject());
-            RebuildUI();
+            Property,
+            Array,
+            Child
         }
 
         private record IndentedTextButton(TextButton Button, int IndentLevel);
