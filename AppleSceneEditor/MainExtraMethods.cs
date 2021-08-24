@@ -169,7 +169,8 @@ namespace AppleSceneEditor
                     
                     if (_mainPanelHandler is null)
                     {
-                        _mainPanelHandler = new ComponentPanelHandler(selectedJsonObject, nameStackPanel, valueStackPanel);
+                        _mainPanelHandler = new ComponentPanelHandler(_desktop, selectedJsonObject, nameStackPanel,
+                            valueStackPanel);
                     }
                     else
                     {

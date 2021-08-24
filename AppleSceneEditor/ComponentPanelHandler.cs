@@ -27,9 +27,16 @@ namespace AppleSceneEditor
 
         private JsonObject _rootObject;
 
-        private TextButton _addPropertyButton;
-        private Media
-
+#nullable disable
+        private Window _selectElementTypeWindow;
+#nullable enable
+        
+        /// <summary>
+        /// The <see cref="Desktop"/> instance where <see cref="NameStackPanel"/> and <see cref="ValueStackPanel"/>
+        /// reside. Used to create new windows for selecting new element types.
+        /// </summary>
+        public Desktop Desktop { get; set; }
+        
         /// <summary>
         /// The <see cref="JsonObject"/> instance whose values and components will be seen and changed.
         /// </summary>
@@ -40,18 +47,10 @@ namespace AppleSceneEditor
             {
                 _rootObject = value;
                 
-                //rebuild UI
-                NameStackPanel.Widgets.Clear();
-                ValueStackPanel.Widgets.Clear();
-                
-                //re-add the holder labels
-                NameStackPanel.AddChild(new Label {Text = "Holder"});
-                ValueStackPanel.AddChild(new Label {Text = "Holder"});
-
-                BuildUI(0, value);
+                RebuildUI();
             }
         }
-        
+
         /// <summary>
         /// The <see cref="StackPanel"/> instance that holds the names of the components.
         /// </summary>
@@ -64,21 +63,121 @@ namespace AppleSceneEditor
 
         private readonly DynamicSpriteFont _font;
 
+        private JsonObject _currentBuildedObject;
+
         /// <summary>
         /// Constructs an instance of <see cref="ComponentPanelHandler"/>.
         /// </summary>
+        /// <param name="desktop">The <see cref="Desktop"/> instance where <see cref="NameStackPanel"/> and
+        /// <see cref="ValueStackPanel"/> reside. Used to create new windows for selecting new element types.</param>
         /// <param name="rootObject">The <see cref="JsonObject"/> instance whose values and components will be seen and
         /// changed.</param>
         /// <param name="nameStackPanel">The <see cref="StackPanel"/> instance that holds the names of the components.
         /// </param>
         /// <param name="valueStackPanel">The <see cref="StackPanel"/> instance that holds the values of the components.
         /// </param>
-        public ComponentPanelHandler(JsonObject rootObject, StackPanel nameStackPanel, StackPanel valueStackPanel)
+        public ComponentPanelHandler(Desktop desktop, JsonObject rootObject, StackPanel nameStackPanel,
+            StackPanel valueStackPanel)
         {
-            (_rootObject, NameStackPanel, ValueStackPanel) = (rootObject, nameStackPanel, valueStackPanel);
+            (Desktop, _rootObject, NameStackPanel, ValueStackPanel) =
+                (desktop, rootObject, nameStackPanel, valueStackPanel);
             _font = AppleSerialization.Environment.DefaultFontSystem.GetFont(DefaultTextBoxFontSize);
 
+            _selectElementTypeWindow = CreateSelectElementTypeWindow();
             BuildUI(0, rootObject);
+        }
+
+        private void BuildUI(int indentLevel, JsonObject jsonObject)
+        {
+            _currentBuildedObject = jsonObject;
+
+            //properties
+            foreach (JsonProperty property in jsonObject.Properties)
+            {
+                AddProperty(indentLevel + IndentationIncrement, property);
+            }
+
+            //children
+            foreach (JsonObject obj in jsonObject.Children)
+            {
+                BuildUI(indentLevel + IndentationIncrement, obj);
+            }
+
+            //arrays
+            foreach (JsonArray array in jsonObject.Arrays)
+            {
+                foreach (JsonObject obj in array)
+                {
+                    BuildUI(indentLevel + IndentationIncrement, obj);
+
+                    //add these to separate entries in the array
+                    NameStackPanel.AddChild(CreateAddElementButton());
+                    ValueStackPanel.AddChild(new Label {Text = ""});
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reconstructs and rebuilds any UI elements associated with this object.
+        /// </summary>
+        /// <param name="rootObject">The <see cref="JsonObject"/> to display. If not set to, then an internal root
+        /// object will be used instead.</param>
+        public void RebuildUI(JsonObject? rootObject = null)
+        {
+            rootObject ??= _rootObject;
+            
+            NameStackPanel.Widgets.Clear();
+            ValueStackPanel.Widgets.Clear();
+
+            //re-add the holder labels
+            NameStackPanel.AddChild(new Label {Text = "Holder"});
+            ValueStackPanel.AddChild(new Label {Text = "Holder"});
+
+            BuildUI(0, rootObject);
+        }
+
+        private TextButton CreateAddElementButton()
+        {
+            TextButton outButton = new()
+            {
+                Text = "+",
+                Opacity = 0.5f,
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+            outButton.Click += (o, e) => _selectElementTypeWindow.ShowModal(Desktop);
+
+            return outButton;
+        }
+
+        private Window CreateSelectElementTypeWindow()
+        {
+            VerticalMenu menu = new()
+            {
+                Items =
+                {
+                    new MenuItem {Text = "Create property", Id = "propertyMenuItem"},
+                    new MenuItem {Text = "Create array", Id = "arrayMenuItem"},
+                    new MenuItem {Text = "Create child", Id = "childMenuItem"}
+                }
+            };
+
+            Window outWindow = new() {Content = menu};
+
+            //we're using a foreach loop here and a switch statement since the order of the elements in
+            //_selectElementTypeMenu are subject to change
+            foreach (IMenuItem iItem in menu.Items)
+            {
+                if (iItem is not MenuItem item) continue;
+
+                switch (item.Id)
+                {
+                    case "propertyMenuItem": item.Selected += CreateNewProperty; break;
+                    case "arrayMenuItem": item.Selected += CreateNewArray; break;
+                    case "childMenuItem": item.Selected += CreateNewChild; break;
+                }
+            }
+
+            return outWindow;
         }
 
         public bool SaveToScene(Scene scene)
@@ -100,34 +199,6 @@ namespace AppleSceneEditor
                 : Path.Combine(scene.ScenePath, "Entities", $"{_rootObject.Name}.entity"));
 
             return true;
-        }
-
-        private void BuildUI(int indentLevel, JsonObject jsonObject)
-        {
-            //properties
-            foreach (JsonProperty property in jsonObject.Properties)
-            {
-                AddProperty(indentLevel + IndentationIncrement, property);
-            }
-            
-            //children
-            foreach (JsonObject obj in jsonObject.Children)
-            {
-                BuildUI(indentLevel + IndentationIncrement, obj);
-            }
-            
-            //arrays
-            foreach (JsonArray array in jsonObject.Arrays)
-            {
-                foreach (JsonObject obj in array)
-                {
-                    BuildUI(indentLevel + IndentationIncrement, obj);
-
-                    //add blank label to separate entries in the array
-                    NameStackPanel.AddChild(new Label {Text = ""});
-                    ValueStackPanel.AddChild(new Label {Text = ""});
-                }
-            }
         }
 
         private void AddProperty(int indentLevel, JsonProperty property)
@@ -155,9 +226,13 @@ namespace AppleSceneEditor
 
             addWidget ??= new Label {Text = "Not supported.", Font = _font};
             addWidget.Margin = new Thickness(indentLevel, 0, 0, 0);
-            
+
             ValueStackPanel.AddChild(addWidget);
         }
+
+        //---------------------------
+        // Create editor methods
+        //---------------------------
 
         private CheckBox? CreateBooleanEditor(JsonProperty property)
         {
@@ -211,12 +286,12 @@ namespace AppleSceneEditor
                                 $" Method: ({nameof(CreateNumericEditor)})");
                 return null;
             }
-            
+
             //property.Value should never be null under any circumstances but if it is set it to the default value of
             //an int which in this case is zero.
             property.Value ??= default(int);
             Type propertyValueType = property.Value.GetType();
-            
+
             SpinButton spinButton = new()
             {
                 Integer = propertyValueType.IsNumericInteger(),
@@ -237,7 +312,29 @@ namespace AppleSceneEditor
 
             return spinButton;
         }
-        
-        private static void Create
+
+        //-----------------------------
+        // Element type menu methods
+        //-----------------------------
+
+        private void CreateNewProperty(object? sender, EventArgs? eventArgs)
+        {
+            _currentBuildedObject.Properties.Add(new JsonProperty());
+            RebuildUI();
+        }
+
+        private void CreateNewArray(object? sender, EventArgs? eventArgs)
+        {
+            _currentBuildedObject.Arrays.Add(new JsonArray());
+            RebuildUI();
+        }
+
+        private void CreateNewChild(object? sender, EventArgs? eventArgs)
+        {
+            _currentBuildedObject.Children.Add(new JsonObject());
+            RebuildUI();
+        }
+
+        private record IndentedTextButton(TextButton Button, int IndentLevel);
     }
 }
