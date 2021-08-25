@@ -97,7 +97,8 @@ namespace AppleSceneEditor
             }
 
             _addComponentWindow.Close();
-            componentArray.Add(new JsonObject(new List<JsonProperty> {new("$type", typeName, JsonValueKind.String)}));
+            componentArray.Add(new JsonObject(null,
+                new List<JsonProperty> {new("$type", typeName, JsonValueKind.String)}));
         }
     }
 }

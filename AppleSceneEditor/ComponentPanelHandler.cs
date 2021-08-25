@@ -12,6 +12,7 @@ using FontStashSharp;
 using GrappleFightNET5.Scenes;
 using Myra.Graphics2D;
 using Myra.Graphics2D.UI.Styles;
+using StbImageSharp;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor
@@ -82,7 +83,7 @@ namespace AppleSceneEditor
                 (desktop, rootObject, nameStackPanel, valueStackPanel);
             _font = AppleSerialization.Environment.DefaultFontSystem.GetFont(DefaultTextBoxFontSize);
 
-            _selectElementTypeWindow = new Window();
+           _selectElementTypeWindow = new Window();
             BuildUI(0, rootObject);
         }
         
@@ -166,7 +167,7 @@ namespace AppleSceneEditor
         // Create UI element methods
         //----------------------------
 
-        private TextButton CreateAddElementButton(JsonObject obj)
+        private TextButton CreateAddElementButton(JsonObject parentObj)
         {
             TextButton outButton = new()
             {
@@ -175,7 +176,7 @@ namespace AppleSceneEditor
                 HorizontalAlignment = HorizontalAlignment.Right
             };
 
-            Menu selectTypeMenu = CreateSelectElementTypeMenu(obj);
+            Menu selectTypeMenu = CreateSelectElementTypeMenu(parentObj);
 
             outButton.Click += (o, e) =>
             {
@@ -186,7 +187,7 @@ namespace AppleSceneEditor
             return outButton;
         }
 
-        private Menu CreateSelectElementTypeMenu(JsonObject obj)
+        private Menu CreateSelectElementTypeMenu(JsonObject parentObj)
         {
             VerticalMenu menu = new()
             {
@@ -204,22 +205,23 @@ namespace AppleSceneEditor
             {
                 if (iItem is not MenuItem item) continue;
 
-                JsonElementTypes newElemType;
+                JsonElementType newElemType;
                 switch (item.Id)
                 {
-                    case "propertyMenuItem": newElemType = JsonElementTypes.Property; break;
-                    case "arrayMenuItem": newElemType = JsonElementTypes.Array; break;
-                    case "childMenuItem": newElemType = JsonElementTypes.Child; break;
+                    case "propertyMenuItem": newElemType = JsonElementType.Property; break;
+                    case "arrayMenuItem": newElemType = JsonElementType.Array; break;
+                    case "childMenuItem": newElemType = JsonElementType.Child; break;
                     default:
                         Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateSelectElementTypeMenu)}:" +
                                         "item id is not valid!. Must be \"propertyMenuItem\", \"arrayMenuItem\", or" +
                                         $"\"childMenuItem\". The actual id is: {item.Id}. Using JsonElementTypes." +
                                         "Property as a replacement value.");
-                        newElemType = JsonElementTypes.Property;
+                        newElemType = JsonElementType.Property;
                         break;
                 }
 
-                item.Selected += new NewElementTypeMethodHolder(obj, this, in newElemType).OutEvent;
+                item.Selected += new NewElementTypeMethodHolder(parentObj, this, in newElemType).OutEvent;
+                item.Selected += (o, e) => _selectElementTypeWindow.Close();
             }
 
             return menu;
@@ -338,7 +340,7 @@ namespace AppleSceneEditor
         }
 
         //-----------------------------
-        // Element type menu methods
+        // New element handlers
         //-----------------------------
 
         private class NewElementTypeMethodHolder
@@ -348,16 +350,19 @@ namespace AppleSceneEditor
             public ComponentPanelHandler Handler { get; set; } 
             public JsonObject Object { get; set; }
 
+            private Window _initElementWindow;
+
             public NewElementTypeMethodHolder(JsonObject obj, ComponentPanelHandler handler,
-                in JsonElementTypes type)
+                in JsonElementType type)
             {
                 (Object, Handler) = (obj, handler);
+                _initElementWindow = CreateInitElementWindow(type);
 
                 switch (type)
                 {
-                    case JsonElementTypes.Property: OutEvent = CreateNewProperty; break;
-                    case JsonElementTypes.Child: OutEvent = CreateNewChild; break;
-                    case JsonElementTypes.Array: OutEvent = CreateNewArray; break;
+                    case JsonElementType.Property: OutEvent = CreateNewProperty; break;
+                    case JsonElementType.Child: OutEvent = CreateNewChild; break;
+                    case JsonElementType.Array: OutEvent = CreateNewArray; break;
                     default:
                         Debug.WriteLine($"{nameof(NewElementTypeMethodHolder)}: for some reason, the type " +
                                         "parameter value in the constructor for this type is not valid. The OutEvent " +
@@ -369,30 +374,138 @@ namespace AppleSceneEditor
             
             private void CreateNewProperty(object? sender, EventArgs? eventArgs)
             {
-                Object.Properties.Add(new JsonProperty());
+                _initElementWindow.ShowModal(Handler.Desktop);
                 Handler.RebuildUI();
             }
 
             private void CreateNewArray(object? sender, EventArgs? eventArgs)
             {
-                Object.Arrays.Add(new JsonArray {new()}); 
+                _initElementWindow.ShowModal(Handler.Desktop);
                 Handler.RebuildUI();
             }
 
             private void CreateNewChild(object? sender, EventArgs? eventArgs)
             {
-                Object.Children.Add(new JsonObject());
+                _initElementWindow.ShowModal(Handler.Desktop);
                 Handler.RebuildUI();
             }
-        }
+            
+            private Window CreateInitElementWindow(JsonElementType elementType)
+            {
+                const HorizontalAlignment center = HorizontalAlignment.Center;
+                Window outWindow = new();
+                
+                VerticalStackPanel stackPanel = new() {HorizontalAlignment = center};
 
-        private enum JsonElementTypes
+                TextBox nameTextBox = new() {Text = "Enter name here...", HorizontalAlignment = center};
+                TextButton finishButton = new() {Text = "Finish", HorizontalAlignment = center};
+                ComboBox typeComboBox = new()
+                {
+                    Items =
+                    {
+                        new ListItem {Text = "Boolean", Id = "boolean"},
+                        new ListItem {Text = "Integer", Id = "integer"},
+                        new ListItem {Text = "Float", Id = "float"},
+                        new ListItem {Text = "String", Id = "string"}
+                    },
+                    SelectedIndex = 0,
+                    HorizontalAlignment = center
+                };
+                typeComboBox.SelectedItem = typeComboBox.Items[0];
+
+                finishButton.Click += (o, e) =>
+                {
+                    FinishButtonClick(nameTextBox.Text, in elementType, typeComboBox.SelectedItem.Id switch
+                    {
+                        "boolean" => JsonPropertyType.Boolean,
+                        "integer" => JsonPropertyType.Integer,
+                        "float" => JsonPropertyType.Float,
+                        "string" => JsonPropertyType.String,
+                        _ => JsonPropertyType.Integer,
+                    });
+                    
+                    outWindow.Close();
+                };
+
+                stackPanel.AddChild(new Label {Text = "Enter the name of the element:", HorizontalAlignment = center});
+                stackPanel.AddChild(nameTextBox);
+                stackPanel.AddChild(new Label());
+
+                if (elementType == JsonElementType.Property)
+                {
+                    stackPanel.AddChild(new Label {Text = "Select type of the element:", HorizontalAlignment = center});
+                    stackPanel.AddChild(typeComboBox);
+                    stackPanel.AddChild(new Label());
+                }
+
+                stackPanel.AddChild(finishButton);
+
+                outWindow.Content = stackPanel;
+
+                return outWindow;
+            }
+
+            private void FinishButtonClick(string name, in JsonElementType elementType,
+                in JsonPropertyType propertyType)
+            {
+                switch (elementType)
+                {
+                    case JsonElementType.Property:
+                        object value = default(int);
+                        JsonValueKind kind = JsonValueKind.Number;
+                            
+                        switch (propertyType)
+                        {
+                            case JsonPropertyType.Boolean:
+                                value = default(bool);
+                                kind = (bool)value ? JsonValueKind.True : JsonValueKind.False;
+                                break;
+                            case JsonPropertyType.Integer:
+                                value = default(int);
+                                kind = JsonValueKind.Number;
+                                break;
+                            case JsonPropertyType.Float:
+                                value = default(float);
+                                kind = JsonValueKind.Number;
+                                break;
+                            case JsonPropertyType.String:
+                                value = "";
+                                kind = JsonValueKind.String;
+                                break;
+                        }
+
+                        Object.Properties.Add(new JsonProperty(name, value, in kind));
+                        Handler.RebuildUI();
+                        break;
+                    case JsonElementType.Array:
+                        Object.Arrays.Add(new JsonArray(name) {new()});
+                        Handler.RebuildUI();
+                        break;
+                    case JsonElementType.Child:
+                        Object.Children.Add(new JsonObject(name));
+                        Handler.RebuildUI();
+                        break;
+                }
+            }
+        }
+        
+        //------------------
+        // Enums and misc.
+        //------------------
+
+        private enum JsonElementType
         {
             Property,
             Array,
             Child
         }
 
-        private record IndentedTextButton(TextButton Button, int IndentLevel);
+        private enum JsonPropertyType
+        {
+            Boolean,
+            Integer,
+            Float,
+            String,
+        }
     }
 }
