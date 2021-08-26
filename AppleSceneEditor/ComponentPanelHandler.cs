@@ -154,7 +154,7 @@ namespace AppleSceneEditor
             foreach (JsonArray array in jsonObject.Arrays)
             {
                 AddINameStringEditor(array, indentLevel);
-                
+
                 foreach (JsonObject obj in array)
                 {
                     BuildUI(indentLevel + IndentationIncrement, obj);

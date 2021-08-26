@@ -40,10 +40,10 @@
   <SpinButtonStyles>
     <SpinButtonStyle Background="textfield">
       <TextBoxStyle TextColor="white" DisabledTextColor="gray" Font="default-font" Cursor="cursor" Selection="selection" />
-      <UpButtonStyle Width="12" Height="12" Background="button" OverBackground="button-over" PressedBackground="button-down">
+      <UpButtonStyle Width="12" Height="8" Background="button" OverBackground="button-over" PressedBackground="button-down">
         <ImageStyle Image="select-up" />
       </UpButtonStyle>
-      <DownButtonStyle Width="12" Height="12" Background="button" OverBackground="button-over" PressedBackground="button-down">
+      <DownButtonStyle Width="12" Height="8" Background="button" OverBackground="button-over" PressedBackground="button-down">
         <ImageStyle Image="select-down" />
       </DownButtonStyle>
     </SpinButtonStyle>

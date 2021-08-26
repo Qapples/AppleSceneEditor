@@ -124,10 +124,11 @@ namespace AppleSceneEditor
             Stylesheet stylesheet = _stylesheetPath is null
                 ? Stylesheet.Current
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
+            Stylesheet.Current = stylesheet;
+            
             _addComponentWindow = CreateAddComponentDialog();
 
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
-            
             _desktop = new Desktop
             {
                 Root = _project.Root
