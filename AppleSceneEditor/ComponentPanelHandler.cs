@@ -146,23 +146,38 @@ namespace AppleSceneEditor
             //children
             foreach (JsonObject obj in jsonObject.Children)
             {
+                AddINameStringEditor(obj, indentLevel);
                 BuildUI(indentLevel + IndentationIncrement, obj);
             }
 
             //arrays
             foreach (JsonArray array in jsonObject.Arrays)
             {
+                AddINameStringEditor(array, indentLevel);
+                
                 foreach (JsonObject obj in array)
                 {
                     BuildUI(indentLevel + IndentationIncrement, obj);
 
                     //add these to separate entries in the array
                     NameStackPanel.AddChild(CreateAddElementButton(obj));
-                    ValueStackPanel.AddChild(new Label {Text = ""});
+                    ValueStackPanel.AddChild(new Label());
                 }
             }
         }
-        
+
+        private void AddINameStringEditor(IName name, int indentLevel)
+        {
+            TextBox? strEditor = CreateStringEditor(name);
+            if (strEditor is not null)
+            {
+                strEditor.Margin = new Thickness(indentLevel + IndentationIncrement, 0, 0, 0);
+
+                NameStackPanel.AddChild(strEditor);
+                ValueStackPanel.AddChild(new Label());
+            }
+        }
+
         //----------------------------
         // Create UI element methods
         //----------------------------
@@ -281,8 +296,8 @@ namespace AppleSceneEditor
         {
             if (property.ValueKind != JsonValueKind.String && !changeName)
             {
-                Debug.WriteLine($"Value kind is not a string! Returning null. Value kind: {property.ValueKind}. " +
-                                $" Method: ({nameof(CreateStringEditor)})");
+                Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateStringEditor)} (JsonProperty): " +
+                                $"Value kind is not a string! Returning null. Value kind: {property.ValueKind}. ");
                 return null;
             }
 
@@ -299,6 +314,32 @@ namespace AppleSceneEditor
 
                 if (changeName) property.Name = textBox.Text;
                 else property.Value = textBox.Text;
+            };
+
+            return textBox;
+        }
+
+        private TextBox? CreateStringEditor(IName name)
+        {
+            if (name.Name is null)
+            {
+                Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateStringEditor)} (IName):" +
+                                $"parameter's name value is null! Cannot create string editor. Returning null.");
+                return null;
+            }
+
+            TextBox textBox = new()
+            {
+                Text = name.Name,
+                MaxWidth = 50,
+                Font = _font
+            };
+
+            textBox.TextChanged += (s, e) =>
+            {
+                if (textBox.Text is null || textBox.Text.Length > MaxTextLength) return;
+
+                name.Name = textBox.Text;
             };
 
             return textBox;
