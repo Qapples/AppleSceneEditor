@@ -10,6 +10,7 @@ using FontStashSharp;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
 using Myra.Graphics2D;
+using Myra.Graphics2D.UI.Styles;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 
@@ -203,7 +204,7 @@ namespace AppleSceneEditor
             return outButton;
         }
 
-        public TextButton CreateAddArrElemButton(JsonObject parentObj)
+        public TextButton CreateAddArrElemButton(JsonArray array)
         {
             TextButton outButton = new()
             {
@@ -213,7 +214,7 @@ namespace AppleSceneEditor
                 TextColor = Color.Red
             };
             
-            Menu selectTypeMenu = CreateSelectArrElemTypeMenu(parentObj);
+            Menu selectTypeMenu = CreateSelectArrElemTypeMenu(array);
 
             outButton.Click += (o, e) =>
             {
@@ -247,7 +248,7 @@ namespace AppleSceneEditor
                 {
                     case "propertyMenuItem": newElemType = JsonElementType.Property; break;
                     case "arrayMenuItem": newElemType = JsonElementType.Array; break;
-                    case "childMenuItem": newElemType = JsonElementType.Child; break;
+                    case "childMenuItem": newElemType = JsonElementType.Object; break;
                     default:
                         Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateSelectElemTypeMenu)}:" +
                                         "item id is not valid!. Must be \"propertyMenuItem\", \"arrayMenuItem\", or" +
@@ -264,42 +265,41 @@ namespace AppleSceneEditor
             return outMenu;
         }
 
-        private Menu CreateSelectArrElemTypeMenu(JsonObject parentObj)
+        private Menu CreateSelectArrElemTypeMenu(JsonArray array)
         {
             VerticalMenu outMenu = new()
             {
                 Items =
                 {
                     new MenuItem {Text = "Create value", Id = "valueMenuItem"},
-                    new MenuItem {Text = "Create object", Id = ""}
+                    new MenuItem {Text = "Create object", Id = "objectMenuItem"}
                 }
             };
-
+        
             //we're using a foreach loop here and a switch statement since the order of the elements in
             //_selectElemTypeMenu are subject to change
             foreach (IMenuItem iItem in outMenu.Items)
             {
                 if (iItem is not MenuItem item) continue;
-
+        
                 JsonElementType newElemType;
                 switch (item.Id)
                 {
-                    case "propertyMenuItem": newElemType = JsonElementType.Property; break;
-                    case "arrayMenuItem": newElemType = JsonElementType.Array; break;
-                    case "childMenuItem": newElemType = JsonElementType.Child; break;
+                    case "valueMenuItem": newElemType = JsonElementType.Property; break;
+                    case "objectMenuItem": newElemType = JsonElementType.Object; break;
                     default:
-                        Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateSelectElemTypeMenu)}:" +
-                                        "item id is not valid!. Must be \"propertyMenuItem\", \"arrayMenuItem\", or" +
-                                        $"\"childMenuItem\". The actual id is: {item.Id}. Using JsonElementTypes." +
-                                        "Property as a replacement value.");
+                        Debug.WriteLine($"{nameof(ComponentPanelHandler)}.{nameof(CreateSelectArrElemTypeMenu)}:" +
+                                        "item id is not valid!. Must be \"valueMenuItem\" or \"objectMenuItem\" " +
+                                        $". The actual id is: {item.Id}. Using JsonElementType.Property as a " +
+                                        "replacement value.");
                         newElemType = JsonElementType.Property;
                         break;
                 }
-
-                item.Selected += new NewElementHandler(parentObj, this, in newElemType).OutEvent;
+        
+                item.Selected += new NewElementHandler(array, this, in newElemType).OutEvent;
                 item.Selected += (o, e) => _selectArrElemTypeWindow.Close();
             }
-
+        
             return outMenu;
         }
 
@@ -448,13 +448,7 @@ namespace AppleSceneEditor
         {
             Property,
             Array,
-            Child
-        }
-
-        private enum JsonArrayElementType
-        {
-            Value,
-            Object
+            Object,
         }
 
         private enum JsonPropertyType

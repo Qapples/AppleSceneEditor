@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
 using AppleSerialization.Json;
@@ -9,52 +10,46 @@ namespace AppleSceneEditor
 {
     public partial class ComponentPanelHandler
     {
-        private class NewElementHandler
+        //TODO: Change this into it's own dialog instead of being just a handler?
+        private class NewElementHandler 
         {
             public EventHandler OutEvent { get; init; }
             
-            public ComponentPanelHandler Handler { get; set; } 
-            public JsonObject Object { get; set; }
+            public ComponentPanelHandler PanelHandler { get; set; } 
+            
+            public JsonObject? Object { get; set; }
+            
+            public JsonArray? Array { get; set; }
 
+            public bool IsHandlingObject { get; set; }
+            
             private Window _initElementWindow;
 
-            public NewElementHandler(JsonObject obj, ComponentPanelHandler handler,
+            public NewElementHandler(JsonObject obj, ComponentPanelHandler panelHandler,
                 in JsonElementType type)
             {
-                (Object, Handler) = (obj, handler);
+                (Object, PanelHandler, IsHandlingObject) = (obj, panelHandler, true);
                 _initElementWindow = CreateInitElementWindow(type);
 
-                switch (type)
+                OutEvent = (o, e) =>
                 {
-                    case JsonElementType.Property: OutEvent = CreateNewProperty; break;
-                    case JsonElementType.Child: OutEvent = CreateNewChild; break;
-                    case JsonElementType.Array: OutEvent = CreateNewArray; break;
-                    default:
-                        Debug.WriteLine($"{nameof(NewElementHandler)}: for some reason, the type " +
-                                        "parameter value in the constructor for this type is not valid. The OutEvent " +
-                                        "property will be set to the \"CreateNewProperty\" method.");
-                        OutEvent = CreateNewProperty;
-                        break;
-                }
-            }
-            
-            private void CreateNewProperty(object? sender, EventArgs? eventArgs)
-            {
-                _initElementWindow.ShowModal(Handler.Desktop);
-                Handler.RebuildUI();
+                    _initElementWindow.ShowModal(PanelHandler.Desktop);
+                    PanelHandler.RebuildUI();
+                };
             }
 
-            private void CreateNewArray(object? sender, EventArgs? eventArgs)
+            public NewElementHandler(JsonArray array, ComponentPanelHandler panelHandler, in JsonElementType type)
             {
-                _initElementWindow.ShowModal(Handler.Desktop);
-                Handler.RebuildUI();
+                (Array, PanelHandler, IsHandlingObject) = (array, panelHandler, false);
+                _initElementWindow = CreateInitElementWindow(type);
+
+                OutEvent = (o, e) =>
+                {
+                    _initElementWindow.ShowModal(PanelHandler.Desktop);
+                    PanelHandler.RebuildUI();
+                };
             }
 
-            private void CreateNewChild(object? sender, EventArgs? eventArgs)
-            {
-                _initElementWindow.ShowModal(Handler.Desktop);
-                Handler.RebuildUI();
-            }
             
             private Window CreateInitElementWindow(JsonElementType elementType)
             {
@@ -93,9 +88,13 @@ namespace AppleSceneEditor
                     outWindow.Close();
                 };
 
-                stackPanel.AddChild(new Label {Text = "Enter the name of the element:", HorizontalAlignment = center});
-                stackPanel.AddChild(nameTextBox);
-                stackPanel.AddChild(new Label());
+                if (IsHandlingObject)
+                {
+                    stackPanel.AddChild(new Label
+                        {Text = "Enter the name of the element:", HorizontalAlignment = center});
+                    stackPanel.AddChild(nameTextBox);
+                    stackPanel.AddChild(new Label());
+                }
 
                 if (elementType == JsonElementType.Property)
                 {
@@ -140,16 +139,17 @@ namespace AppleSceneEditor
                                 break;
                         }
 
-                        Object.Properties.Add(new JsonProperty(name, value, in kind));
-                        Handler.RebuildUI();
+                        if (IsHandlingObject) Object.Properties.Add(new JsonProperty(name, value, in kind));
+                        else Array.Add(new JsonProperty(null, value, in kind));
+                        PanelHandler.RebuildUI();
                         break;
                     case JsonElementType.Array:
                         Object.Arrays.Add(new JsonArray(name) {new()});
-                        Handler.RebuildUI();
+                        PanelHandler.RebuildUI();
                         break;
-                    case JsonElementType.Child:
+                    case JsonElementType.Object:
                         Object.Children.Add(new JsonObject(name));
-                        Handler.RebuildUI();
+                        PanelHandler.RebuildUI();
                         break;
                 }
             }
