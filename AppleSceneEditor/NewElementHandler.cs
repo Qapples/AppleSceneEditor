@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
+using AppleSerialization.Info;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
@@ -58,7 +59,7 @@ namespace AppleSceneEditor
                 
                 VerticalStackPanel stackPanel = new() {HorizontalAlignment = center};
 
-                TextBox nameTextBox = new() {Text = "Enter name here...", HorizontalAlignment = center};
+                TextBox nameTextBox = new() {HintText = "Enter name...", HorizontalAlignment = center};
                 TextButton finishButton = new() {Text = "Finish", HorizontalAlignment = center};
                 ComboBox typeComboBox = new()
                 {
@@ -109,6 +110,7 @@ namespace AppleSceneEditor
 
                 return outWindow;
             }
+            
 
             private void FinishButtonClick(string name, in JsonElementType elementType,
                 in JsonPropertyType propertyType)
@@ -123,7 +125,7 @@ namespace AppleSceneEditor
                         {
                             case JsonPropertyType.Boolean:
                                 value = default(bool);
-                                kind = (bool)value ? JsonValueKind.True : JsonValueKind.False;
+                                kind = (bool) value ? JsonValueKind.True : JsonValueKind.False;
                                 break;
                             case JsonPropertyType.Integer:
                                 value = default(int);
@@ -140,7 +142,7 @@ namespace AppleSceneEditor
                         }
 
                         if (IsHandlingObject) Object.Properties.Add(new JsonProperty(name, value, in kind));
-                        else Array.Add(new JsonProperty(null, value, in kind));
+                        //else Array.Add(new JsonObject(name, value, in kind));
                         PanelHandler.RebuildUI();
                         break;
                     case JsonElementType.Array:
