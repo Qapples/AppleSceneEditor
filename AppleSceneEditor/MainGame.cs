@@ -125,7 +125,7 @@ namespace AppleSceneEditor
                 ? Stylesheet.Current
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
             Stylesheet.Current = stylesheet;
-            
+
             _addComponentWindow = CreateAddComponentDialog();
 
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);

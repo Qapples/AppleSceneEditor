@@ -2,15 +2,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using AppleSceneEditor.Helpers;
+using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
 using AssetManagementBase.Utility;
-using FontStashSharp;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
 using Myra.Graphics2D;
-using Myra.Graphics2D.UI.Styles;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 
@@ -64,7 +62,6 @@ namespace AppleSceneEditor
         /// </summary> 
         public StackPanel ValueStackPanel { get; set; }
 
-        private readonly DynamicSpriteFont _font;
 
         /// <summary>
         /// Constructs an instance of <see cref="ComponentPanelHandler"/>.
@@ -82,7 +79,6 @@ namespace AppleSceneEditor
         {
             (Desktop, _rootObject, NameStackPanel, ValueStackPanel) =
                 (desktop, rootObject, nameStackPanel, valueStackPanel);
-            _font = AppleSerialization.Environment.DefaultFontSystem.GetFont(DefaultTextBoxFontSize);
 
             (_selectElemTypeWindow, _selectArrElemTypeWindow) = (new Window(), new Window());
             BuildUI(0, rootObject);
@@ -326,7 +322,7 @@ namespace AppleSceneEditor
                     break;
             }
 
-            addWidget ??= new Label {Text = "Not supported.", Font = _font};
+            addWidget ??= new Label {Text = "Not supported."};
             addWidget.Margin = new Thickness(indentLevel, 0, 0, 0);
 
             ValueStackPanel.AddChild(addWidget);
@@ -366,7 +362,6 @@ namespace AppleSceneEditor
             {
                 Text = changeName ? property.Name : property.Value as string,
                 MaxWidth = 50,
-                Font = _font
             };
 
             textBox.TextChanged += (s, ea) =>
@@ -393,7 +388,6 @@ namespace AppleSceneEditor
             {
                 Text = name.Name,
                 MaxWidth = 50,
-                Font = _font
             };
 
             textBox.TextChanged += (s, e) =>
