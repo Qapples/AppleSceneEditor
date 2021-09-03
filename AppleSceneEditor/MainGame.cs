@@ -33,11 +33,11 @@ namespace AppleSceneEditor
         private Window _addComponentWindow;
         
         private readonly string _uiPath;
+        private readonly string _stylesheetPath;
+        private readonly string _defaultWorldPath;
+        private readonly string _keybindConfigPath;
 #nullable enable
-        private readonly string? _stylesheetPath;
-        private readonly string? _defaultWorldPath;
-        private readonly string? _keybindConfigPath;
-        
+
         private Scene? _currentScene;
 
         private List<JsonObject> _jsonObjects;
@@ -52,7 +52,10 @@ namespace AppleSceneEditor
             Content.RootDirectory = Path.Combine("..", "..", "..", "Content");
             IsMouseVisible = true;
             
-            _uiPath = Path.Combine("..", "..", "..", "Content", "Menu.xmmp");
+            _uiPath = Path.Combine(Content.RootDirectory, "Menu.xmmp");
+            _stylesheetPath = Path.Combine(Content.RootDirectory, "Stylesheets", "editor_ui_skin.xmms");
+            _defaultWorldPath = Path.Combine("..", "..", "..", "Examples", "BasicWorld", "BasicWorld.world");
+            _keybindConfigPath = Path.Combine("..", "..", "..", "Config");
 
             StringComparison comparison = StringComparison.Ordinal;
             foreach (string arg in args)
@@ -79,10 +82,10 @@ namespace AppleSceneEditor
             }
 
             _uiPath = Path.GetFullPath(_uiPath);
-            if (_stylesheetPath is not null) _stylesheetPath = Path.GetFullPath(_stylesheetPath);
+            _stylesheetPath = Path.GetFullPath(_stylesheetPath);
+            _defaultWorldPath = Path.GetFullPath(_defaultWorldPath);
+            _keybindConfigPath = Path.GetFullPath(_keybindConfigPath);
         }
-
-        private SpriteFontBase _font;
         
         protected override void Initialize()
         {
@@ -99,7 +102,7 @@ namespace AppleSceneEditor
             
             _jsonObjects = new List<JsonObject>();
 
-            Config.ParseConfigFile(File.ReadAllText(Path.Combine("..", "..", "..", "Config.txt")));
+            Config.ParseKeybindConfigFile(_keybindConfigPath);
 
             _graphics.PreferredBackBufferWidth = 1600;
             _graphics.PreferredBackBufferHeight = 900;
