@@ -32,10 +32,12 @@ namespace AppleSceneEditor
 
         private Window _addComponentWindow;
         
+        //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
         private readonly string _uiPath;
         private readonly string _stylesheetPath;
         private readonly string _defaultWorldPath;
         private readonly string _keybindConfigPath;
+        private readonly string _typeAliasesConfigPath;
 #nullable enable
 
         private Scene? _currentScene;
@@ -48,14 +50,17 @@ namespace AppleSceneEditor
 
         public MainGame(string[] args)
         {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = Path.Combine("..", "..", "..", "Content");
-            IsMouseVisible = true;
+            string root = Path.Combine("..", "..", "..");
             
+            _graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = Path.Combine(root, "Content");
+            IsMouseVisible = true;
+
             _uiPath = Path.Combine(Content.RootDirectory, "Menu.xmmp");
             _stylesheetPath = Path.Combine(Content.RootDirectory, "Stylesheets", "editor_ui_skin.xmms");
-            _defaultWorldPath = Path.Combine("..", "..", "..", "Examples", "BasicWorld", "BasicWorld.world");
-            _keybindConfigPath = Path.Combine("..", "..", "..", "Config");
+            _defaultWorldPath = Path.Combine(root, "Examples", "BasicWorld", "BasicWorld.world");
+            _keybindConfigPath = Path.Combine(root, "Config", "Keybinds.txt");
+            _typeAliasesConfigPath = Path.Combine(root, "Config", "TypeAliases.txt");
 
             StringComparison comparison = StringComparison.Ordinal;
             foreach (string arg in args)
@@ -102,7 +107,7 @@ namespace AppleSceneEditor
             
             _jsonObjects = new List<JsonObject>();
 
-            Config.ParseKeybindConfigFile(_keybindConfigPath);
+            Config.ParseKeybindConfigFile(File.ReadAllText(_keybindConfigPath));
 
             _graphics.PreferredBackBufferWidth = 1600;
             _graphics.PreferredBackBufferHeight = 900;
@@ -114,6 +119,8 @@ namespace AppleSceneEditor
         protected override void LoadContent()
         {
             base.LoadContent();
+
+            AppleSerialization.Environment.LoadTypeAliasFileContents(File.ReadAllText(_typeAliasesConfigPath));
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 

@@ -9,6 +9,7 @@ using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor.Extensions
 {
+    //TODO: Add docs. Not super important but do it at some point.
     public static class ValueEditorFactory
     {
         private const int MaxTextLength = 25;

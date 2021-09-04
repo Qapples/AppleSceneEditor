@@ -1,0 +1,1 @@
+MeshInfo "GrappleFightNET5.Scenes.Info.MeshInfo, GrappleFightNET5.Scenes"

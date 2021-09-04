@@ -13,7 +13,7 @@
       }
     },
     {
-      "$type": "GrappleFightNET5.Scenes.Info.MeshInfo, GrappleFightNET5.Scenes",
+      "$type": "MeshInfo",
       "meshIndex": 0,
       "skinIndex": 0,
       "meshPath": {
