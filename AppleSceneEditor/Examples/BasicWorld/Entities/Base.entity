@@ -1,12 +1,12 @@
 {
   "components": [
     {
-      "$type": "AppleSerialization.Info.ValueInfo, AppleSerialization",
+      "$type": "ValueInfo",
       "valueType": "System.Int32",
       "value": "2"
     },
     {
-      "$type": "GrappleFightNET5.Scenes.Info.TextureInfo, GrappleFightNET5.Scenes",
+      "$type": "TextureInfo",
       "texturePath": {
         "path": "Textures/TestTexture.png",
         "isContentPath": true
