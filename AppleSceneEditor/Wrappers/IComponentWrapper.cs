@@ -26,8 +26,8 @@ namespace AppleSceneEditor.Wrappers
         Panel UIPanel { get; set; }
         
         /// <summary>
-        /// If true, then there is no data associated with this wrapper. Otherwise, false. <br/>
-        /// (In most cases, this should be true)
+        /// If true, then there is no data associated with this wrapper or creation of the the wrapper failed. Otherwise
+        /// ,false. <br/>
         /// </summary>
         bool IsEmpty { get; }
         
