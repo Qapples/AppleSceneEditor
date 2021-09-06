@@ -21,11 +21,10 @@ namespace AppleSceneEditor.Extensions
         private static Dictionary<Type, Type> Implementers { get; }
 
         private const BindingFlags ActivatorFlags = BindingFlags.Instance | BindingFlags.NonPublic;
-        
 
         private static Dictionary<Type, Type> LoadImplementers()
         {
-            string methodName = $"{nameof(ComponentWrapperExtensions)}.{nameof(LoadImplementers)}";
+            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(LoadImplementers);
             Dictionary<Type, Type> outDictionary = new();
             IEnumerable<Type> assemblyTypes;
             Type wrapperInterface = typeof(IComponentWrapper);
@@ -68,8 +67,8 @@ namespace AppleSceneEditor.Extensions
         }
 
         /// <summary>
-        /// Creates a new object that implements <see cref="IComponentWrapper"/> with a specified type that it wraps
-        /// around.
+        /// Creates a new object that implements <see cref="IComponentWrapper"/> with a given type specifying the type
+        /// of data the given <see cref="JsonObject"/> is representing.
         /// </summary>
         /// <param name="jsonObject">The <see cref="JsonObject"/> instance that contains the data the wrapper will work
         /// with.</param>
@@ -79,9 +78,9 @@ namespace AppleSceneEditor.Extensions
         /// returned.</returns>
         public static IComponentWrapper? CreateFromType(JsonObject jsonObject, Type? type)
         {
-            if (type is null) return null;
+            if (type is null || !jsonObject.IsType(type)) return null;
 
-            string methodName = $"{nameof(ComponentWrapperExtensions)}.{nameof(CreateFromType)}";
+            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(CreateFromType);
             
             if (!Implementers.TryGetValue(type, out var wrapperType))
             {
@@ -103,8 +102,8 @@ namespace AppleSceneEditor.Extensions
         }
 
         /// <summary>
-        /// Creates a new object that implements <see cref="IComponentWrapper"/> with a specified type (in string form)
-        /// that it wraps around.
+        /// Creates a new object that implements <see cref="IComponentWrapper"/> with a given type (in string form)
+        /// specifying the type of data the given <see cref="JsonObject"/> is representing.
         /// </summary>
         /// <param name="jsonObject">The <see cref="JsonObject"/> instance that contains the data the wrapper will work
         /// with.</param>
@@ -114,6 +113,26 @@ namespace AppleSceneEditor.Extensions
         /// is returned.</returns>
         public static IComponentWrapper? CreateFromType(JsonObject jsonObject, string typeName) =>
             CreateFromType(jsonObject, ConverterHelper.GetTypeFromString(typeName));
+
+        private static bool IsType(this JsonObject jsonObject, Type? type)
+        {
+            if (type is null) return false;
+            
+            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(IsType);
+
+            foreach (JsonProperty property in jsonObject.Properties)
+            {
+                if (property.Name?.ToLower() == "$type" && property.Value != null &&
+                    ConverterHelper.GetTypeFromString((string) property.Value) == type)
+                {
+                    return true;
+                }
+            }
+            
+            Debug.WriteLine($"{methodName}: given object is not of type {type}!");
+
+            return false;
+        }
 
         static ComponentWrapperExtensions()
         {
