@@ -53,10 +53,5 @@ namespace AppleSceneEditor.Wrappers
         {
             (JsonObject, UIPanel, IsEmpty) = (null, null, true);
         }
-
-        public static MeshInfoWrapper? New(JsonObject jsonObject)
-        {
-            return null;
-        }
     }
 }
