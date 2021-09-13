@@ -114,7 +114,7 @@ namespace AppleSceneEditor
             });
 
             TextBox typeTextBox = new()
-                {Text = "Enter the type of the component...", HorizontalAlignment = HorizontalAlignment.Center};
+                {HintText = "Enter the name of the type...", HorizontalAlignment = HorizontalAlignment.Center};
             propertyPanel.AddChild(typeTextBox);
             
             TextButton finishButton = new()

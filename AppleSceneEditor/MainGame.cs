@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Systems;
+using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
 using AssetManagementBase;
@@ -32,12 +34,14 @@ namespace AppleSceneEditor
 
         private Window _addComponentWindow;
         
+        //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
         private readonly string _uiPath;
+        private readonly string _stylesheetPath;
+        private readonly string _defaultWorldPath;
+        private readonly string _keybindConfigPath;
+        private readonly string _typeAliasesConfigPath;
 #nullable enable
-        private readonly string? _stylesheetPath;
-        private readonly string? _defaultWorldPath;
-        private readonly string? _keybindConfigPath;
-        
+
         private Scene? _currentScene;
 
         private List<JsonObject> _jsonObjects;
@@ -48,11 +52,17 @@ namespace AppleSceneEditor
 
         public MainGame(string[] args)
         {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = Path.Combine("..", "..", "..", "Content");
-            IsMouseVisible = true;
+            string root = Path.Combine("..", "..", "..");
             
-            _uiPath = Path.Combine("..", "..", "..", "Content", "Menu.xmmp");
+            _graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = Path.Combine(root, "Content");
+            IsMouseVisible = true;
+
+            _uiPath = Path.Combine(Content.RootDirectory, "Menu.xmmp");
+            _stylesheetPath = Path.Combine(Content.RootDirectory, "Stylesheets", "editor_ui_skin.xmms");
+            _defaultWorldPath = Path.Combine(root, "Examples", "BasicWorld", "BasicWorld.world");
+            _keybindConfigPath = Path.Combine(root, "Config", "Keybinds.txt");
+            _typeAliasesConfigPath = Path.Combine(root, "Config", "TypeAliases.txt");
 
             StringComparison comparison = StringComparison.Ordinal;
             foreach (string arg in args)
@@ -79,10 +89,10 @@ namespace AppleSceneEditor
             }
 
             _uiPath = Path.GetFullPath(_uiPath);
-            if (_stylesheetPath is not null) _stylesheetPath = Path.GetFullPath(_stylesheetPath);
+            _stylesheetPath = Path.GetFullPath(_stylesheetPath);
+            _defaultWorldPath = Path.GetFullPath(_defaultWorldPath);
+            _keybindConfigPath = Path.GetFullPath(_keybindConfigPath);
         }
-
-        private SpriteFontBase _font;
         
         protected override void Initialize()
         {
@@ -99,7 +109,7 @@ namespace AppleSceneEditor
             
             _jsonObjects = new List<JsonObject>();
 
-            Config.ParseConfigFile(File.ReadAllText(Path.Combine("..", "..", "..", "Config.txt")));
+            Config.ParseKeybindConfigFile(File.ReadAllText(_keybindConfigPath));
 
             _graphics.PreferredBackBufferWidth = 1600;
             _graphics.PreferredBackBufferHeight = 900;
@@ -111,6 +121,8 @@ namespace AppleSceneEditor
         protected override void LoadContent()
         {
             base.LoadContent();
+
+            AppleSerialization.Environment.LoadTypeAliasFileContents(File.ReadAllText(_typeAliasesConfigPath));
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -125,7 +137,7 @@ namespace AppleSceneEditor
                 ? Stylesheet.Current
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
             Stylesheet.Current = stylesheet;
-            
+
             _addComponentWindow = CreateAddComponentDialog();
 
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);

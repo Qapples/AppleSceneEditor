@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using GrappleFightNET5.Scenes;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
 
@@ -56,7 +55,7 @@ namespace AppleSceneEditor.Input
                                     $"{functionName}");
                     continue;
                 }
-                
+
                 //it takes a while for a keystroke combination to be registered and acknowledged. unsure on why this is
                 //the case as actual performance does not take any noticeable hit. not a very big deal but maybe this
                 //is something to fix later on.

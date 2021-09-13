@@ -30,7 +30,7 @@ namespace AppleSceneEditor
         /// Parses a file and adjusts the data stored in the static <see cref="Config"/> type accordingly.
         /// </summary>
         /// <param name="configFileContents">The CONTENTS of the config file.</param>
-        public static void ParseConfigFile(string configFileContents)
+        public static void ParseKeybindConfigFile(string configFileContents)
         {
             int lineNum = 0;
             foreach (string line in configFileContents.Split('\n'))
@@ -51,7 +51,7 @@ namespace AppleSceneEditor
                         }
                         else
                         {
-                            Debug.WriteLine($"{nameof(ParseConfigFile)}: Cannot parse key ({keyStr}) on line#{lineNum}." +
+                            Debug.WriteLine($"{nameof(ParseKeybindConfigFile)}: Cannot parse key ({keyStr}) on line#{lineNum}." +
                                             $"\nLine contents:{line}");
                         }
                     }
@@ -67,7 +67,7 @@ namespace AppleSceneEditor
                 }
                 else
                 {
-                    Debug.WriteLine($"{nameof(ParseConfigFile)}: Line #{lineNum} in config file cannot be parsed. Line " +
+                    Debug.WriteLine($"{nameof(ParseKeybindConfigFile)}: Line #{lineNum} in config file cannot be parsed. Line " +
                                     $"contents: {line}");
                 }
 

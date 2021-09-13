@@ -10,12 +10,12 @@ using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
 
-namespace AppleSceneEditor.Helpers
+namespace AppleSceneEditor.Extensions
 {
     /// <summary>
     /// Provides additional methods for working with anything involving <see cref="Entity"/> instances.
     /// </summary>
-    public static class EntityHelper
+    public static class EntityExtensions
     {
         private static readonly JsonReaderOptions DefaultJsonReaderOptions = new()
         {
