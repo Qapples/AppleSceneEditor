@@ -113,20 +113,7 @@ namespace AppleSceneEditor.Extensions
         /// is returned.</returns>
         public static IComponentWrapper? CreateFromType(JsonObject jsonObject, string typeName) =>
             CreateFromType(jsonObject, ConverterHelper.GetTypeFromString(typeName));
-
-        /// <summary>
-        /// Finds a <see cref="JsonProperty"/> by name a <see cref="JsonObject"/> instance.
-        /// </summary>
-        /// <param name="jsonObject"><see cref="JsonObject"/> to find the <see cref="JsonProperty"/> in.</param>
-        /// <param name="propertyName">The name of the <see cref="JsonProperty"/> to find.</param>
-        /// <param name="comparison">Optional <see cref="StringComparison"/> that determines how names are compared.
-        /// By default, it is <see cref="StringComparison.CurrentCultureIgnoreCase"/>.</param>
-        /// <returns>If a <see cref="JsonProperty"/> with the specified name is found, then that JsonProperty is
-        /// returned. Otherwise, null is returned.</returns>
-        public static JsonProperty? FindProperty(this JsonObject jsonObject, string propertyName,
-            StringComparison comparison = StringComparison.CurrentCultureIgnoreCase) =>
-            jsonObject.Properties.FirstOrDefault(p => string.Equals(p.Name, propertyName, comparison));
-
+        
         private static bool IsType(this JsonObject jsonObject, Type? type)
         {
             if (type is null) return false;
