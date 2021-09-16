@@ -156,12 +156,8 @@ namespace AppleSceneEditor
 
                 foreach (JsonObject obj in array)
                 {
-                    if (obj.Properties.Any(e => e.Name == "$type"))
-                    {
-                        IComponentWrapper wrapper =
-                            ComponentWrapperExtensions.CreateFromType(obj, obj.Properties.First().Value as string);
-                    }
-                    
+                    IComponentWrapper? wrapper = ComponentWrapperExtensions.CreateFromObject(obj);
+
                     BuildUI(indentLevel + IndentationIncrement, obj);
 
                     //add these to separate entries in the array

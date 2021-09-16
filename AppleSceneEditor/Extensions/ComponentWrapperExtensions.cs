@@ -77,11 +77,13 @@ namespace AppleSceneEditor.Extensions
         /// <see cref="IComponentWrapper"/> instance referencing that wrapper class is returned. Otherwise, OR if the
         /// returned wrapper instance has <see cref="IComponentWrapper.IsEmpty"/> set to true, then null is
         /// returned.</returns>
-        public static IComponentWrapper? CreateFromType(JsonObject jsonObject, Type? type)
+        /// <remarks>This method will attempt to create a <see cref="IComponentWrapper"/> instance regardless if the
+        /// provided <see cref="JsonObject"/> has a type identifier that matches that of type parameter.</remarks>
+        public static IComponentWrapper? CreateFromObject(JsonObject jsonObject, Type? type)
         {
-            if (type is null || !jsonObject.IsType(type)) return null;
+            if (type is null) return null;
 
-            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(CreateFromType);
+            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(CreateFromObject);
             
             if (!Implementers.TryGetValue(type, out var wrapperType))
             {
@@ -106,18 +108,25 @@ namespace AppleSceneEditor.Extensions
         }
 
         /// <summary>
-        /// Creates a new object that implements <see cref="IComponentWrapper"/> with a given type (in string form)
-        /// specifying the type of data the given <see cref="JsonObject"/> is representing.
+        /// Creates a new object that implements <see cref="IComponentWrapper"/> with a given <see cref="JsonObject"/>.
+        /// The type of the provided <see cref="JsonObject"/> will be attempt to found.
         /// </summary>
         /// <param name="jsonObject">The <see cref="JsonObject"/> instance that contains the data the wrapper will work
         /// with.</param>
-        /// <param name="typeName">The name of the type that <see cref="jsonObject"/> has.</param>
-        /// <returns>If <see cref="typeName"/> is valid and if there is a wrapper class associated with that type, then
-        /// a new <see cref="IComponentWrapper"/> instance referencing that wrapper class is returned. Otherwise, null
-        /// is returned.</returns>
-        public static IComponentWrapper? CreateFromType(JsonObject jsonObject, string typeName) =>
-            CreateFromType(jsonObject, ConverterHelper.GetTypeFromString(typeName));
+        /// <returns>If a type was found in the provided <see cref="JsonObject"/> and if there is a wrapper
+        /// class associated with that type, then a new <see cref="IComponentWrapper"/> instance referencing that
+        /// wrapper class is returned. Otherwise, OR if the returned wrapper instance has
+        /// <see cref="IComponentWrapper.IsEmpty"/> set to true, then null is returned.</returns>
+        public static IComponentWrapper? CreateFromObject(JsonObject jsonObject)
+        {
+            JsonProperty? typeProp = jsonObject.FindProperty(AppleSerialization.Environment.TypeIdentifier);
+
+            return typeProp?.Value is not string value
+                ? null
+                : CreateFromObject(jsonObject, ConverterHelper.GetTypeFromString(value));
+        }
         
+
         private static bool IsType(this JsonObject jsonObject, Type? type)
         {
             if (type is null) return false;
