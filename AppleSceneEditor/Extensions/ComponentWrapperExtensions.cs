@@ -73,8 +73,9 @@ namespace AppleSceneEditor.Extensions
         /// <param name="jsonObject">The <see cref="JsonObject"/> instance that contains the data the wrapper will work
         /// with.</param>
         /// <param name="type">The <see cref="Type"/> that <see cref="jsonObject"/> has.</param>
-        /// <returns>If there is a wrapper class associated with the specified type (<see cref="type"/>), then a new
-        /// <see cref="IComponentWrapper"/> instance referencing that wrapper class is returned. Otherwise, null is
+        /// <returns>If there is a wrapper class associated with the specified type, then a new
+        /// <see cref="IComponentWrapper"/> instance referencing that wrapper class is returned. Otherwise, OR if the
+        /// returned wrapper instance has <see cref="IComponentWrapper.IsEmpty"/> set to true, then null is
         /// returned.</returns>
         public static IComponentWrapper? CreateFromType(JsonObject jsonObject, Type? type)
         {
@@ -97,8 +98,11 @@ namespace AppleSceneEditor.Extensions
                 return null;
             }
 
-            return Activator.CreateInstance(wrapperType, bindingAttr: ActivatorFlags, binder: null,
-                args: new[] {jsonObject}, null) as IComponentWrapper;
+            IComponentWrapper? outWrapper = Activator.CreateInstance(wrapperType, bindingAttr: ActivatorFlags,
+                binder: null, args: new[] {jsonObject}, null) as IComponentWrapper;
+
+            //outWrapper?.IsEmpty could be either true, false or null. Return null if it is true or null.
+            return outWrapper?.IsEmpty != false ? null : outWrapper;
         }
 
         /// <summary>
