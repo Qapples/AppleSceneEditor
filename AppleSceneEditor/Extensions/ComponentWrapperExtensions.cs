@@ -125,27 +125,6 @@ namespace AppleSceneEditor.Extensions
                 ? null
                 : CreateFromObject(jsonObject, ConverterHelper.GetTypeFromString(value));
         }
-        
-
-        private static bool IsType(this JsonObject jsonObject, Type? type)
-        {
-            if (type is null) return false;
-            
-            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(IsType);
-
-            foreach (JsonProperty property in jsonObject.Properties)
-            {
-                if (property.Name?.ToLower() == "$type" && property.Value != null &&
-                    ConverterHelper.GetTypeFromString((string) property.Value) == type)
-                {
-                    return true;
-                }
-            }
-            
-            Debug.WriteLine($"{methodName}: given object is not of type {type}!");
-
-            return false;
-        }
 
         static ComponentWrapperExtensions()
         {
