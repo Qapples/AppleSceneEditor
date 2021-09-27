@@ -18,7 +18,7 @@ namespace AppleSceneEditor.Extensions
         /// All classes that implement <see cref="IComponentWrapper"/>. The key a type and the value is the wrapper
         /// associated with that type (if there is one)
         /// </summary>
-        private static Dictionary<Type, Type> Implementers { get; }
+        public static Dictionary<Type, Type> Implementers { get; }
 
         private const BindingFlags ActivatorFlags = BindingFlags.Instance | BindingFlags.NonPublic;
 

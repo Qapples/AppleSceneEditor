@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Wrappers;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
@@ -100,33 +103,26 @@ namespace AppleSceneEditor
                 Debug.WriteLine("Error was encountered in InitUIFromScene. Use debugger.");
             }
         }
-
-        //The component window should be pretty simple which is why we are doing it here.
-        private Window CreateAddComponentDialog()
+        
+        private Window CreateNewComponentDialog()
         {
             Panel panel = new();
-            Window outWindow = new() {Title = "Add Component", Content = panel};
-            
-            VerticalStackPanel propertyPanel = new() {HorizontalAlignment = HorizontalAlignment.Center};
-            propertyPanel.AddChild(new Label
+            Window outWindow = new() {Content = panel};
+            VerticalStackPanel stackPanel = new();
+
+            ComboBox typeSelectionBox = new();
+            foreach (Type type in IComponentWrapper.Implementers.Keys)
             {
-                Text = "Type of new component:", StyleName = "small", HorizontalAlignment = HorizontalAlignment.Center
-            });
+                typeSelectionBox.Items.Add(new ListItem {Text = type.Name});
+            }
 
-            TextBox typeTextBox = new()
-                {HintText = "Enter the name of the type...", HorizontalAlignment = HorizontalAlignment.Center};
-            propertyPanel.AddChild(typeTextBox);
-            
-            TextButton finishButton = new()
-            {
-                Text = "Finish", StyleName = "small", HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom
-            };
-            propertyPanel.AddChild(finishButton);
+            TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
+            okButton.Click += FinishButtonClick()
 
-            finishButton.Click += (o, e) => FinishButtonClick(typeTextBox.Text);
-
-            panel.AddChild(propertyPanel);
+            stackPanel.AddChild(new Label
+                {Text = "Select type of component", HorizontalAlignment = HorizontalAlignment.Center});
+            stackPanel.AddChild(new ComboBox());
+            stackPanel.AddChild();
 
             return outWindow;
         }
@@ -135,17 +131,17 @@ namespace AppleSceneEditor
 
         private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
         {
+            const string methodName = nameof(MainGame) + "." + nameof(UpdatePropertyGridWithEntity);
+            
             _desktop.Root.ProcessWidgets(widget =>
             {
                 if (widget.Id == "MainGrid")
                 {
                     if (widget is not Grid grid) return false;
                     if (!TryGetEntityById(scene, entityId, out var entity)) return false;
-
-                    StackPanel? nameStackPanel = TryFindWidgetById<StackPanel>(grid, "NameStackPanel");
-                    StackPanel? valueStackPanel = TryFindWidgetById<StackPanel>(grid, "ValueStackPanel");
-
-                    if (valueStackPanel is null || nameStackPanel is null) return false;
+                    
+                    StackPanel? propertyStackPanel = TryFindWidgetById<StackPanel>(grid, "PropertyStackPanel");
+                    if (propertyStackPanel is null) return false;
 
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
                     //so we're gonna have to make a new ComponentPanelHandler on the spot.
@@ -160,8 +156,7 @@ namespace AppleSceneEditor
                     if (selectedJsonObject is null)
                     {
                         //nameof just in case the name of the method changes
-                        Debug.WriteLine($"Cannot find entity of Id {entityId} in _jsonObjects. Returning false" +
-                                        $" ({nameof(UpdatePropertyGridWithEntity)})");
+                        Debug.WriteLine($"{methodName}: Cannot find entity of Id {entityId} in _jsonObjects.");
                         return false;
                     }
 
@@ -169,12 +164,28 @@ namespace AppleSceneEditor
                     
                     if (_mainPanelHandler is null)
                     {
-                        _mainPanelHandler = new ComponentPanelHandler(_desktop, selectedJsonObject, nameStackPanel,
-                            valueStackPanel);
+                        try
+                        {
+                            _mainPanelHandler =
+                                new ComponentPanelHandler(_desktop, selectedJsonObject, propertyStackPanel);
+                        }
+                        catch (ComponentPanelHandler.ComponentsNotFoundException e)
+                        {
+                            Debug.WriteLine(e);
+                            return false;
+                        }
                     }
                     else
                     {
-                        _mainPanelHandler.RootObject = selectedJsonObject;
+                        try
+                        {
+                            _mainPanelHandler.RootObject = selectedJsonObject;
+                        }
+                        catch (ComponentPanelHandler.ComponentsNotFoundException e)
+                        {
+                            Debug.WriteLine(e);
+                            return false;
+                        }
                     }
                 }
 

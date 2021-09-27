@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
@@ -38,5 +39,11 @@ namespace AppleSceneEditor.Wrappers
         /// The type of data the wrapper is targeting.
         /// </summary>
         Type AssociatedType { get; }
+
+        /// <summary>
+        /// All classes that implement <see cref="IComponentWrapper"/>. The key a type and the value is the wrapper
+        /// associated with that type (if there is one)
+        /// </summary>
+        public static Dictionary<Type, Type> Implementers => ComponentWrapperExtensions.Implementers;
     }
 }

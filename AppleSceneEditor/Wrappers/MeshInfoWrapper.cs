@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using AppleSceneEditor.Extensions;
 using AppleSerialization;
 using AppleSerialization.Json;
 using GrappleFightNET5.Scenes.Info;
@@ -41,7 +42,7 @@ namespace AppleSceneEditor.Wrappers
                 IsEmpty = true;
                 return;
             }
-
+            
 
             UIPanel = new Panel
             {
@@ -55,14 +56,32 @@ namespace AppleSceneEditor.Wrappers
                             {
                                 Widgets =
                                 {
-                                    new Label {Text = "Path: "}
+                                    new Label {Text = "meshIndex: "},
+                                    ValueEditorFactory.CreateNumericEditor(meshIndexProp)
                                 }
                             },
                             new HorizontalStackPanel
                             {
                                 Widgets =
                                 {
-                                    new Label {Text = "IsContentPath: "},
+                                    new Label {Text = "skinIndex: "},
+                                    ValueEditorFactory.CreateNumericEditor(skinIndexProp)
+                                }
+                            },
+                            new HorizontalStackPanel
+                            {
+                                Widgets =
+                                {
+                                    new Label {Text = "path: "},
+                                    ValueEditorFactory.CreateStringEditor(meshPathProp)
+                                }
+                            },
+                            new HorizontalStackPanel
+                            {
+                                Widgets =
+                                {
+                                    new Label {Text = "isContentPath: "},
+                                    ValueEditorFactory.CreateBooleanEditor(isContentPathProp)
                                 }
                             }
                         }

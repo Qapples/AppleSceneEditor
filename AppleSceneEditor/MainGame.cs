@@ -138,7 +138,7 @@ namespace AppleSceneEditor
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
             Stylesheet.Current = stylesheet;
 
-            _addComponentWindow = CreateAddComponentDialog();
+            _addComponentWindow = CreateNewComponentDialog();
 
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
             _desktop = new Desktop

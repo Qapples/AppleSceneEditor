@@ -40,18 +40,19 @@
       </ScrollViewer>
 
       <ScrollViewer GridColumn="2" Id="PropertyScrollViewer">
-        <HorizontalSplitPane Id="PropertySplitPane">
-          <Grid RowSpacing="8" Id="NameGrid">
-            <VerticalStackPanel Id="NameStackPanel">
-              <Label Text="Holder"/>
-            </VerticalStackPanel>
-          </Grid>
-          <Grid RowSpacing="8" Id="ValueGrid">
-            <VerticalStackPanel Id="ValueStackPanel">
-              <Label Text="Holder"/>
-            </VerticalStackPanel>
-          </Grid>
-        </HorizontalSplitPane>
+<!--        <HorizontalSplitPane Id="PropertySplitPane">-->
+<!--          <Grid RowSpacing="8" Id="NameGrid">-->
+<!--            <VerticalStackPanel Id="NameStackPanel">-->
+<!--              <Label Text="Holder"/>-->
+<!--            </VerticalStackPanel>-->
+<!--          </Grid>-->
+<!--          <Grid RowSpacing="8" Id="ValueGrid">-->
+<!--            <VerticalStackPanel Id="ValueStackPanel">-->
+<!--              <Label Text="Holder"/>-->
+<!--            </VerticalStackPanel>-->
+<!--          </Grid>-->
+<!--        </HorizontalSplitPane>-->
+        <VerticalStackPanel Id="PropertyStackPanel"/>
       </ScrollViewer>
     </Grid>
 

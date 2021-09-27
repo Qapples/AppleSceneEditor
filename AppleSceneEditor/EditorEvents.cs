@@ -78,11 +78,6 @@ namespace AppleSceneEditor
             _addComponentWindow.ShowModal(_desktop);
         }
 
-        private void AddPropertyButtonClick(object? sender, EventArgs? eventArgs)
-        {
-            if (_jsonObjectToEdit is null) return;
-        }
-
         private void FinishButtonClick(string typeName)
         {
             if (_jsonObjectToEdit is null || _currentJsonObject is null) return;
@@ -97,8 +92,11 @@ namespace AppleSceneEditor
             }
 
             _addComponentWindow.Close();
-            componentArray.Add(new JsonObject(null,
-                new List<JsonProperty> {new("$type", typeName, JsonValueKind.String)}));
+
+            JsonObject newObject = new(null, _currentJsonObject);
+            newObject.Properties.Add(new JsonProperty("type", typeName, newObject, JsonValueKind.String));
+            
+            componentArray.Add(newObject);
         }
     }
 }
