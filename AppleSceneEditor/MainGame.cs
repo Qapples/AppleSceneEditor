@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using AppleSceneEditor.Extensions;
+using System.Text.Json;
 using AppleSceneEditor.Systems;
-using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
 using AssetManagementBase;
@@ -19,6 +18,7 @@ using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
 using Myra.Utility;
 using Environment = AppleSerialization.Environment;
+using JsonProperty = AppleSerialization.Json.JsonProperty;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
 namespace AppleSceneEditor
@@ -46,9 +46,54 @@ namespace AppleSceneEditor
 
         private List<JsonObject> _jsonObjects;
         private JsonObject? _currentJsonObject;
-        private JsonObject? _jsonObjectToEdit;
-        
+
         private ISystem<GameTime>? _drawSystem;
+
+        public static Dictionary<string, JsonObject> NewComponentPrototypes { get; set; }
+
+        static MainGame()
+        {
+            NewComponentPrototypes = new Dictionary<string, JsonObject>();
+
+            /* TODO: 
+             * Find a more scalable way of doing this lol. Not a huge deal but could cause issues in the future.
+             * Don't wanna rely on tests and this single static method might add up a bunch in the future.
+             */
+            JsonObject meshInfoRoot = new("MeshInfo");
+            NewComponentPrototypes.Add("MeshInfo", meshInfoRoot);
+
+            meshInfoRoot.Properties.Add(new JsonProperty("$type", "MeshInfo", meshInfoRoot, JsonValueKind.String));
+            meshInfoRoot.Properties.Add(new JsonProperty("meshIndex", 0, meshInfoRoot, JsonValueKind.Number));
+            meshInfoRoot.Properties.Add(new JsonProperty("meshIndex", 0, meshInfoRoot, JsonValueKind.Number));
+
+            meshInfoRoot.Children.Add(new JsonObject("meshPath", meshInfoRoot, new List<JsonProperty>
+            {
+                new("path", "", meshInfoRoot, JsonValueKind.String),
+                new("isContentPath", false, meshInfoRoot, JsonValueKind.False)
+            }));
+
+            //TextureInfo
+            JsonObject textureInfoRoot = new("TextureInfo");
+            NewComponentPrototypes.Add("TextureInfo", textureInfoRoot);
+            
+            textureInfoRoot.Properties.Add(new JsonProperty("$type", "TextureInfo", meshInfoRoot,
+                JsonValueKind.String));
+
+            textureInfoRoot.Children.Add(new JsonObject("texturePath", meshInfoRoot, new List<JsonProperty>
+            {
+                new("path", "", meshInfoRoot, JsonValueKind.String),
+                new("isContentPath", false, meshInfoRoot, JsonValueKind.False)
+            }));
+
+            //ValueInfo
+            JsonObject valueInfoRoot = new("ValueInfo");
+            NewComponentPrototypes.Add("ValueInfo", valueInfoRoot);
+
+            valueInfoRoot.Properties.Add(new JsonProperty("$type", "ValueInfo", meshInfoRoot, JsonValueKind.String));
+            valueInfoRoot.Properties.Add(new JsonProperty("valueType", "System.Int32", meshInfoRoot,
+                JsonValueKind.String));
+            valueInfoRoot.Properties.Add(new JsonProperty("value", "2", meshInfoRoot, JsonValueKind.String));
+        }
 
         public MainGame(string[] args)
         {
