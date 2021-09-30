@@ -5,10 +5,12 @@ using System.IO;
 using System.Text.Json;
 using AppleSceneEditor.Systems;
 using AppleSerialization;
+using AppleSerialization.Info;
 using AppleSerialization.Json;
 using AssetManagementBase;
 using DefaultEcs.System;
 using FontStashSharp;
+using GrappleFightNET5.Scenes.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -51,7 +53,7 @@ namespace AppleSceneEditor
 
         public static Dictionary<string, JsonObject> NewComponentPrototypes { get; set; }
 
-        static MainGame()
+        private static void InitComponentPrototypes()
         {
             NewComponentPrototypes = new Dictionary<string, JsonObject>();
 
@@ -141,12 +143,23 @@ namespace AppleSceneEditor
         
         protected override void Initialize()
         {
+            const string sceneNamespace = nameof(GrappleFightNET5) + "." + nameof(GrappleFightNET5.Scenes);
+            const string appleInfoNamespace = nameof(AppleSerialization) + "." + nameof(AppleSerialization.Info);
+                            
             MyraEnvironment.Game = this;
 
             RawContentManager contentManager = new(GraphicsDevice, Content.RootDirectory);
 
             Environment.GraphicsDevice = GraphicsDevice;
-            Environment.ContentManager = contentManager;
+            Environment.ContentManager = contentManager; 
+            
+            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.MeshInfo, {sceneNamespace}", typeof(MeshInfo));
+            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.TextureInfo, {sceneNamespace}", typeof(TextureInfo));
+            Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
+
+            Environment.LoadTypeAliasFileContents(File.ReadAllText(_typeAliasesConfigPath));
+            
+            InitComponentPrototypes();
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
@@ -166,8 +179,6 @@ namespace AppleSceneEditor
         protected override void LoadContent()
         {
             base.LoadContent();
-
-            AppleSerialization.Environment.LoadTypeAliasFileContents(File.ReadAllText(_typeAliasesConfigPath));
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
