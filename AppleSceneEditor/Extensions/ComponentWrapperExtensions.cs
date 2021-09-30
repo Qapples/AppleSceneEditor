@@ -127,20 +127,17 @@ namespace AppleSceneEditor.Extensions
         }
 
         /// <summary>
-        /// Verifies that a <see cref="IComponentWrapper"/>'s <see cref="IComponentWrapper.JsonObject"/> instance
-        /// contains a collection JsonProperties with specified names.
+        /// Verifies that a <see cref="JsonObject"/> instance contains a collection JsonProperties with specified names.
         /// </summary>
-        /// <param name="wrapper">The <see cref="IComponentWrapper"/> instance to get the <see cref="JsonObject"/>
-        /// from</param>
-        /// <param name="propertyNames">The names of the properties to verify that the <see cref="IComponentWrapper"/>
-        /// has.</param>
+        /// <param name="obj">The <see cref="JsonObject"/> to find the properties in.</param>
+        /// <param name="propertyNames">The names of the properties to verify that the <see cref="JsonObject"/>.</param>
         /// <param name="printDebug">If set to true, then the names of properties that couldn't be find will be printed
         /// to the debug console. By default, set to false.</param>
         /// <param name="stringComparison">Determines how names should be found. By default, set to
         /// <see cref="StringComparison.CurrentCultureIgnoreCase"/></param>
         /// <returns>If every property was found, then a <see cref="List{T}"/> of JsonProperties that were found are
         /// returned. Otherwise, if a single property was not found, then null is returned.</returns>
-        public static List<JsonProperty>? VerifyProperties(this IComponentWrapper wrapper,
+        public static List<JsonProperty>? VerifyProperties(this JsonObject obj,
             IEnumerable<string> propertyNames, bool printDebug = true,
             in StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
         {
@@ -151,7 +148,7 @@ namespace AppleSceneEditor.Extensions
             
             foreach (string name in propertyNames)
             {
-                JsonProperty? property = wrapper.JsonObject.FindProperty(name, in stringComparison);
+                JsonProperty? property = obj.FindProperty(name, in stringComparison);
 
                 if (property is null) missingMessages.Add($"{name} not found");
                 else outProperties.Add(property);
