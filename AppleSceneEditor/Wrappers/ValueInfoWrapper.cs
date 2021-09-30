@@ -22,8 +22,7 @@ namespace AppleSceneEditor.Wrappers
 
         private ValueInfoWrapper(JsonObject jsonObject)
         {
-            JsonObject = jsonObject;
-            IsEmpty = false;
+            (JsonObject, IsEmpty) = (jsonObject, false);
 
             List<JsonProperty>? foundProperties = jsonObject.VerifyProperties(new[] {"valueType", "value"});
 

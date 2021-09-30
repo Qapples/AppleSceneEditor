@@ -12,9 +12,9 @@ namespace AppleSceneEditor.Wrappers
     /// </summary>
     public class TextureInfoWrapper : IComponentWrapper
     {
-        public JsonObject JsonObject { get; set; }
+        public JsonObject? JsonObject { get; set; }
         
-        public Panel UIPanel { get; set; }
+        public Panel? UIPanel { get; set; }
         
         public bool IsEmpty { get; }
         
@@ -22,8 +22,7 @@ namespace AppleSceneEditor.Wrappers
 
         private TextureInfoWrapper(JsonObject jsonObject)
         {
-            JsonObject = jsonObject;
-            IsEmpty = false;
+            (JsonObject, IsEmpty) = (jsonObject, false);
 
             List<JsonProperty>? foundProperties =
                 jsonObject.VerifyProperties(new[] {"path", "isContentPath"});

@@ -10,6 +10,9 @@ using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.Wrappers
 {
+    /// <summary>
+    /// <see cref="IComponentWrapper"/> for <see cref="MeshInfo"/>.
+    /// </summary>
     public class MeshInfoWrapper : IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
@@ -22,10 +25,7 @@ namespace AppleSceneEditor.Wrappers
 
         private MeshInfoWrapper(JsonObject jsonObject)
         {
-            const StringComparison compare = StringComparison.CurrentCultureIgnoreCase;
-
-            JsonObject = jsonObject;
-            IsEmpty = false;
+            (JsonObject, IsEmpty) = (jsonObject, false);
 
             List<JsonProperty>? foundProperties =
                 jsonObject.VerifyProperties(new[] {"meshIndex", "skinIndex", "path", "isContentPath"});
