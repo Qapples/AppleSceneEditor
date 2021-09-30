@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using AppleSceneEditor.Extensions;
@@ -12,6 +13,7 @@ namespace AppleSceneEditor.Wrappers
     public class MeshInfoWrapper : IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
+        
         public Panel? UIPanel { get; set; }
         
         public bool IsEmpty { get; }
@@ -25,24 +27,17 @@ namespace AppleSceneEditor.Wrappers
             JsonObject = jsonObject;
             IsEmpty = false;
 
-            JsonProperty? meshIndexProp = jsonObject.FindProperty("meshIndex", compare);
-            JsonProperty? skinIndexProp = jsonObject.FindProperty("skinIndex", compare);
-            JsonProperty? meshPathProp = jsonObject.FindProperty("path", compare);
-            JsonProperty? isContentPathProp = jsonObject.FindProperty("isContentPath", compare);
-
-            if (meshIndexProp is null || skinIndexProp is null || meshPathProp is null || isContentPathProp is null)
+            List<JsonProperty>? foundProperties =
+                jsonObject.VerifyProperties(new[] {"meshIndex", "skinIndex", "path", "isContentPath"});
+            
+            if (foundProperties is null)
             {
-                Debug.WriteLine($"{nameof(MeshInfoWrapper)} constructor: cannot find critical property! " +
-                                "Missing properties:\n" +
-                                (meshIndexProp is null ? "meshIndexProp cannot be found.\n" : "") +
-                                (skinIndexProp is null ? "skinIndexProp cannot be found.\n" : "") +
-                                (meshPathProp is null ? "MeshPathProp cannot be found.\n" : "") +
-                                (isContentPathProp is null ? "isContentPathProp cannot be found." : ""));
-
                 IsEmpty = true;
                 return;
             }
-            
+
+            var (meshIndexProp, skinIndexProp, meshPathProp, isContentPathProp) = (foundProperties[0],
+                foundProperties[1], foundProperties[2], foundProperties[3]);
 
             UIPanel = new Panel
             {
