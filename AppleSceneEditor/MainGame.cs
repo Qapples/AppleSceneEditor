@@ -61,7 +61,7 @@ namespace AppleSceneEditor
              * Find a more scalable way of doing this lol. Not a huge deal but could cause issues in the future.
              * Don't wanna rely on tests and this single static method might add up a bunch in the future.
              */
-            JsonObject meshInfoRoot = new("MeshInfo");
+            JsonObject meshInfoRoot = new();
             NewComponentPrototypes.Add("MeshInfo", meshInfoRoot);
 
             meshInfoRoot.Properties.Add(new JsonProperty("$type", "MeshInfo", meshInfoRoot, JsonValueKind.String));
@@ -75,7 +75,7 @@ namespace AppleSceneEditor
             }));
 
             //TextureInfo
-            JsonObject textureInfoRoot = new("TextureInfo");
+            JsonObject textureInfoRoot = new();
             NewComponentPrototypes.Add("TextureInfo", textureInfoRoot);
             
             textureInfoRoot.Properties.Add(new JsonProperty("$type", "TextureInfo", meshInfoRoot,
@@ -88,7 +88,7 @@ namespace AppleSceneEditor
             }));
 
             //ValueInfo
-            JsonObject valueInfoRoot = new("ValueInfo");
+            JsonObject valueInfoRoot = new();
             NewComponentPrototypes.Add("ValueInfo", valueInfoRoot);
 
             valueInfoRoot.Properties.Add(new JsonProperty("$type", "ValueInfo", meshInfoRoot, JsonValueKind.String));
