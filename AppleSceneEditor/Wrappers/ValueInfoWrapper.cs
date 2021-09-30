@@ -63,5 +63,11 @@ namespace AppleSceneEditor.Wrappers
                 }
             };
         }
+        
+        
+        private ValueInfoWrapper()
+        {
+            (JsonObject, UIPanel, IsEmpty) = (null, null, true);
+        }
     }
 }

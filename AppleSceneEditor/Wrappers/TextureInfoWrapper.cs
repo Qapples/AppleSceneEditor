@@ -64,5 +64,11 @@ namespace AppleSceneEditor.Wrappers
                 }
             };
         }
+        
+        
+        private TextureInfoWrapper()
+        {
+            (JsonObject, UIPanel, IsEmpty) = (null, null, true);
+        }
     }
 }
