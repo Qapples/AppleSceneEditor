@@ -80,23 +80,21 @@ namespace AppleSceneEditor
 
         private void FinishButtonClick(string typeName)
         {
-            if (_jsonObjectToEdit is null || _currentJsonObject is null) return;
+            const string methodName = nameof(MainGame) + "." + nameof(FinishButtonClick) + " (EditorEvents)";
+            
+            if (_currentJsonObject is null) return;
+            
+            _addComponentWindow.Close();
 
-            JsonArray? componentArray =
-                _currentJsonObject.Arrays.FirstOrDefault(a => a.Name is not null && a.Name.ToLower() == "components");
-            if (componentArray is null)
+            if (!NewComponentPrototypes.TryGetValue(typeName, out var prototype))
             {
-                Debug.WriteLine($"{nameof(FinishButtonClick)}: cannot find array with name of \"components\" in " +
-                                $"the current json object. Cannot finish.");
+                Debug.WriteLine($"{methodName}: cannot find component prototype of name {typeName}! Cannot create" +
+                                "new component");
                 return;
             }
 
-            _addComponentWindow.Close();
-
-            JsonObject newObject = new(null, _currentJsonObject);
-            newObject.Properties.Add(new JsonProperty("type", typeName, newObject, JsonValueKind.String));
-            
-            componentArray.Add(newObject);
+            _mainPanelHandler?.Components.Add(prototype);
+            _mainPanelHandler?.RebuildUI();
         }
     }
 }

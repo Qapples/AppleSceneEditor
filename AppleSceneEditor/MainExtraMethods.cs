@@ -103,26 +103,32 @@ namespace AppleSceneEditor
                 Debug.WriteLine("Error was encountered in InitUIFromScene. Use debugger.");
             }
         }
-        
+
         private Window CreateNewComponentDialog()
         {
             Panel panel = new();
             Window outWindow = new() {Content = panel};
             VerticalStackPanel stackPanel = new();
 
-            ComboBox typeSelectionBox = new();
+            ComboBox typeSelectionBox = new() {HorizontalAlignment = HorizontalAlignment.Center};
             foreach (Type type in IComponentWrapper.Implementers.Keys)
             {
                 typeSelectionBox.Items.Add(new ListItem {Text = type.Name});
             }
 
             TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
-            okButton.Click += FinishButtonClick()
+            TextButton cancelButton = new() {Text = "Cancel", HorizontalAlignment = HorizontalAlignment.Right};
+            
+            okButton.Click += (o, e) => FinishButtonClick(typeSelectionBox.SelectedItem.Text);
+            cancelButton.Click += (o, e) => outWindow.Close();
 
             stackPanel.AddChild(new Label
                 {Text = "Select type of component", HorizontalAlignment = HorizontalAlignment.Center});
-            stackPanel.AddChild(new ComboBox());
-            stackPanel.AddChild();
+            stackPanel.AddChild(typeSelectionBox);
+            stackPanel.AddChild(new HorizontalStackPanel
+                {Widgets = {okButton, cancelButton}, HorizontalAlignment = HorizontalAlignment.Right});
+            
+            panel.Widgets.Add(stackPanel);
 
             return outWindow;
         }

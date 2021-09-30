@@ -66,7 +66,7 @@ namespace AppleSceneEditor
 
             meshInfoRoot.Properties.Add(new JsonProperty("$type", "MeshInfo", meshInfoRoot, JsonValueKind.String));
             meshInfoRoot.Properties.Add(new JsonProperty("meshIndex", 0, meshInfoRoot, JsonValueKind.Number));
-            meshInfoRoot.Properties.Add(new JsonProperty("meshIndex", 0, meshInfoRoot, JsonValueKind.Number));
+            meshInfoRoot.Properties.Add(new JsonProperty("skinIndex", 0, meshInfoRoot, JsonValueKind.Number));
 
             meshInfoRoot.Children.Add(new JsonObject("meshPath", meshInfoRoot, new List<JsonProperty>
             {
