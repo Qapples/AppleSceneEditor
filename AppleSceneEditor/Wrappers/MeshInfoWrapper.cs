@@ -7,6 +7,7 @@ using AppleSerialization;
 using AppleSerialization.Json;
 using GrappleFightNET5.Scenes.Info;
 using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.Wrappers
 {
@@ -29,7 +30,7 @@ namespace AppleSceneEditor.Wrappers
 
             List<JsonProperty>? foundProperties =
                 jsonObject.VerifyProperties(new[] {"meshIndex", "skinIndex", "path", "isContentPath"});
-            
+
             if (foundProperties is null)
             {
                 IsEmpty = true;
@@ -39,7 +40,7 @@ namespace AppleSceneEditor.Wrappers
             var (meshIndexProp, skinIndexProp, meshPathProp, isContentPathProp) = (foundProperties[0],
                 foundProperties[1], foundProperties[2], foundProperties[3]);
 
-            UIPanel = new Panel
+            Panel widgetsPanel = new()
             {
                 Widgets =
                 {
@@ -83,7 +84,11 @@ namespace AppleSceneEditor.Wrappers
                     }
                 }
             };
+
+            UIPanel = new Panel
+                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, "MeshInfo")}};
         }
+    
 
         private MeshInfoWrapper()
         {

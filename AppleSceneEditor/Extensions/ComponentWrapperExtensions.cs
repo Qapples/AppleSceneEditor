@@ -7,6 +7,8 @@ using System.Reflection;
 using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
+using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.Extensions
 {
@@ -174,6 +176,56 @@ namespace AppleSceneEditor.Extensions
             }
 
             return null;
+        }
+
+        public static Grid GenerateComponentGrid(Panel widgetsPanel, string header)
+        {
+            widgetsPanel.GridRow = 1;
+            widgetsPanel.GridColumn = 1;
+
+            Grid outGrid = new()
+            {
+                ColumnSpacing = 4,
+                RowSpacing = 4
+            };
+            
+            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
+            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Fill));
+            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
+            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
+            
+            ImageButton mark = new(null)
+            {
+                Toggleable = true,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            
+            mark.PressedChanged += (_, _) =>
+            {
+                if (mark.IsPressed)
+                {
+                    outGrid.AddChild(widgetsPanel);
+                }
+                else
+                {
+                    outGrid.RemoveChild(widgetsPanel);
+                }
+            };
+            
+            mark.ApplyImageButtonStyle(Stylesheet.Current.TreeStyle.MarkStyle);
+            outGrid.AddChild(mark);
+
+            Label label = new(null)
+            {
+                Text = header,
+                GridColumn = 1
+            };
+            
+            label.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
+            outGrid.AddChild(label);
+
+            return outGrid;
         }
 
         static ComponentWrapperExtensions()
