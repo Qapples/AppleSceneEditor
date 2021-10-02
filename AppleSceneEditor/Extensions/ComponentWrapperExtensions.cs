@@ -178,6 +178,15 @@ namespace AppleSceneEditor.Extensions
             return null;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Grid"/> whose purpose is to hold <see cref="Widget"/> instances under a toggleable
+        /// drop down.
+        /// </summary>
+        /// <param name="widgetsPanel">A panel containing <see cref="Widget"/> instances. These are the widgets that
+        /// will be displayed when the drop down is toggled on.</param>
+        /// <param name="header">The header that is displayed next to the drop down button.</param>
+        /// <returns>A <see cref="Grid"/> instance that represents a drop down button that shows the widgets in
+        /// <see cref="widgetsPanel"/> when toggled on.</returns>
         public static Grid GenerateComponentGrid(Panel widgetsPanel, string header)
         {
             widgetsPanel.GridRow = 1;
