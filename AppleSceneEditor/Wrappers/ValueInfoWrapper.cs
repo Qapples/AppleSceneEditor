@@ -62,12 +62,12 @@ namespace AppleSceneEditor.Wrappers
                     }
                 }
             };
-            
+
             UIPanel = new Panel
-                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, "ValueInfo")}};
+                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, this, "ValueInfo")}};
         }
-        
-        
+
+
         private ValueInfoWrapper()
         {
             (JsonObject, UIPanel, IsEmpty) = (null, null, true);

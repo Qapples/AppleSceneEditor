@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using AppleSceneEditor.Extensions;
-using AppleSerialization;
 using AppleSerialization.Json;
 using GrappleFightNET5.Scenes.Info;
 using Myra.Graphics2D.UI;
-using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.Wrappers
 {
@@ -86,7 +82,7 @@ namespace AppleSceneEditor.Wrappers
             };
 
             UIPanel = new Panel
-                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, "MeshInfo")}};
+                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, this, "MeshInfo")}};
         }
     
 

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -178,16 +177,19 @@ namespace AppleSceneEditor.Extensions
             return null;
         }
 
+        private const string ComponentGridId = "ComponentGrid";
+
         /// <summary>
         /// Creates a new <see cref="Grid"/> whose purpose is to hold <see cref="Widget"/> instances under a toggleable
         /// drop down.
         /// </summary>
         /// <param name="widgetsPanel">A panel containing <see cref="Widget"/> instances. These are the widgets that
         /// will be displayed when the drop down is toggled on.</param>
+        /// <param name="wrapper">The <see cref="IComponentWrapper"/> <see cref="widgetsPanel"/> is apart of.</param>
         /// <param name="header">The header that is displayed next to the drop down button.</param>
         /// <returns>A <see cref="Grid"/> instance that represents a drop down button that shows the widgets in
         /// <see cref="widgetsPanel"/> when toggled on.</returns>
-        public static Grid GenerateComponentGrid(Panel widgetsPanel, string header)
+        public static Grid GenerateComponentGrid(Panel widgetsPanel, IComponentWrapper wrapper, string header)
         {
             widgetsPanel.GridRow = 1;
             widgetsPanel.GridColumn = 1;
@@ -195,7 +197,8 @@ namespace AppleSceneEditor.Extensions
             Grid outGrid = new()
             {
                 ColumnSpacing = 4,
-                RowSpacing = 4
+                RowSpacing = 4,
+                Id = ComponentGridId
             };
             
             outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
@@ -233,6 +236,24 @@ namespace AppleSceneEditor.Extensions
             
             label.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
             outGrid.AddChild(label);
+
+            TextButton removeButton = new()
+            {
+                Text = "-",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                GridColumn = 1
+            };
+
+            removeButton.Click += (_, _) =>
+            {
+                wrapper.UIPanel.RemoveFromParent();
+                
+                wrapper.JsonObject = null!;
+                wrapper.UIPanel = null!;
+                wrapper = null!;
+            };
+
+            outGrid.AddChild(removeButton);
 
             return outGrid;
         }

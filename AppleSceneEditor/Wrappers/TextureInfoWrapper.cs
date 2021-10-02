@@ -63,12 +63,12 @@ namespace AppleSceneEditor.Wrappers
                     }
                 }
             };
-            
+
             UIPanel = new Panel
-                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, "TextureInfo")}};
+                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, this, "TextureInfo")}};
         }
-        
-        
+
+
         private TextureInfoWrapper()
         {
             (JsonObject, UIPanel, IsEmpty) = (null, null, true);
