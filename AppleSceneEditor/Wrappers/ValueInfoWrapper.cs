@@ -34,7 +34,7 @@ namespace AppleSceneEditor.Wrappers
 
             var (valueTypeProp, valueProp) = (foundProperties[0], foundProperties[1]);
             
-            UIPanel = new Panel
+            Panel widgetsPanel = new()
             {
                 Widgets =
                 {
@@ -62,6 +62,9 @@ namespace AppleSceneEditor.Wrappers
                     }
                 }
             };
+            
+            UIPanel = new Panel
+                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, "ValueInfo")}};
         }
         
         

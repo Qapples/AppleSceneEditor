@@ -35,7 +35,7 @@ namespace AppleSceneEditor.Wrappers
 
             var (pathProp, isContentPathProp) = (foundProperties[0], foundProperties[1]);
 
-            UIPanel = new Panel
+            Panel widgetsPanel = new()
             {
                 Widgets =
                 {
@@ -63,6 +63,9 @@ namespace AppleSceneEditor.Wrappers
                     }
                 }
             };
+            
+            UIPanel = new Panel
+                {Widgets = {ComponentWrapperExtensions.GenerateComponentGrid(widgetsPanel, "TextureInfo")}};
         }
         
         
