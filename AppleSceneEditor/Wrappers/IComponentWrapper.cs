@@ -39,12 +39,6 @@ namespace AppleSceneEditor.Wrappers
         /// The type of data the wrapper is targeting.
         /// </summary>
         Type AssociatedType { get; }
-        
-        /// <summary>
-        /// A <see cref="JsonObject"/> representing the targeted type with blank data. This instance will be cloned
-        /// whenever a new component is added.
-        /// </summary>
-        JsonObject Prototype { get; }
 
         /// <summary>
         /// All classes that implement <see cref="IComponentWrapper"/>. The key a type and the value is the wrapper

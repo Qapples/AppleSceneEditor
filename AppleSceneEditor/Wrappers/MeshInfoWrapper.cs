@@ -12,7 +12,7 @@ namespace AppleSceneEditor.Wrappers
     /// <summary>
     /// <see cref="IComponentWrapper"/> for <see cref="MeshInfo"/>.
     /// </summary>
-    public class MeshInfoWrapper : IComponentWrapper
+    public class MeshInfoWrapper : JsonPrototype, IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
         
@@ -22,23 +22,9 @@ namespace AppleSceneEditor.Wrappers
 
         public Type AssociatedType { get; } = typeof(MeshInfo);
 
-        public JsonObject Prototype { get; } 
-
         private MeshInfoWrapper(JsonObject jsonObject)
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
-
-            Prototype = new JsonObject();
-            
-            Prototype.Properties.Add(new JsonProperty("$type", "MeshInfo", Prototype, JsonValueKind.String));
-            Prototype.Properties.Add(new JsonProperty("meshIndex", 0, Prototype, JsonValueKind.Number));
-            Prototype.Properties.Add(new JsonProperty("skinIndex", 0, Prototype, JsonValueKind.Number));
-
-            Prototype.Children.Add(new JsonObject("meshPath", Prototype, new List<JsonProperty>
-            {
-                new("path", "", Prototype, JsonValueKind.String),
-                new("isContentPath", false, Prototype, JsonValueKind.False)
-            }));
 
             List<JsonProperty>? foundProperties =
                 jsonObject.VerifyProperties(new[] {"meshIndex", "skinIndex", "path", "isContentPath"});
@@ -105,6 +91,21 @@ namespace AppleSceneEditor.Wrappers
         private MeshInfoWrapper()
         {
             (JsonObject, UIPanel, IsEmpty) = (null, null, true);
+        }
+
+        static MeshInfoWrapper()
+        {
+            Prototype = new JsonObject();
+            
+            Prototype.Properties.Add(new JsonProperty("$type", "MeshInfo", Prototype, JsonValueKind.String));
+            Prototype.Properties.Add(new JsonProperty("meshIndex", 0, Prototype, JsonValueKind.Number));
+            Prototype.Properties.Add(new JsonProperty("skinIndex", 0, Prototype, JsonValueKind.Number));
+
+            Prototype.Children.Add(new JsonObject("meshPath", Prototype, new List<JsonProperty>
+            {
+                new("path", "", Prototype, JsonValueKind.String),
+                new("isContentPath", false, Prototype, JsonValueKind.False)
+            }));
         }
     }
 }

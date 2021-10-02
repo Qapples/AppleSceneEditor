@@ -12,7 +12,7 @@ namespace AppleSceneEditor.Wrappers
     /// <summary>
     /// <see cref="IComponentWrapper"/> for <see cref="TextureInfo"/>.
     /// </summary>
-    public class TextureInfoWrapper : IComponentWrapper
+    public class TextureInfoWrapper : JsonPrototype, IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
         
@@ -21,8 +21,6 @@ namespace AppleSceneEditor.Wrappers
         public bool IsEmpty { get; }
         
         public Type AssociatedType { get; } = typeof(TextureInfo);
-        
-        public JsonObject Prototype { get; }
 
         private TextureInfoWrapper(JsonObject jsonObject)
         {
@@ -90,6 +88,11 @@ namespace AppleSceneEditor.Wrappers
         private TextureInfoWrapper()
         {
             (JsonObject, UIPanel, IsEmpty) = (null, null, true);
+        }
+
+        static TextureInfoWrapper()
+        {
+            
         }
     }
 }
