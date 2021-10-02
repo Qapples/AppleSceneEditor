@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
+using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor.Wrappers
 {
@@ -19,10 +21,18 @@ namespace AppleSceneEditor.Wrappers
         public bool IsEmpty { get; }
 
         public Type AssociatedType { get; } = typeof(ValueInfo);
+        
+        public JsonObject Prototype { get; }
 
         private ValueInfoWrapper(JsonObject jsonObject)
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
+
+            Prototype = new JsonObject();
+            
+            Prototype.Properties.Add(new JsonProperty("$type", "ValueInfo", Prototype, JsonValueKind.String));
+            Prototype.Properties.Add(new JsonProperty("valueType", "System.Int32", Prototype, JsonValueKind.String));
+            Prototype.Properties.Add(new JsonProperty("value", "0", Prototype, JsonValueKind.String));
 
             List<JsonProperty>? foundProperties = jsonObject.VerifyProperties(new[] {"valueType", "value"});
 

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using GrappleFightNET5.Scenes.Info;
 using Myra.Graphics2D.UI;
+using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor.Wrappers
 {
@@ -19,11 +21,27 @@ namespace AppleSceneEditor.Wrappers
         public bool IsEmpty { get; }
         
         public Type AssociatedType { get; } = typeof(TextureInfo);
+        
+        public JsonObject Prototype { get; }
 
         private TextureInfoWrapper(JsonObject jsonObject)
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
 
+            Prototype = new JsonObject();
+            
+            Prototype.Children.Add(new JsonObject("texturePath", Prototype, new List<JsonProperty>
+            {
+                new("path", "", Prototype, JsonValueKind.String),
+                new("isContentPath", false, Prototype, JsonValueKind.False)
+            }));
+            
+            Prototype.Children.Add(new JsonObject("texturePath", Prototype, new List<JsonProperty>
+            {
+                new("path", "", Prototype, JsonValueKind.String),
+                new("isContentPath", false, Prototype, JsonValueKind.False)
+            }));
+            
             List<JsonProperty>? foundProperties =
                 jsonObject.VerifyProperties(new[] {"path", "isContentPath"});
             
