@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -47,11 +48,22 @@ namespace AppleSceneEditor.Extensions
             foreach (Type type in assemblyTypes)
             {
                 //wrapper should NOT Be null.
-                if (type == typeof(IComponentWrapper) ||
-                    Activator.CreateInstance(type, ActivatorFlags, null, null, null) is not IComponentWrapper wrapper)
+                if (type == typeof(IComponentWrapper)) continue;
+                
+                bool hasParam = type.GetConstructor(ActivatorFlags, null, new[] {typeof(JsonObject)}, null) != null;
+                bool hasDefault = type.GetConstructor(ActivatorFlags, null, Type.EmptyTypes, null) != null;
+
+                if (!hasParam || !hasDefault)
                 {
+                    Debug.WriteLine($"{methodName}: wrapper type ({type}) does not have the required constructors!\n" +
+                                    $"{(!hasParam ? "missing JsonObject constructor " : "")} " +
+                                    $"{(!hasDefault ? "missing parameterless constructor" : "")}");
                     continue;
                 }
+
+                //wrapper should NEVER be null.
+                IComponentWrapper wrapper =
+                    (IComponentWrapper) Activator.CreateInstance(type, ActivatorFlags, null, null, null)!;
 
                 if (outDictionary.ContainsKey(wrapper.AssociatedType))
                 {
