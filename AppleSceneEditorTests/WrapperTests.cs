@@ -51,13 +51,14 @@ namespace AppleSceneEditorTests
             foreach (Type wrapperType in assemblyTypes)
             {
                 if (wrapperType == typeof(IComponentWrapper)) continue;
-                
-                var hasParam = wrapperType?.GetConstructor(flags, null, new[] {typeof(JsonObject)}, null) != null;
-                var hasDefault = wrapperType?.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
 
-                Assert.False(!hasParam || !hasDefault, $"Type {wrapperType} does NOT have the required constructors!\n" +
-                                                       $"{(!hasParam ? "Missing JsonObject constructor " : "")} " +
-                                                       $"{(!hasDefault ? "Missing parameterless constructor" : "")}");
+                bool hasParam = wrapperType?.GetConstructor(flags, null, new[] {typeof(JsonObject)}, null) != null;
+                bool hasDefault = wrapperType?.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
+
+                Assert.False(!hasParam || !hasDefault,
+                    $"Type {wrapperType} does NOT have the required constructors!\n" +
+                    $"{(!hasParam ? "Missing JsonObject constructor " : "")} " +
+                    $"{(!hasDefault ? "Missing parameterless constructor" : "")}");
             }
         }
     }
