@@ -133,6 +133,29 @@ namespace AppleSceneEditor
             return outWindow;
         }
 
+        private Window CreateAlreadyExistsDialog()
+        {
+            Panel panel = new();
+            Window outWindow = new() {Content = panel};
+            VerticalStackPanel stackPanel = new();
+
+            stackPanel.AddChild(new Label
+            {
+                Text = "Cannot add component because another component of the same type already exists!",
+                StyleName = "small",
+                HorizontalAlignment = HorizontalAlignment.Center,
+            });
+            
+            TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
+            okButton.Click += (o, e) => outWindow.Close();
+
+            stackPanel.AddChild(okButton);
+            
+            panel.Widgets.Add(stackPanel);
+            
+            return outWindow;
+        }
+
         private ComponentPanelHandler? _mainPanelHandler;
 
         private void UpdatePropertyGridWithEntity(Scene scene, string entityId)

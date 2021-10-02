@@ -77,15 +77,16 @@ namespace AppleSceneEditor
             
             _addComponentWindow.ShowModal(_desktop);
         }
+        
 
         private void FinishButtonClick(string typeName)
         {
             const string methodName = nameof(MainGame) + "." + nameof(FinishButtonClick) + " (EditorEvents)";
             
-            if (_currentJsonObject is null) return;
-            
             _addComponentWindow.Close();
 
+            if (_currentJsonObject is null || _mainPanelHandler is null) return;
+            
             if (!NewComponentPrototypes.TryGetValue(typeName, out var prototype))
             {
                 Debug.WriteLine($"{methodName}: cannot find component prototype of name {typeName}! Cannot create" +
@@ -93,8 +94,18 @@ namespace AppleSceneEditor
                 return;
             }
 
-            _mainPanelHandler?.Components.Add(prototype);
-            _mainPanelHandler?.RebuildUI();
+            if (_mainPanelHandler.Components.Any(e => e.FindProperty("$type")?.Value as string == typeName))
+            {
+                Debug.WriteLine($"{methodName}: component of type {typeName} already exists in the currently " +
+                                $"selected entity!");
+
+                _alreadyExistsWindow.ShowModal(_desktop);
+
+                return;
+            }
+
+            _mainPanelHandler.Components.Add(prototype);
+            _mainPanelHandler.RebuildUI();
         }
     }
 }

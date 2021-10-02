@@ -35,6 +35,7 @@ namespace AppleSceneEditor
         private Desktop _desktop;
 
         private Window _addComponentWindow;
+        private Window _alreadyExistsWindow;
         
         //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
         private readonly string _uiPath;
@@ -195,6 +196,7 @@ namespace AppleSceneEditor
             Stylesheet.Current = stylesheet;
 
             _addComponentWindow = CreateNewComponentDialog();
+            _alreadyExistsWindow = CreateAlreadyExistsDialog();
 
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
             _desktop = new Desktop
