@@ -21,13 +21,13 @@ namespace AppleSceneEditor.Wrappers
         /// <summary>
         /// Represents the component to wrap around.
         /// </summary>
-        JsonObject? JsonObject { get; set; }
+        JsonObject JsonObject { get; set; }
 
         /// <summary>
         /// <see cref="Panel"/> containing <see cref="Widget"/> instances that is displayed to the user in the property
         /// editor and additional occasions.
         /// </summary>
-        Panel? UIPanel { get; set; }
+        Panel UIPanel { get; set; }
         
         /// <summary>
         /// If true, then there is no data associated with this wrapper or creation of the the wrapper failed. Otherwise,
