@@ -248,9 +248,11 @@ namespace AppleSceneEditor.Extensions
             {
                 wrapper.UIPanel.RemoveFromParent();
                 
+                JsonArray? componentArray = wrapper.JsonObject.Parent?.FindArray("components");
+                componentArray?.Remove(wrapper.JsonObject);
+
                 wrapper.JsonObject = null!;
                 wrapper.UIPanel = null!;
-                wrapper = null!;
             };
 
             outGrid.AddChild(removeButton);
