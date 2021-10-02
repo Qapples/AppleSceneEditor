@@ -53,7 +53,7 @@ namespace AppleSceneEditor
 
         public static Dictionary<string, JsonObject> NewComponentPrototypes { get; set; }
 
-        private static void InitComponentPrototypes()
+        public static void InitComponentPrototypes()
         {
             NewComponentPrototypes = new Dictionary<string, JsonObject>();
 

@@ -19,6 +19,8 @@ namespace AppleSceneEditorTests
         public void PrototypeTest()
         { 
             AppleSerialization.Environment.LoadTypeAliasFileContents(File.ReadAllText(TypeAliasPath));
+            MainGame.InitComponentPrototypes();
+            
             foreach (string typeName in AppleSerialization.Environment.TypeAliases.Keys)
             {
                 Assert.True(MainGame.NewComponentPrototypes.TryGetValue(typeName, out _),
