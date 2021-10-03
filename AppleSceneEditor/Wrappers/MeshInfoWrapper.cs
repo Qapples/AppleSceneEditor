@@ -107,8 +107,8 @@ namespace AppleSceneEditor.Wrappers
                 new("isContentPath", false, prototype, JsonValueKind.False)
             }));
             
-            //ComponentWrapperExtensions.Implementers.Add(typeof(MeshInfo), typeof(MeshInfoWrapper));
-            ComponentWrapperExtensions.Prototypes.Add(typeof(MeshInfo), prototype);
+            ComponentWrapperExtensions.Implementers.Add(AssociatedType, typeof(MeshInfoWrapper));
+            ComponentWrapperExtensions.Prototypes.Add(AssociatedType, prototype);
         }
     }
 }

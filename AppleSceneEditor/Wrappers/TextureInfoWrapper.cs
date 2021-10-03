@@ -92,8 +92,8 @@ namespace AppleSceneEditor.Wrappers
                 new("isContentPath", false, prototype, JsonValueKind.False)
             }));
             
-            ComponentWrapperExtensions.Implementers.Add(typeof(TextureInfo), typeof(TextureInfoWrapper));
-            ComponentWrapperExtensions.Prototypes.Add(typeof(TextureInfo), prototype);
+            ComponentWrapperExtensions.Implementers.Add(AssociatedType, typeof(TextureInfoWrapper));
+            ComponentWrapperExtensions.Prototypes.Add(AssociatedType, prototype);
         }
     }
 }
