@@ -27,7 +27,7 @@ namespace AppleSceneEditor.Extensions
         /// Represents a <see cref="JsonObject"/> with blank data for each type in <see cref="Implementers"/>. A
         /// prototype is copied whenever a new component is created.
         /// </summary>
-        public static Dictionary<string, JsonObject> Prototypes { get; }
+        public static Dictionary<Type, JsonObject> Prototypes { get; }
 
         private const BindingFlags ActivatorFlags = BindingFlags.Instance | BindingFlags.NonPublic;
 
@@ -242,7 +242,7 @@ namespace AppleSceneEditor.Extensions
         static ComponentWrapperExtensions()
         {
             Implementers = new Dictionary<Type, Type>();
-            Prototypes = new Dictionary<string, JsonObject>();
+            Prototypes = new Dictionary<Type, JsonObject>();
             
             //init all static methods if implementers 
             foreach (Type t in GetWrapperImplementers())

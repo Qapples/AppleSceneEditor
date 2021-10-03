@@ -83,7 +83,7 @@ namespace AppleSceneEditor.Wrappers
             prototype.Properties.Add(new JsonProperty("value", "0", prototype, JsonValueKind.String));
             
             ComponentWrapperExtensions.Implementers.Add(typeof(ValueInfo), typeof(ValueInfoWrapper));
-            ComponentWrapperExtensions.Prototypes.Add("ValueInfo", prototype);
+            ComponentWrapperExtensions.Prototypes.Add(typeof(ValueInfo), prototype);
         }
     }
 }

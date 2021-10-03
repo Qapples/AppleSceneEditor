@@ -93,7 +93,7 @@ namespace AppleSceneEditor.Wrappers
             }));
             
             ComponentWrapperExtensions.Implementers.Add(typeof(TextureInfo), typeof(TextureInfoWrapper));
-            ComponentWrapperExtensions.Prototypes.Add("TextureInfo", prototype);
+            ComponentWrapperExtensions.Prototypes.Add(typeof(TextureInfo), prototype);
         }
     }
 }

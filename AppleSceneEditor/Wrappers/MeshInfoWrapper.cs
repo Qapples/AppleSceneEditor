@@ -108,7 +108,7 @@ namespace AppleSceneEditor.Wrappers
             }));
             
             ComponentWrapperExtensions.Implementers.Add(typeof(MeshInfo), typeof(MeshInfoWrapper));
-            ComponentWrapperExtensions.Prototypes.Add("MeshInfo", prototype);
+            ComponentWrapperExtensions.Prototypes.Add(typeof(MeshInfo), prototype);
         }
     }
 }

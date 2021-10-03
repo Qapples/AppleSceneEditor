@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Systems;
+using AppleSerialization;
 using Myra.Graphics2D.UI.File;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
@@ -80,12 +80,13 @@ namespace AppleSceneEditor
         private void FinishButtonClick(string typeName)
         {
             const string methodName = nameof(MainGame) + "." + nameof(FinishButtonClick) + " (EditorEvents)";
+            Type? type = ConverterHelper.GetTypeFromString(typeName);
             
             _addComponentWindow.Close();
 
-            if (_currentJsonObject is null || _mainPanelHandler is null) return;
+            if (_currentJsonObject is null || _mainPanelHandler is null || type is null) return;
             
-            if (!ComponentWrapperExtensions.Prototypes.TryGetValue(typeName, out var prototype))
+            if (!ComponentWrapperExtensions.Prototypes.TryGetValue(type, out var prototype))
             {
                 Debug.WriteLine($"{methodName}: cannot find component prototype of name {typeName}! Cannot create" +
                                 "new component");
