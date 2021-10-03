@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
+using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Systems;
-using AppleSerialization.Json;
 using Myra.Graphics2D.UI.File;
-using JsonProperty = AppleSerialization.Json.JsonProperty;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
 namespace AppleSceneEditor
@@ -87,7 +85,7 @@ namespace AppleSceneEditor
 
             if (_currentJsonObject is null || _mainPanelHandler is null) return;
             
-            if (!NewComponentPrototypes.TryGetValue(typeName, out var prototype))
+            if (!ComponentWrapperExtensions.Prototypes.TryGetValue(typeName, out var prototype))
             {
                 Debug.WriteLine($"{methodName}: cannot find component prototype of name {typeName}! Cannot create" +
                                 "new component");
