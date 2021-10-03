@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AppleSceneEditor;
+using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Wrappers;
 using AppleSerialization.Json;
 using Xunit;
@@ -19,11 +20,10 @@ namespace AppleSceneEditorTests
         public void PrototypeTest()
         { 
             AppleSerialization.Environment.LoadTypeAliasFileContents(File.ReadAllText(TypeAliasPath));
-            MainGame.InitComponentPrototypes();
-            
+
             foreach (string typeName in AppleSerialization.Environment.TypeAliases.Keys)
             {
-                Assert.True(MainGame.NewComponentPrototypes.TryGetValue(typeName, out _),
+                Assert.True(ComponentWrapperExtensions.Prototypes.TryGetValue(typeName, out _),
                     $"{typeName} does NOT have a prototype!");
             }
         }

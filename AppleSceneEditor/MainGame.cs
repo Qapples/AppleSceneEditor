@@ -52,52 +52,6 @@ namespace AppleSceneEditor
 
         private ISystem<GameTime>? _drawSystem;
 
-        public static Dictionary<string, JsonObject> NewComponentPrototypes { get; set; }
-
-        public static void InitComponentPrototypes()
-        {
-            NewComponentPrototypes = new Dictionary<string, JsonObject>();
-
-            /* TODO: 
-             * Find a more scalable way of doing this lol. Not a huge deal but could cause issues in the future.
-             * Don't wanna rely on tests and this single static method might add up a bunch in the future.
-             */
-            JsonObject meshInfoRoot = new();
-            NewComponentPrototypes.Add("MeshInfo", meshInfoRoot);
-
-            meshInfoRoot.Properties.Add(new JsonProperty("$type", "MeshInfo", meshInfoRoot, JsonValueKind.String));
-            meshInfoRoot.Properties.Add(new JsonProperty("meshIndex", 0, meshInfoRoot, JsonValueKind.Number));
-            meshInfoRoot.Properties.Add(new JsonProperty("skinIndex", 0, meshInfoRoot, JsonValueKind.Number));
-
-            meshInfoRoot.Children.Add(new JsonObject("meshPath", meshInfoRoot, new List<JsonProperty>
-            {
-                new("path", "", meshInfoRoot, JsonValueKind.String),
-                new("isContentPath", false, meshInfoRoot, JsonValueKind.False)
-            }));
-
-            //TextureInfo
-            JsonObject textureInfoRoot = new();
-            NewComponentPrototypes.Add("TextureInfo", textureInfoRoot);
-            
-            textureInfoRoot.Properties.Add(new JsonProperty("$type", "TextureInfo", meshInfoRoot,
-                JsonValueKind.String));
-
-            textureInfoRoot.Children.Add(new JsonObject("texturePath", meshInfoRoot, new List<JsonProperty>
-            {
-                new("path", "", meshInfoRoot, JsonValueKind.String),
-                new("isContentPath", false, meshInfoRoot, JsonValueKind.False)
-            }));
-
-            //ValueInfo
-            JsonObject valueInfoRoot = new();
-            NewComponentPrototypes.Add("ValueInfo", valueInfoRoot);
-
-            valueInfoRoot.Properties.Add(new JsonProperty("$type", "ValueInfo", meshInfoRoot, JsonValueKind.String));
-            valueInfoRoot.Properties.Add(new JsonProperty("valueType", "System.Int32", meshInfoRoot,
-                JsonValueKind.String));
-            valueInfoRoot.Properties.Add(new JsonProperty("value", "2", meshInfoRoot, JsonValueKind.String));
-        }
-
         public MainGame(string[] args)
         {
             string root = Path.Combine("..", "..", "..");
@@ -156,11 +110,10 @@ namespace AppleSceneEditor
             
             Environment.ExternalTypes.Add($"{sceneNamespace}.Info.MeshInfo, {sceneNamespace}", typeof(MeshInfo));
             Environment.ExternalTypes.Add($"{sceneNamespace}.Info.TextureInfo, {sceneNamespace}", typeof(TextureInfo));
+            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.ScriptInfo, {sceneNamespace}", typeof(ScriptInfo));
             Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
 
             Environment.LoadTypeAliasFileContents(File.ReadAllText(_typeAliasesConfigPath));
-            
-            InitComponentPrototypes();
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
