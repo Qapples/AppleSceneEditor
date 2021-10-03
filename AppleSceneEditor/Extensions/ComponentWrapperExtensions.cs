@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
@@ -21,16 +22,20 @@ namespace AppleSceneEditor.Extensions
         /// associated with that type (if there is one)
         /// </summary>
         public static Dictionary<Type, Type> Implementers { get; }
+        
+        /// <summary>
+        /// Represents a <see cref="JsonObject"/> with blank data for each type in <see cref="Implementers"/>. A
+        /// prototype is copied whenever a new component is created.
+        /// </summary>
+        public static Dictionary<string, JsonObject> Prototypes { get; }
 
         private const BindingFlags ActivatorFlags = BindingFlags.Instance | BindingFlags.NonPublic;
 
-        private static Dictionary<Type, Type> LoadImplementers()
+        private static void InitStaticMethods()
         {
-            const string methodName = nameof(ComponentWrapperExtensions) + "." + nameof(LoadImplementers);
-            Dictionary<Type, Type> outDictionary = new();
             IEnumerable<Type> assemblyTypes;
             Type wrapperInterface = typeof(IComponentWrapper);
-
+        
             //we're putting this here just in case we load assemblies that rely on other assemblies that we don't
             //reference
             try
@@ -43,40 +48,13 @@ namespace AppleSceneEditor.Extensions
                     where type is not null
                     select (Type) type;
             }
-
+        
             assemblyTypes = assemblyTypes.Where(wrapperInterface.IsAssignableFrom).ToList();
 
-            foreach (Type type in assemblyTypes)
+            foreach (Type t in assemblyTypes)
             {
-                //wrapper should NOT Be null.
-                if (type == typeof(IComponentWrapper)) continue;
-                
-                bool hasParam = type.GetConstructor(ActivatorFlags, null, new[] {typeof(JsonObject)}, null) != null;
-                bool hasDefault = type.GetConstructor(ActivatorFlags, null, Type.EmptyTypes, null) != null;
-
-                if (!hasParam || !hasDefault)
-                {
-                    Debug.WriteLine($"{methodName}: wrapper type ({type}) does not have the required constructors!\n" +
-                                    $"{(!hasParam ? "missing JsonObject constructor " : "")} " +
-                                    $"{(!hasDefault ? "missing parameterless constructor" : "")}");
-                    continue;
-                }
-
-                //wrapper should NEVER be null.
-                IComponentWrapper wrapper =
-                    (IComponentWrapper) Activator.CreateInstance(type, ActivatorFlags, null, null, null)!;
-
-                if (outDictionary.ContainsKey(wrapper.AssociatedType))
-                {
-                    Debug.WriteLine($"{methodName}: cannot include {type} because another type has already " +
-                                    $"implemented {wrapper.AssociatedType}");
-                    continue;
-                }
-                
-                outDictionary.Add(wrapper.AssociatedType, type);
+                RuntimeHelpers.RunClassConstructor(t.TypeHandle);
             }
-
-            return outDictionary;
         }
 
         /// <summary>
@@ -262,7 +240,9 @@ namespace AppleSceneEditor.Extensions
 
         static ComponentWrapperExtensions()
         {
-            Implementers = LoadImplementers();
+            Implementers = new Dictionary<Type, Type>();
+            Prototypes = new Dictionary<string, JsonObject>();
+            InitStaticMethods();
         }
     }
 }

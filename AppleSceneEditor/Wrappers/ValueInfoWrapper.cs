@@ -12,7 +12,7 @@ namespace AppleSceneEditor.Wrappers
     /// <summary>
     /// <see cref="IComponentWrapper"/> for <see cref="ValueInfoWrapper"/>
     /// </summary>
-    public class ValueInfoWrapper : JsonPrototype, IComponentWrapper
+    public class ValueInfoWrapper : IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
         
@@ -76,11 +76,14 @@ namespace AppleSceneEditor.Wrappers
         
         static ValueInfoWrapper()
         {
-            Prototype = new JsonObject();
+            JsonObject prototype = new();
             
-            Prototype.Properties.Add(new JsonProperty("$type", "ValueInfo", Prototype, JsonValueKind.String));
-            Prototype.Properties.Add(new JsonProperty("valueType", "System.Int32", Prototype, JsonValueKind.String));
-            Prototype.Properties.Add(new JsonProperty("value", "0", Prototype, JsonValueKind.String));
+            prototype.Properties.Add(new JsonProperty("$type", "ValueInfo", prototype, JsonValueKind.String));
+            prototype.Properties.Add(new JsonProperty("valueType", "System.Int32", prototype, JsonValueKind.String));
+            prototype.Properties.Add(new JsonProperty("value", "0", prototype, JsonValueKind.String));
+            
+            ComponentWrapperExtensions.Implementers.Add(typeof(ValueInfo), typeof(ValueInfoWrapper));
+            ComponentWrapperExtensions.Prototypes.Add("ValueInfo", prototype);
         }
     }
 }

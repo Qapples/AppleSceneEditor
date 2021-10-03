@@ -12,7 +12,7 @@ namespace AppleSceneEditor.Wrappers
     /// <summary>
     /// <see cref="IComponentWrapper"/> for <see cref="MeshInfo"/>.
     /// </summary>
-    public class MeshInfoWrapper : JsonPrototype, IComponentWrapper
+    public class MeshInfoWrapper : IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
         
@@ -95,17 +95,20 @@ namespace AppleSceneEditor.Wrappers
 
         static MeshInfoWrapper()
         {
-            Prototype = new JsonObject();
+            JsonObject prototype = new();
             
-            Prototype.Properties.Add(new JsonProperty("$type", "MeshInfo", Prototype, JsonValueKind.String));
-            Prototype.Properties.Add(new JsonProperty("meshIndex", 0, Prototype, JsonValueKind.Number));
-            Prototype.Properties.Add(new JsonProperty("skinIndex", 0, Prototype, JsonValueKind.Number));
+            prototype.Properties.Add(new JsonProperty("$type", "MeshInfo", prototype, JsonValueKind.String));
+            prototype.Properties.Add(new JsonProperty("meshIndex", 0, prototype, JsonValueKind.Number));
+            prototype.Properties.Add(new JsonProperty("skinIndex", 0, prototype, JsonValueKind.Number));
 
-            Prototype.Children.Add(new JsonObject("meshPath", Prototype, new List<JsonProperty>
+            prototype.Children.Add(new JsonObject("meshPath", prototype, new List<JsonProperty>
             {
-                new("path", "", Prototype, JsonValueKind.String),
-                new("isContentPath", false, Prototype, JsonValueKind.False)
+                new("path", "", prototype, JsonValueKind.String),
+                new("isContentPath", false, prototype, JsonValueKind.False)
             }));
+            
+            ComponentWrapperExtensions.Implementers.Add(typeof(MeshInfo), typeof(MeshInfoWrapper));
+            ComponentWrapperExtensions.Prototypes.Add("MeshInfo", prototype);
         }
     }
 }

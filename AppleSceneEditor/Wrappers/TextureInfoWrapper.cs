@@ -12,7 +12,7 @@ namespace AppleSceneEditor.Wrappers
     /// <summary>
     /// <see cref="IComponentWrapper"/> for <see cref="TextureInfo"/>.
     /// </summary>
-    public class TextureInfoWrapper : JsonPrototype, IComponentWrapper
+    public class TextureInfoWrapper : IComponentWrapper
     {
         public JsonObject? JsonObject { get; set; }
         
@@ -26,20 +26,6 @@ namespace AppleSceneEditor.Wrappers
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
 
-            Prototype = new JsonObject();
-            
-            Prototype.Children.Add(new JsonObject("texturePath", Prototype, new List<JsonProperty>
-            {
-                new("path", "", Prototype, JsonValueKind.String),
-                new("isContentPath", false, Prototype, JsonValueKind.False)
-            }));
-            
-            Prototype.Children.Add(new JsonObject("texturePath", Prototype, new List<JsonProperty>
-            {
-                new("path", "", Prototype, JsonValueKind.String),
-                new("isContentPath", false, Prototype, JsonValueKind.False)
-            }));
-            
             List<JsonProperty>? foundProperties =
                 jsonObject.VerifyProperties(new[] {"path", "isContentPath"});
             
@@ -92,7 +78,22 @@ namespace AppleSceneEditor.Wrappers
 
         static TextureInfoWrapper()
         {
+            JsonObject prototype = new();
             
+            prototype.Children.Add(new JsonObject("texturePath", prototype, new List<JsonProperty>
+            {
+                new("path", "", prototype, JsonValueKind.String),
+                new("isContentPath", false, prototype, JsonValueKind.False)
+            }));
+            
+            prototype.Children.Add(new JsonObject("texturePath", prototype, new List<JsonProperty>
+            {
+                new("path", "", prototype, JsonValueKind.String),
+                new("isContentPath", false, prototype, JsonValueKind.False)
+            }));
+            
+            ComponentWrapperExtensions.Implementers.Add(typeof(TextureInfo), typeof(TextureInfoWrapper));
+            ComponentWrapperExtensions.Prototypes.Add("TextureInfo", prototype);
         }
     }
 }
