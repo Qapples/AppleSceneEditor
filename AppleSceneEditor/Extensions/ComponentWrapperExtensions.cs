@@ -31,32 +31,6 @@ namespace AppleSceneEditor.Extensions
 
         private const BindingFlags ActivatorFlags = BindingFlags.Instance | BindingFlags.NonPublic;
 
-        private static void InitStaticMethods()
-        {
-            IEnumerable<Type> assemblyTypes;
-            Type wrapperInterface = typeof(IComponentWrapper);
-        
-            //we're putting this here just in case we load assemblies that rely on other assemblies that we don't
-            //reference
-            try
-            {
-                assemblyTypes = wrapperInterface.Assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                assemblyTypes = from type in e.Types
-                    where type is not null
-                    select (Type) type;
-            }
-        
-            assemblyTypes = assemblyTypes.Where(wrapperInterface.IsAssignableFrom).ToList();
-
-            foreach (Type t in assemblyTypes)
-            {
-                RuntimeHelpers.RunClassConstructor(t.TypeHandle);
-            }
-        }
-
         /// <summary>
         /// Creates a new object that implements <see cref="IComponentWrapper"/> with a given type specifying the type
         /// of data the given <see cref="JsonObject"/> is representing.
@@ -238,11 +212,43 @@ namespace AppleSceneEditor.Extensions
             return outGrid;
         }
 
+        /// <summary>
+        /// Gets a <see cref="List{T}"/> which contain <see cref="Type"/> that reference all classes that implement
+        /// <see cref="IComponentWrapper"/>.
+        /// </summary>
+        /// <returns>A <see cref="List{T}"/> that contains all classes that implement <see cref="IComponentWrapper"/>
+        /// </returns>
+        public static List<Type> GetWrapperImplementers()
+        {
+            IEnumerable<Type> assemblyTypes;
+            Type wrapperInterface = typeof(IComponentWrapper);
+        
+            //we're putting this here just in case we load assemblies that rely on other assemblies that we don't
+            //reference
+            try
+            {
+                assemblyTypes = wrapperInterface.Assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                assemblyTypes = from type in e.Types
+                    where type is not null
+                    select (Type) type;
+            }
+        
+            return assemblyTypes.Where(wrapperInterface.IsAssignableFrom).ToList();
+        }
+
         static ComponentWrapperExtensions()
         {
             Implementers = new Dictionary<Type, Type>();
             Prototypes = new Dictionary<string, JsonObject>();
-            InitStaticMethods();
+            
+            //init all static methods if implementers 
+            foreach (Type t in GetWrapperImplementers())
+            {
+                RuntimeHelpers.RunClassConstructor(t.TypeHandle);
+            }
         }
     }
 }
