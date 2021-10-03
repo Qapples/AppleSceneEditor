@@ -32,6 +32,9 @@ namespace AppleSceneEditorTests
         public void ConstructorTest()
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            const BindingFlags staticFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static |
+                                             BindingFlags.FlattenHierarchy;
+            
             IEnumerable<Type> assemblyTypes;
             Type wrapperInterface = typeof(IComponentWrapper);
 
@@ -56,11 +59,13 @@ namespace AppleSceneEditorTests
 
                 bool hasParam = wrapperType?.GetConstructor(flags, null, new[] {typeof(JsonObject)}, null) != null;
                 bool hasDefault = wrapperType?.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
+                bool hasStatic = wrapperType?.GetConstructor(staticFlags, null, Type.EmptyTypes, null) != null;
 
-                Assert.False(!hasParam || !hasDefault,
+                Assert.False(!hasParam || !hasDefault || !hasStatic,
                     $"Type {wrapperType} does NOT have the required constructors!\n" +
                     $"{(!hasParam ? "Missing JsonObject constructor " : "")} " +
-                    $"{(!hasDefault ? "Missing parameterless constructor" : "")}");
+                    $"{(!hasDefault ? "Missing parameterless constructor" : "")}" +
+                    $"{(!hasStatic ? "Missing static constructor" : "")}");
             }
         }
     }
