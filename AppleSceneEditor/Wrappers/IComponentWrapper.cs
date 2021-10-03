@@ -34,11 +34,6 @@ namespace AppleSceneEditor.Wrappers
         /// false.
         /// </summary>
         bool IsEmpty { get; }
-        
-        /// <summary>
-        /// The type of data the wrapper is targeting.
-        /// </summary>
-        Type AssociatedType { get; }
 
         /// <summary>
         /// All classes that implement <see cref="IComponentWrapper"/>. The key a type and the value is the wrapper

@@ -17,10 +17,10 @@ namespace AppleSceneEditor.Wrappers
         public JsonObject? JsonObject { get; set; }
         
         public Panel? UIPanel { get; set; }
-        
+
         public bool IsEmpty { get; }
-        
-        public Type AssociatedType { get; } = typeof(TextureInfo);
+
+        public static readonly Type AssociatedType = typeof(TextureInfo);
 
         private TextureInfoWrapper(JsonObject jsonObject)
         {

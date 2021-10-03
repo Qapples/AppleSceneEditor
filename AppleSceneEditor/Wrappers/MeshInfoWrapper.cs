@@ -20,7 +20,7 @@ namespace AppleSceneEditor.Wrappers
         
         public bool IsEmpty { get; }
 
-        public Type AssociatedType { get; } = typeof(MeshInfo);
+        public static readonly Type AssociatedType = typeof(MeshInfo);
 
         private MeshInfoWrapper(JsonObject jsonObject)
         {
@@ -107,7 +107,7 @@ namespace AppleSceneEditor.Wrappers
                 new("isContentPath", false, prototype, JsonValueKind.False)
             }));
             
-            ComponentWrapperExtensions.Implementers.Add(typeof(MeshInfo), typeof(MeshInfoWrapper));
+            //ComponentWrapperExtensions.Implementers.Add(typeof(MeshInfo), typeof(MeshInfoWrapper));
             ComponentWrapperExtensions.Prototypes.Add(typeof(MeshInfo), prototype);
         }
     }
