@@ -8,7 +8,8 @@ namespace AppleSceneEditor.Wrappers
 {
     /// <summary>
     /// Represents an object that wraps around a <see cref="JsonObject"/> of a specified type and exposes data that
-    /// the user can manipulate through the property editor.
+    /// the user can manipulate through the property editor. WARNING: Any implementers must also implement a public
+    /// static field "AssociatedType" that dictates the type the wrapper is supported to wrap around.
     /// <remarks>In order to create instances, use
     /// <see cref="AppleSceneEditor.Extensions.ComponentWrapperExtensions.CreateFromObject(AppleSerialization.Json.JsonObject)"/>
     /// or <br/>
