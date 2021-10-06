@@ -1,3 +1,4 @@
 MeshInfo "GrappleFightNET5.Scenes.Info.MeshInfo, GrappleFightNET5.Scenes"
 TextureInfo "GrappleFightNET5.Scenes.Info.TextureInfo, GrappleFightNET5.Scenes"
+ScriptInfo "GrappleFightNET5.Scenes.Info.ScriptInfo, GrappleFightNET5.Scenes"
 ValueInfo "AppleSerialization.Info.ValueInfo, AppleSerialization"
