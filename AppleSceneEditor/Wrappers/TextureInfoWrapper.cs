@@ -80,12 +80,8 @@ namespace AppleSceneEditor.Wrappers
         {
             JsonObject prototype = new();
             
-            prototype.Children.Add(new JsonObject("texturePath", prototype, new List<JsonProperty>
-            {
-                new("path", "", prototype, JsonValueKind.String),
-                new("isContentPath", false, prototype, JsonValueKind.False)
-            }));
-            
+            prototype.Properties.Add(new JsonProperty("$type", "TextureInfo", prototype, JsonValueKind.String));
+
             prototype.Children.Add(new JsonObject("texturePath", prototype, new List<JsonProperty>
             {
                 new("path", "", prototype, JsonValueKind.String),
