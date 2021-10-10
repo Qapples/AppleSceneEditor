@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using AppleSceneEditor;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
-using SharpGLTF.Schema2;
 using Xunit;
 
 namespace AppleSceneEditorTests
@@ -64,6 +62,16 @@ namespace AppleSceneEditorTests
                         implementedType == i), (implementedType is not null
                         ? $"type {i} that implements {nameof(IComponentWrapper)} does not add an entry to Implementers! Cannot continue with test."
                         : $"type {i} does not add an entry to prototype!"));
+            }
+        }
+
+        [Fact]
+        public void TypePropertyTest()
+        {
+            foreach (var (type, prototype) in ComponentWrapperExtensions.Prototypes)
+            {
+                Assert.False(prototype.FindProperty("$type") is null, $"prototype of {type} does NOT " +
+                                                                      $"have a $type property!");
             }
         }
 
