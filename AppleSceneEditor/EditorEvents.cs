@@ -103,6 +103,7 @@ namespace AppleSceneEditor
                 return;
             }
 
+            prototype.Parent = _mainPanelHandler.Components.Parent;
             _mainPanelHandler.Components.Add(prototype);
             _mainPanelHandler.RebuildUI();
         }
