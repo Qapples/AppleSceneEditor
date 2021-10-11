@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Text.Json;
 using AppleSerialization.Json;
 using AssetManagementBase.Utility;
-using FontStashSharp;
 using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.File;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor.Extensions
@@ -116,6 +116,42 @@ namespace AppleSceneEditor.Extensions
             };
 
             return spinButton;
+        }
+
+        public static (TextButton dialogButon, TextBox pathBox, FileDialog fileDialog)? CreateFileSelectionWidgets(
+            string filter, Desktop desktop, JsonProperty? property = null)
+        {
+            TextBox pathBox = new()
+            {
+                Readonly = true,
+                HintText = "Path of the file will be shown here",
+                HintTextEnabled = true
+            };
+
+            FileDialog fileDialog = new(FileDialogMode.OpenFile) {Filter = filter};
+
+            fileDialog.Closed += (_, _) =>
+            {
+                if (!fileDialog.Result) return;
+
+                string filePath = fileDialog.FilePath;
+                if (string.IsNullOrEmpty(filePath)) return;
+
+                pathBox.Text = filePath;
+
+                if (property?.ValueKind == JsonValueKind.String)
+                {
+                    property.Value = filePath;
+                }
+            };
+
+            TextButton dialogButton = new()
+            {
+                Text = "Select File..."
+            };
+            dialogButton.Click += (_, _) => fileDialog.ShowModal(desktop);
+
+            return (dialogButton, pathBox, fileDialog);
         }
     }
 }
