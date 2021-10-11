@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
@@ -15,15 +17,16 @@ namespace AppleSceneEditor.Wrappers
         public Panel? UIPanel { get; set; }
 
         public bool IsEmpty { get; }
+        
+        public string Path { get; }
 
         public static readonly Type AssociatedType = typeof(GrappleFightNET5.Scenes.Info.ScriptInfo);
 
-
-        private ScriptInfoWrapper(JsonObject jsonObject)
+        private ScriptInfoWrapper(JsonObject jsonObject, Desktop desktop)
         {
-            (JsonObject, IsEmpty) = (jsonObject, false);
+            (JsonObject, IsEmpty, Path) = (jsonObject, false, "");
 
-            List<JsonProperty>? foundProperties = jsonObject.VerifyProperties(new[] {"ScriptFile"});
+            List<JsonProperty>? foundProperties = jsonObject.VerifyProperties(new[] {"name"});
 
             if (foundProperties is null)
             {
@@ -31,8 +34,22 @@ namespace AppleSceneEditor.Wrappers
                 return;
             }
 
-            var (meshIndexProp, skinIndexProp, meshPathProp, isContentPathProp) = (foundProperties[0],
-                foundProperties[1], foundProperties[2], foundProperties[3]);
+            JsonProperty nameProp = foundProperties.First();
+            TextBox? namePropEditor = ValueEditorFactory.CreateStringEditor(nameProp);
+
+            var (dialogButton, pathBox, fileDialog) =
+                ValueEditorFactory.CreateFileSelectionWidgets("", desktop, nameProp);
+            
+            fileDialog.Closed += (_, _) =>
+            {
+                string? fileName = System.IO.Path.GetFileName(nameProp.Value as string);
+                fileName = fileName?.Remove(fileName.IndexOf('.'));
+                if (fileName is null) return;
+                
+                nameProp.Value = System.IO.Path.GetFileName(nameProp.Value as string);
+
+                if (namePropEditor is not null) namePropEditor.Text = nameProp.Value as string;
+            };
 
             Panel widgetsPanel = new()
             {
@@ -46,32 +63,18 @@ namespace AppleSceneEditor.Wrappers
                             {
                                 Widgets =
                                 {
-                                    new Label {Text = "meshIndex: "},
-                                    ValueEditorFactory.CreateNumericEditor(meshIndexProp)
+                                    new Label {Text = "Name: "},
+                                    namePropEditor
                                 }
                             },
                             new HorizontalStackPanel
                             {
+                                Spacing = 4,
                                 Widgets =
                                 {
-                                    new Label {Text = "skinIndex: "},
-                                    ValueEditorFactory.CreateNumericEditor(skinIndexProp)
-                                }
-                            },
-                            new HorizontalStackPanel
-                            {
-                                Widgets =
-                                {
-                                    new Label {Text = "path: "},
-                                    ValueEditorFactory.CreateStringEditor(meshPathProp)
-                                }
-                            },
-                            new HorizontalStackPanel
-                            {
-                                Widgets =
-                                {
-                                    new Label {Text = "isContentPath: "},
-                                    ValueEditorFactory.CreateBooleanEditor(isContentPathProp)
+                                    new Label {Text = "Script Path: "},
+                                    pathBox,
+                                    dialogButton,
                                 }
                             }
                         }
@@ -85,7 +88,7 @@ namespace AppleSceneEditor.Wrappers
 
         private ScriptInfoWrapper()
         {
-            (JsonObject, UIPanel, IsEmpty) = (null, null, false);
+            (JsonObject, UIPanel, IsEmpty, Path) = (null, null, false, "");
         }
 
         static ScriptInfoWrapper()
@@ -93,7 +96,7 @@ namespace AppleSceneEditor.Wrappers
             JsonObject prototype = new();
             
             prototype.Properties.Add(new JsonProperty("$type", "ScriptInfo", prototype, JsonValueKind.String));
-            prototype.Properties.Add(new JsonProperty(""));
+            prototype.Properties.Add(new JsonProperty("name", "", prototype, JsonValueKind.String));
             
             ComponentWrapperExtensions.Implementers.Add(AssociatedType, typeof(ScriptInfoWrapper));
             ComponentWrapperExtensions.Prototypes.Add(AssociatedType, prototype);
