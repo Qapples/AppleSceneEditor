@@ -43,7 +43,6 @@ namespace AppleSceneEditor.Extensions
             TextBox textBox = new()
             {
                 Text = changeName ? property.Name : property.Value as string,
-                MaxWidth = 50,
                 StyleName = "small"
             };
 
@@ -70,7 +69,6 @@ namespace AppleSceneEditor.Extensions
             TextBox textBox = new()
             {
                 Text = name.Name,
-                MaxWidth = 50
             };
 
             textBox.TextChanged += (s, e) =>
@@ -118,13 +116,13 @@ namespace AppleSceneEditor.Extensions
             return spinButton;
         }
 
-        public static (TextButton dialogButon, TextBox pathBox, FileDialog fileDialog) CreateFileSelectionWidgets(
+        public static (TextButton dialogButton, TextBox pathBox, FileDialog fileDialog) CreateFileSelectionWidgets(
             string filter, Desktop desktop, JsonProperty? property = null)
         {
             TextBox pathBox = new()
             {
                 Readonly = true,
-                HintText = "Path of the file will be shown here",
+                HintText = "File Path",
                 HintTextEnabled = true
             };
 
