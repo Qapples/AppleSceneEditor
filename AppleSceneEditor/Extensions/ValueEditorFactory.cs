@@ -118,7 +118,7 @@ namespace AppleSceneEditor.Extensions
             return spinButton;
         }
 
-        public static (TextButton dialogButon, TextBox pathBox, FileDialog fileDialog)? CreateFileSelectionWidgets(
+        public static (TextButton dialogButon, TextBox pathBox, FileDialog fileDialog) CreateFileSelectionWidgets(
             string filter, Desktop desktop, JsonProperty? property = null)
         {
             TextBox pathBox = new()
