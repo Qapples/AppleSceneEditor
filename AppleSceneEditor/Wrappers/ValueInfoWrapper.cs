@@ -22,7 +22,7 @@ namespace AppleSceneEditor.Wrappers
 
         public static readonly Type AssociatedType = typeof(ValueInfo);
 
-        private ValueInfoWrapper(JsonObject jsonObject)
+        private ValueInfoWrapper(JsonObject jsonObject, Desktop desktop)
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
 

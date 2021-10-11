@@ -45,8 +45,8 @@ namespace AppleSceneEditor.Wrappers
                 string? fileName = System.IO.Path.GetFileName(nameProp.Value as string);
                 fileName = fileName?.Remove(fileName.IndexOf('.'));
                 if (fileName is null) return;
-                
-                nameProp.Value = System.IO.Path.GetFileName(nameProp.Value as string);
+
+                nameProp.Value = fileName;
 
                 if (namePropEditor is not null) namePropEditor.Text = nameProp.Value as string;
             };

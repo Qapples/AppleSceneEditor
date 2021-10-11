@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
+
 using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.Wrappers
@@ -11,9 +12,9 @@ namespace AppleSceneEditor.Wrappers
     /// the user can manipulate through the property editor. WARNING: Any implementers must also implement a public
     /// static field "AssociatedType" that dictates the type the wrapper is supported to wrap around.
     /// <remarks>In order to create instances, use
-    /// <see cref="AppleSceneEditor.Extensions.ComponentWrapperExtensions.CreateFromObject(AppleSerialization.Json.JsonObject)"/>
+    /// <see cref="AppleSceneEditor.Extensions.ComponentWrapperExtensions.CreateFromObject(AppleSerialization.Json.JsonObject, Myra.Graphics2D.UI.Desktop)"/>
     /// or <br/>
-    /// <see cref="ComponentWrapperExtensions.CreateFromObject(AppleSerialization.Json.JsonObject,System.Type?)"/>.
+    /// <see cref="ComponentWrapperExtensions.CreateFromObject(AppleSerialization.Json.JsonObject, Myra.Graphics2D.UI.Desktop, System.Type?)"/>.
     /// <br/> Do not attempt to use constructors.
     /// </remarks>
     /// </summary>

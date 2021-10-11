@@ -22,7 +22,7 @@ namespace AppleSceneEditor.Wrappers
 
         public static readonly Type AssociatedType = typeof(MeshInfo);
 
-        private MeshInfoWrapper(JsonObject jsonObject)
+        private MeshInfoWrapper(JsonObject jsonObject, Desktop desktop)
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
 

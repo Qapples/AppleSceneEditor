@@ -7,6 +7,7 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
+using Myra.Graphics2D.UI;
 using Xunit;
 
 namespace AppleSceneEditorTests
@@ -119,13 +120,13 @@ namespace AppleSceneEditorTests
             {
                 if (wrapperType == typeof(IComponentWrapper)) continue;
 
-                bool hasParam = wrapperType?.GetConstructor(flags, null, new[] {typeof(JsonObject)}, null) != null;
+                bool hasParam = wrapperType?.GetConstructor(flags, null, new[] {typeof(JsonObject), typeof(Desktop)}, null) != null;
                 bool hasDefault = wrapperType?.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
                 bool hasStatic = wrapperType?.GetConstructor(staticFlags, null, Type.EmptyTypes, null) != null;
 
                 Assert.False(!hasParam || !hasDefault || !hasStatic,
                     $"Type {wrapperType} does NOT have the required constructors!\n" +
-                    $"{(!hasParam ? "Missing JsonObject constructor " : "")} " +
+                    $"{(!hasParam ? "Missing JsonObject & Desktop constructor " : "")} " +
                     $"{(!hasDefault ? "Missing parameterless constructor" : "")}" +
                     $"{(!hasStatic ? "Missing static constructor" : "")}");
             }

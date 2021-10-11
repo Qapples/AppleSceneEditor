@@ -22,7 +22,7 @@ namespace AppleSceneEditor.Wrappers
 
         public static readonly Type AssociatedType = typeof(TextureInfo);
 
-        private TextureInfoWrapper(JsonObject jsonObject)
+        private TextureInfoWrapper(JsonObject jsonObject, Desktop desktop)
         {
             (JsonObject, IsEmpty) = (jsonObject, false);
 

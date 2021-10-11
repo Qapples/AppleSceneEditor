@@ -8,6 +8,7 @@ using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.File;
 using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.Extensions
@@ -37,6 +38,8 @@ namespace AppleSceneEditor.Extensions
         /// </summary>
         /// <param name="jsonObject">The <see cref="JsonObject"/> instance that contains the data the wrapper will work
         /// with.</param>
+        /// <param name="desktop"><see cref="Desktop"/> instance that will allow the <see cref="IComponentWrapper"/> to
+        /// show <see cref="Window"/> and <see cref="FileDialog"/> instances.</param>
         /// <param name="type">The <see cref="Type"/> that <see cref="jsonObject"/> has.</param>
         /// <returns>If there is a wrapper class associated with the specified type, then a new
         /// <see cref="IComponentWrapper"/> instance referencing that wrapper class is returned. Otherwise, OR if the
@@ -44,7 +47,7 @@ namespace AppleSceneEditor.Extensions
         /// returned.</returns>
         /// <remarks>This method will attempt to create a <see cref="IComponentWrapper"/> instance regardless if the
         /// provided <see cref="JsonObject"/> has a type identifier that matches that of type parameter.</remarks>
-        public static IComponentWrapper? CreateFromObject(JsonObject jsonObject, Type? type)
+        public static IComponentWrapper? CreateFromObject(JsonObject jsonObject, Desktop desktop, Type? type)
         {
             if (type is null) return null;
 
@@ -66,7 +69,7 @@ namespace AppleSceneEditor.Extensions
             }
 
             IComponentWrapper? outWrapper = Activator.CreateInstance(wrapperType, bindingAttr: ActivatorFlags,
-                binder: null, args: new[] {jsonObject}, null) as IComponentWrapper;
+                binder: null, args: new object[] {jsonObject, desktop}, null) as IComponentWrapper;
 
             //outWrapper?.IsEmpty could be either true, false or null. Return null if it is true or null.
             return outWrapper?.IsEmpty != false ? null : outWrapper;
@@ -78,17 +81,19 @@ namespace AppleSceneEditor.Extensions
         /// </summary>
         /// <param name="jsonObject">The <see cref="JsonObject"/> instance that contains the data the wrapper will work
         /// with.</param>
+        /// <param name="desktop"><see cref="Desktop"/> instance that will allow the <see cref="IComponentWrapper"/> to
+        /// show <see cref="Window"/> and <see cref="FileDialog"/> instances.</param>
         /// <returns>If a type was found in the provided <see cref="JsonObject"/> and if there is a wrapper
         /// class associated with that type, then a new <see cref="IComponentWrapper"/> instance referencing that
         /// wrapper class is returned. Otherwise, OR if the returned wrapper instance has
         /// <see cref="IComponentWrapper.IsEmpty"/> set to true, then null is returned.</returns>
-        public static IComponentWrapper? CreateFromObject(JsonObject jsonObject)
+        public static IComponentWrapper? CreateFromObject(JsonObject jsonObject, Desktop desktop)
         {
             JsonProperty? typeProp = jsonObject.FindProperty(AppleSerialization.Environment.TypeIdentifier);
 
             return typeProp?.Value is not string value
                 ? null
-                : CreateFromObject(jsonObject, ConverterHelper.GetTypeFromString(value));
+                : CreateFromObject(jsonObject, desktop, ConverterHelper.GetTypeFromString(value));
         }
 
         /// <summary>
