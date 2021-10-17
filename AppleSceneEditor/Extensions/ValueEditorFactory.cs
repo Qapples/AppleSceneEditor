@@ -1,11 +1,16 @@
 using System;
 using System.Diagnostics;
+using System.Numerics;
+using System.Text;
 using System.Text.Json;
+using AppleSerialization;
 using AppleSerialization.Json;
 using AssetManagementBase.Utility;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
+using Myra.Utility;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace AppleSceneEditor.Extensions
 {
@@ -150,6 +155,58 @@ namespace AppleSceneEditor.Extensions
             dialogButton.Click += (_, _) => fileDialog.ShowModal(desktop);
 
             return (dialogButton, pathBox, fileDialog);
+        }
+
+        public static HorizontalStackPanel? CreateVector3Editor(JsonProperty property)
+        {
+            const string methodName = nameof(ValueEditorFactory) + "." + nameof(CreateVector3Editor);
+            
+            var (xLabel, yLabel, zLabel) =
+                (new Label {Text = " X: "}, new Label {Text = " Y: "}, new Label {Text = " Z: "});
+            var (xBox, yBox, zBox) = (new TextBox(), new TextBox(), new TextBox());
+
+            if (property.ValueKind != JsonValueKind.String || property.Value is not string propertyValue)
+            {
+                Debug.WriteLine($"{methodName}: property's value is NOT a string! Returning null.");
+                return null;
+            }
+
+            if (!ParseHelper.TryParseVector3(propertyValue, out Vector3 value))
+            {
+                Debug.WriteLine($"{methodName}: cannot parse property as vector3! Returning null.");
+                return null;
+            }
+
+            (xBox.Text, yBox.Text, zBox.Text) = (value.X.ToString(), value.Y.ToString(), value.Z.ToString());
+
+            void TextChangeMethod(object? boxObj, ValueChangedEventArgs<string> args, JsonProperty tempProperty)
+            {
+                if (boxObj is not TextBox box) return;
+
+                if (!float.TryParse(args.NewValue, out _))
+                {
+                    box.Text = args.OldValue;
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(args.NewValue)) box.Text = "0";
+
+                tempProperty.Value = $"{xBox.Text} {yBox.Text} {zBox.Text}";
+            }
+
+            xBox.TextChanged += (o, a) => TextChangeMethod(o, a, property);
+            yBox.TextChanged += (o, a) => TextChangeMethod(o, a, property);
+            zBox.TextChanged += (o, a) => TextChangeMethod(o, a, property);
+
+            return new HorizontalStackPanel
+            {
+                Widgets =
+                {
+                    xLabel, xBox,
+                    yLabel, yBox,
+                    zLabel, zBox
+                }
+            };
         }
     }
 }
