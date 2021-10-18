@@ -3,15 +3,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Factories;
 using AppleSceneEditor.Wrappers;
+using AppleSerialization;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
 using AssetManagementBase.Utility;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
 using Myra.Graphics2D;
+using Myra.Graphics2D.UI.Styles;
+using BindingFlags = System.Reflection.BindingFlags;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 
@@ -27,11 +33,7 @@ namespace AppleSceneEditor
         private const int MaxTextLength = 25;
         private const int DefaultTextBoxFontSize = 18;
         private const int IndentationIncrement = 8;
-
-#nullable disable
-        private Window _selectElemTypeWindow;
-        private Window _selectArrElemTypeWindow;
-#nullable enable
+        private const string ComponentGridId = "ComponentGrid";
 
         private JsonObject _rootObject;
         
@@ -62,8 +64,6 @@ namespace AppleSceneEditor
             Wrappers = new List<IComponentWrapper>();
             
             (Desktop, PropertyStackPanel, RootObject) = (desktop, propertyStackPanel, rootObject);
-            
-            (_selectElemTypeWindow, _selectArrElemTypeWindow) = (new Window(), new Window());
         }
         
         //------------------
@@ -121,6 +121,146 @@ namespace AppleSceneEditor
                 PropertyStackPanel.AddChild(wrapper.UIPanel);
             }
         }
+        
+        private static Grid CreateComponentGrid(JsonObject obj, Panel widgetsPanel, string header)
+        {
+            widgetsPanel.GridRow = 1;
+            widgetsPanel.GridColumn = 1;
+
+            Grid outGrid = new()
+            {
+                ColumnSpacing = 4,
+                RowSpacing = 4,
+                Id = ComponentGridId
+            };
+            
+            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
+            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Fill));
+            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
+            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
+            
+            ImageButton mark = new(null)
+            {
+                Toggleable = true,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            
+            mark.PressedChanged += (_, _) =>
+            {
+                if (mark.IsPressed)
+                {
+                    outGrid.AddChild(widgetsPanel);
+                }
+                else
+                {
+                    outGrid.RemoveChild(widgetsPanel);
+                }
+            };
+            
+            mark.ApplyImageButtonStyle(Stylesheet.Current.TreeStyle.MarkStyle);
+            outGrid.AddChild(mark);
+
+            Label label = new(null)
+            {
+                Text = header,
+                GridColumn = 1
+            };
+            
+            label.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
+            outGrid.AddChild(label);
+
+            TextButton removeButton = new()
+            {
+                Text = "-",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                GridColumn = 1
+            };
+
+            removeButton.Click += (_, _) =>
+            {
+                JsonArray? componentArray = obj.Parent?.FindArray("components");
+                componentArray?.Remove(obj);
+            };
+
+            outGrid.AddChild(removeButton);
+
+            return outGrid;
+        }
+
+        private static Panel? CreateComponentWidgets(JsonObject obj, Desktop desktop)
+        {
+            const string methodName = nameof(ComponentPanelHandler) + "." + nameof(CreateComponentWidgets);
+
+            VerticalStackPanel stackPanel = new();
+
+            JsonProperty? typeProp = obj.FindProperty("$type");
+            if (typeProp?.Value is null || typeProp.ValueKind != JsonValueKind.String)
+            {
+                Debug.WriteLine($"{methodName}: can't find valid string $type property in JsonObject! Returning null.");
+                return null;
+            }
+
+            Type? objType = ConverterHelper.GetTypeFromString((string) typeProp.Value);
+            if (objType is null)
+            {
+                Debug.WriteLine($"{methodName}: can't find type of name ${typeProp.Value as string}. Returning null.");
+                return null;
+            }
+
+            ParameterInfo[]? paramsInfo = GetConstructorParamTypes(objType);
+            if (paramsInfo is null)
+            {
+                Debug.WriteLine($"{methodName}: can't find parameter with JsonConstructor attribute! Returning null.");
+                return null;
+            }
+
+            foreach (var (property, type) in from property in obj.Properties
+                from info in paramsInfo
+                where property.Name == info.Name
+                select (property, info.ParameterType))
+            {
+                switch (property.ValueKind)
+                {
+                    case JsonValueKind.Number:
+                        stackPanel.AddChild(ValueEditorFactory.CreateNumericEditor(property));
+                        break;
+                    case JsonValueKind.False or JsonValueKind.True:
+                        stackPanel.AddChild(ValueEditorFactory.CreateBooleanEditor(property));
+                        break;
+                    case JsonValueKind.String:
+                        if (type == typeof(Vector2))
+                        {
+                            stackPanel.AddChild(
+                                ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector2, property));
+                        }
+                        else if (type == typeof(Vector3))
+                        {
+                            string[]? valueNames =
+                                property.Name?.Equals("rotation", StringComparison.CurrentCultureIgnoreCase) == true
+                                    ? new[] {"yaw", "pitch", "roll"}
+                                    : null;
+                            
+                            stackPanel.AddChild(
+                                ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector3, property,
+                                    valueNames));
+                        }
+                        else if (type == typeof(Vector4))
+                        {
+                            stackPanel.AddChild(
+                                ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector4, property));
+                        }
+                        
+                        break;
+                }
+            }
+
+            return new Panel {Widgets = {stackPanel}};
+        }
+
+        private static ParameterInfo[]? GetConstructorParamTypes(Type type) => (from ctor in type.GetConstructors()
+            where ctor.GetCustomAttribute(typeof(JsonConstructorAttribute)) is not null
+            select ctor).FirstOrDefault()?.GetParameters();
         
         public sealed class ComponentsNotFoundException : Exception
         {
