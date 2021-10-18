@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Numerics;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using AppleSerialization;
@@ -10,9 +12,8 @@ using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
 using Myra.Utility;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
-using Vector3 = Microsoft.Xna.Framework.Vector3;
 
-namespace AppleSceneEditor.Extensions
+namespace AppleSceneEditor.Factories
 {
     //TODO: Add docs. Not super important but do it at some point.
     public static class ValueEditorFactory
@@ -157,13 +158,30 @@ namespace AppleSceneEditor.Extensions
             return (dialogButton, pathBox, fileDialog);
         }
 
-        public static HorizontalStackPanel? CreateVector3Editor(JsonProperty property)
+        public static HorizontalStackPanel? CreateVectorEditor(in VectorType vectorType, JsonProperty property,
+            IList<string>? valueNames = null)
         {
-            const string methodName = nameof(ValueEditorFactory) + "." + nameof(CreateVector3Editor);
-            
-            var (xLabel, yLabel, zLabel) =
-                (new Label {Text = " X: "}, new Label {Text = " Y: "}, new Label {Text = " Z: "});
-            var (xBox, yBox, zBox) = (new TextBox(), new TextBox(), new TextBox());
+            const string methodName = nameof(ValueEditorFactory) + "." + nameof(CreateVectorEditor);
+
+            //init valueNames
+            int vectorCount = (int) vectorType;
+
+            if (valueNames is null)
+            {
+                valueNames = new string[vectorCount];
+                (valueNames[0], valueNames[1]) = ("X", "Y");
+
+                if (vectorCount > 2) valueNames[2] = "Z";
+                if (vectorCount > 3) valueNames[3] = "W";
+            }
+
+            if (valueNames.Count < vectorCount)
+            {
+                Debug.WriteLine($"{methodName}: the amount of provided value names is less than it should be! " +
+                                $"valueNames has a count of {valueNames.Count} when it should be atleast {vectorCount}. " +
+                                "Returning null.");
+                return null;
+            }
 
             if (property.ValueKind != JsonValueKind.String || property.Value is not string propertyValue)
             {
@@ -171,15 +189,16 @@ namespace AppleSceneEditor.Extensions
                 return null;
             }
 
-            if (!ParseHelper.TryParseVector3(propertyValue, out Vector3 value))
+            Span<float> values = stackalloc float[vectorCount];
+            if (ParseHelper.TryParseVector(in propertyValue, ref values))
             {
-                Debug.WriteLine($"{methodName}: cannot parse property as vector3! Returning null.");
+                Debug.WriteLine($"{methodName}: can't parse property as space seperated vector float values! " +
+                                $"Returning null.");
                 return null;
             }
 
-            (xBox.Text, yBox.Text, zBox.Text) = (value.X.ToString(), value.Y.ToString(), value.Z.ToString());
-
-            void TextChangeMethod(object? boxObj, ValueChangedEventArgs<string> args, JsonProperty tempProperty)
+            void TextChangedMethod(object? boxObj, ValueChangedEventArgs<string> args, JsonProperty tempProperty,
+                TextBox[] otherBoxes)
             {
                 if (boxObj is not TextBox box) return;
 
@@ -189,24 +208,41 @@ namespace AppleSceneEditor.Extensions
                     return;
                 }
 
-                if (string.IsNullOrEmpty(args.NewValue)) box.Text = "0";
+                if (string.IsNullOrEmpty(args.NewValue))
+                {
+                    box.Text = "0";
 
-                tempProperty.Value = $"{xBox.Text} {yBox.Text} {zBox.Text}";
+                    box.CursorPosition = 1;
+                }
+
+                StringBuilder valueBuilder = new();
+                foreach (TextBox otherBox in otherBoxes) valueBuilder.Append(otherBox.Text + " ");
+                valueBuilder.Remove(valueBuilder.Length - 1, 1);
+
+                tempProperty.Value = valueBuilder.ToString();
             }
 
-            xBox.TextChanged += (o, a) => TextChangeMethod(o, a, property);
-            yBox.TextChanged += (o, a) => TextChangeMethod(o, a, property);
-            zBox.TextChanged += (o, a) => TextChangeMethod(o, a, property);
-
-            return new HorizontalStackPanel
+            Label[] labels = valueNames.Select(s => new Label {Text = s}).ToArray();
+            TextBox[] boxes = Enumerable.Repeat(new TextBox(), vectorCount).ToArray();
+            HorizontalStackPanel outStackPanel = new();
+            
+            for (int i = 0; i < vectorCount; i++)
             {
-                Widgets =
-                {
-                    xLabel, xBox,
-                    yLabel, yBox,
-                    zLabel, zBox
-                }
-            };
+                boxes[i].Text = values[i].ToString();
+                boxes[i].TextChanged += (o, a) => TextChangedMethod(o, a, property, boxes);
+
+                outStackPanel.AddChild(labels[i]);
+                outStackPanel.AddChild(boxes[i]);
+            }
+
+            return outStackPanel;
+        }
+
+        public enum VectorType
+        {
+            Vector2 = 2,
+            Vector3 = 3,
+            Vector4 = 4
         }
     }
 }

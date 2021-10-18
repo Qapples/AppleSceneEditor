@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Factories;
 using AppleSerialization.Json;
 using GrappleFightNET5.Scenes.Info;
 using Myra.Graphics2D.UI;
@@ -48,7 +49,7 @@ namespace AppleSceneEditor.Wrappers
                                 Widgets =
                                 {
                                     new Label {Text = "position:"},
-                                    ValueEditorFactory.CreateVector3Editor(positionProp),
+                                    //ValueEditorFactory.CreateVectorEditor(positionProp),
                                 }
                             },
                             new HorizontalStackPanel
@@ -56,7 +57,7 @@ namespace AppleSceneEditor.Wrappers
                                 Widgets =
                                 {
                                     new Label {Text = "halfExtent:"},
-                                    ValueEditorFactory.CreateVector3Editor(halfExtentProp),
+                                    //ValueEditorFactory.CreateVectorEditor(halfExtentProp),
                                 }
                             },
                             new HorizontalStackPanel
@@ -64,7 +65,7 @@ namespace AppleSceneEditor.Wrappers
                                 Widgets =
                                 {
                                     new Label {Text = "rotation:"},
-                                    ValueEditorFactory.CreateVector3Editor(rotationProp),
+                                    //ValueEditorFactory.CreateVectorEditor(rotationProp),
                                 }
                             },
                         }

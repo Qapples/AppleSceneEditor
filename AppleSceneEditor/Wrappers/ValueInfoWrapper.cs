@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Factories;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;

@@ -2,11 +2,19 @@ using System;
 using System.Collections.Generic;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
-
 using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.Wrappers
 {
+    /*
+     * TODO: It's already kinda too late for this but the way we handle ComponentWrappers is kinda sucky.
+     * Tons of boilerplate. Reliance on tests (not an inherently bad thing but it's still quite iffy). Overall bad.
+     * Not terrible, still usable, but it can be a lot better. Not entirly sure  what to do since I'm going to have to
+     * do quite a bit of refactoring in order to fix this. But, if I continue on like this, it might be too late to fix
+     * it where it can cause much more issues in the future. For now I just want to focus on making a game though, it'll
+     * have to be for now.
+     */
+    
     /// <summary>
     /// Represents an object that wraps around a <see cref="JsonObject"/> of a specified type and exposes data that
     /// the user can manipulate through the property editor. WARNING: Any implementers must also implement a public
