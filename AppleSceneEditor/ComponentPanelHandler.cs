@@ -115,13 +115,26 @@ namespace AppleSceneEditor
         {
             foreach (JsonObject jsonObj in Components)
             {
-                IComponentWrapper? wrapper = ComponentWrapperExtensions.CreateFromObject(jsonObj, Desktop);
-                if (wrapper is null) continue;
+                // IComponentWrapper? wrapper = ComponentWrapperExtensions.CreateFromObject(jsonObj, Desktop);
+                // if (wrapper is null) continue;
+                //
+                // PropertyStackPanel.AddChild(wrapper.UIPanel);
 
-                PropertyStackPanel.AddChild(wrapper.UIPanel);
+                Panel? widgets = CreateComponentWidgets(jsonObj, Desktop);
+                if (widgets is null) continue;
+
+                //GetHeader should not return null here since $type is verified in CreateComponentWidgets
+                PropertyStackPanel.AddChild(CreateComponentGrid(jsonObj, widgets, GetHeader(jsonObj)!));
             }
         }
         
+        private static string? GetHeader(JsonObject obj)
+        {
+            string? name = obj.FindProperty("$type")?.Value as string;
+
+            return name;
+        }
+
         private static Grid CreateComponentGrid(JsonObject obj, Panel widgetsPanel, string header)
         {
             widgetsPanel.GridRow = 1;

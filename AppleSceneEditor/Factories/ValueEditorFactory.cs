@@ -166,6 +166,7 @@ namespace AppleSceneEditor.Factories
             //init valueNames
             int vectorCount = (int) vectorType;
 
+            //Set valueNames to X, Y, Z, or W if is not set to (depends on the vectorType)
             if (valueNames is null)
             {
                 valueNames = new string[vectorCount];
@@ -175,6 +176,7 @@ namespace AppleSceneEditor.Factories
                 if (vectorCount > 3) valueNames[3] = "W";
             }
 
+            //check for valid values
             if (valueNames.Count < vectorCount)
             {
                 Debug.WriteLine($"{methodName}: the amount of provided value names is less than it should be! " +
@@ -190,13 +192,14 @@ namespace AppleSceneEditor.Factories
             }
 
             Span<float> values = stackalloc float[vectorCount];
-            if (ParseHelper.TryParseVector(in propertyValue, ref values))
+            if (!ParseHelper.TryParseVector(in propertyValue, ref values))
             {
                 Debug.WriteLine($"{methodName}: can't parse property as space seperated vector float values! " +
                                 $"Returning null.");
                 return null;
             }
-
+            
+            //this method changes the data in the JsonProperty according to the data the user enters in the UI.
             void TextChangedMethod(object? boxObj, ValueChangedEventArgs<string> args, JsonProperty tempProperty,
                 TextBox[] otherBoxes)
             {
@@ -222,14 +225,21 @@ namespace AppleSceneEditor.Factories
                 tempProperty.Value = valueBuilder.ToString();
             }
 
-            Label[] labels = valueNames.Select(s => new Label {Text = s}).ToArray();
-            TextBox[] boxes = Enumerable.Repeat(new TextBox(), vectorCount).ToArray();
-            HorizontalStackPanel outStackPanel = new();
-            
+            Label[] labels = valueNames.Select(s => new Label {Text = $"{s}: "}).ToArray();
+            TextBox[] boxes = new TextBox[vectorCount];
+            HorizontalStackPanel outStackPanel = new() {Widgets = {new Label {Text = $"{property.Name}: "}}};
+
+            //add UI elements to the outgoing stack panel
             for (int i = 0; i < vectorCount; i++)
             {
-                boxes[i].Text = values[i].ToString();
+                boxes[i] = new TextBox {Text = values[i].ToString()};
                 boxes[i].TextChanged += (o, a) => TextChangedMethod(o, a, property, boxes);
+
+                //ensure that there is a space between each value
+                if (i > 0)
+                {
+                    labels[i].Text = " " + labels[i].Text;
+                }
 
                 outStackPanel.AddChild(labels[i]);
                 outStackPanel.AddChild(boxes[i]);
