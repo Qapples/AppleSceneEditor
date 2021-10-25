@@ -12,12 +12,9 @@ using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
-using AssetManagementBase.Utility;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
-using Myra.Graphics2D;
 using Myra.Graphics2D.UI.Styles;
-using BindingFlags = System.Reflection.BindingFlags;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 
@@ -201,75 +198,122 @@ namespace AppleSceneEditor
             return outGrid;
         }
 
-        private static Panel? CreateComponentWidgets(JsonObject obj, Desktop desktop)
+        private static Panel? CreateComponentWidgets(JsonObject obj, Desktop desktop, Type? objectType = null)
         {
             const string methodName = nameof(ComponentPanelHandler) + "." + nameof(CreateComponentWidgets);
 
+            //if there is no objectType provided it can be safe to assume that there is no $type property in the object
+            //which is useful to know later down when we place separators between elements (properties, children, arrays)
+            bool typeProvided = objectType is not null;
             VerticalStackPanel stackPanel = new();
 
-            JsonProperty? typeProp = obj.FindProperty("$type");
-            if (typeProp?.Value is null || typeProp.ValueKind != JsonValueKind.String)
+            //if a type is not specified for the object in the parameters, try to find it via the $type property.
+            if (objectType is null)
             {
-                Debug.WriteLine($"{methodName}: can't find valid string $type property in JsonObject! Returning null.");
-                return null;
+                JsonProperty? typeProp = obj.FindProperty("$type");
+                if (typeProp?.Value is null || typeProp.ValueKind != JsonValueKind.String)
+                {
+                    Debug.WriteLine(
+                        $"{methodName}: can't find valid string $type property in JsonObject! Returning null.");
+                    return null;
+                }
+
+                objectType = ConverterHelper.GetTypeFromString((string) typeProp.Value);
+                if (objectType is null)
+                {
+                    Debug.WriteLine(
+                        $"{methodName}: can't find type of name ${typeProp.Value as string}. Returning null.");
+                    return null;
+                }
             }
 
-            Type? objType = ConverterHelper.GetTypeFromString((string) typeProp.Value);
-            if (objType is null)
-            {
-                Debug.WriteLine($"{methodName}: can't find type of name ${typeProp.Value as string}. Returning null.");
-                return null;
-            }
-
-            ParameterInfo[]? paramsInfo = GetConstructorParamTypes(objType);
+            ParameterInfo[]? paramsInfo = GetConstructorParamTypes(objectType);
             if (paramsInfo is null)
             {
                 Debug.WriteLine($"{methodName}: can't find parameter with JsonConstructor attribute! Returning null.");
                 return null;
             }
-
+            
+            //hasProp is weird. $type is for the editor only for getting the type and we are not going to show it to
+            //the user. these bools will be used to determine when to place a separator, and as to avoid placing a
+            //separator after nothing, we must account for whenever or not we have $type.
+            bool hasProp = obj.Properties.Count > (typeProvided ? 0 : 1);
+            var (hasChild, hasArray) = (obj.Children.Count > 0, obj.Arrays.Count > 0);
+            
+            //properties to stack panel
             foreach (var (property, type) in from property in obj.Properties
                 from info in paramsInfo
                 where property.Name == info.Name
                 select (property, info.ParameterType))
             {
-                switch (property.ValueKind)
-                {
-                    case JsonValueKind.Number:
-                        stackPanel.AddChild(ValueEditorFactory.CreateNumericEditor(property));
-                        break;
-                    case JsonValueKind.False or JsonValueKind.True:
-                        stackPanel.AddChild(ValueEditorFactory.CreateBooleanEditor(property));
-                        break;
-                    case JsonValueKind.String:
-                        if (type == typeof(Vector2))
-                        {
-                            stackPanel.AddChild(
-                                ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector2, property));
-                        }
-                        else if (type == typeof(Vector3))
-                        {
-                            string[]? valueNames =
-                                property.Name?.Equals("rotation", StringComparison.CurrentCultureIgnoreCase) == true
-                                    ? new[] {"yaw", "pitch", "roll"}
-                                    : null;
-                            
-                            stackPanel.AddChild(
-                                ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector3, property,
-                                    valueNames));
-                        }
-                        else if (type == typeof(Vector4))
-                        {
-                            stackPanel.AddChild(
-                                ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector4, property));
-                        }
-                        
-                        break;
-                }
+                stackPanel.AddChild(GenerateWidgetFromProperty(property, type));
             }
+
+            if (hasChild && hasProp) stackPanel.AddChild(new Label());
+
+            //children/objects to stack panel
+            foreach (var (child, type) in from child in obj.Children
+                from info in paramsInfo
+                where child.Name == info.Name
+                select (child, info.ParameterType))
+            {
+                stackPanel.AddChild(CreateComponentWidgets(child, desktop, type));
+            }
+
+            if (hasArray && (hasChild || hasProp)) stackPanel.AddChild(new Label());
+
+            //arrays to stack panel
+            //TODO: Add support for JsonArrays. Not many components use arrays, so not a huge issue for now.
 
             return new Panel {Widgets = {stackPanel}};
         }
+
+        private static Widget? GenerateWidgetFromProperty(JsonProperty property, Type type)
+        {
+            const string methodName = nameof(ComponentPanelHandler) + "." + nameof(GenerateWidgetFromProperty);
+            
+            switch (property.ValueKind)
+            {
+                case JsonValueKind.Number:
+                    return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateNumericEditor(property));
+                case JsonValueKind.False or JsonValueKind.True:
+                    return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateBooleanEditor(property));
+                case JsonValueKind.String:
+                    if (type == typeof(Vector2))
+                    {
+                        return ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector2, property);
+                    }
+                    else if (type == typeof(Vector3))
+                    {
+                        string[]? valueNames =
+                            property.Name?.Equals("rotation", StringComparison.CurrentCultureIgnoreCase) == true
+                                ? new[] {"yaw", "pitch", "roll"}
+                                : null;
+
+                        return ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector3, property,
+                            valueNames);
+                    }
+                    else if (type == typeof(Vector4))
+                    {
+                        return ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector4, property);
+                    }
+
+                    return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateStringEditor(property));
+            }
+
+            Debug.WriteLine($"{methodName}: property has invalid ValueKind! Must be either Number, False, True," +
+                            $" or String! ValueKind is {property.ValueKind}");
+            return null;
+        }
+
+        private static HorizontalStackPanel GenerateLabelAndEditor(string? label, Widget? editor) => new()
+        {
+            Widgets =
+            {
+                label is not null ? new Label {Text = $"{label}: "} : null,
+                editor
+            }
+        };
 
         private static ParameterInfo[]? GetConstructorParamTypes(Type type) => (from ctor in type.GetConstructors()
             where ctor.GetCustomAttribute(typeof(JsonConstructorAttribute)) is not null
