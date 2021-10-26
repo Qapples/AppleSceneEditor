@@ -85,8 +85,8 @@ namespace AppleSceneEditor
             _addComponentWindow.Close();
 
             if (_currentJsonObject is null || _mainPanelHandler is null || type is null) return;
-            
-            if (!ComponentWrapperExtensions.Prototypes.TryGetValue(type, out var prototype))
+
+            if (!Prototypes.TryGetValue(type, out var prototype))
             {
                 Debug.WriteLine($"{methodName}: cannot find component prototype of name {typeName}! Cannot create" +
                                 "new component");

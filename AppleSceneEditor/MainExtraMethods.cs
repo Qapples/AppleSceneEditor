@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using AppleSceneEditor.Extensions;
-using AppleSceneEditor.Wrappers;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
@@ -111,7 +108,7 @@ namespace AppleSceneEditor
             VerticalStackPanel stackPanel = new();
 
             ComboBox typeSelectionBox = new() {HorizontalAlignment = HorizontalAlignment.Center};
-            foreach (Type type in IComponentWrapper.Implementers.Keys)
+            foreach (Type type in Prototypes.Keys)
             {
                 typeSelectionBox.Items.Add(new ListItem {Text = type.Name});
             }

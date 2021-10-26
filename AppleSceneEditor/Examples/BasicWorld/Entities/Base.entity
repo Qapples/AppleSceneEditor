@@ -20,6 +20,12 @@
         "path": "Textures/TestTexture.png",
         "isContentPath": true
       }
+    },
+    {
+      "$type": "CollisionBoxInfo",
+      "position": "5.1 5.3 132",
+      "halfExtent": "0 0 0",
+      "rotation": "0 0 0"
     }
   ],
   "id": "Base"

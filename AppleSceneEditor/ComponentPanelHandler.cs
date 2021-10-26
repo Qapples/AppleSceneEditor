@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
-using AppleSceneEditor.Wrappers;
 using AppleSerialization;
 using AppleSerialization.Json;
 using Myra.Graphics2D.UI;
@@ -54,12 +52,10 @@ namespace AppleSceneEditor
         
         public StackPanel PropertyStackPanel { get; set; }
         
-        public List<IComponentWrapper> Wrappers { get; set; }
 
         public ComponentPanelHandler(Desktop desktop, JsonObject rootObject, StackPanel propertyStackPanel)
         {
-            Wrappers = new List<IComponentWrapper>();
-            
+
             (Desktop, PropertyStackPanel, RootObject) = (desktop, propertyStackPanel, rootObject);
         }
         
