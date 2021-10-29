@@ -1,16 +1,19 @@
+using System;
 using System.Collections.Generic;
 
 namespace AppleSceneEditor.Commands
 {
-    public class CommandStream
+    //TODO: Add docs
+    public class CommandStream : IDisposable
     {
+        public bool Disposed { get; private set; }
+        
         private List<ICommand> _commands;
         private int _currentIndex;
         
         public CommandStream()
         {
-            _commands = new List<ICommand>();
-            _currentIndex = 0;
+            (_commands, _currentIndex, Disposed) = (new List<ICommand>(), 0, false);
         }
 
         public void AddCommandAndExecute(ICommand command)
@@ -39,6 +42,13 @@ namespace AppleSceneEditor.Commands
             if (_currentIndex >= _commands.Count - 1) return;
             
             _commands[++_currentIndex].Redo();
+        }
+
+        public void Dispose()
+        {
+            foreach (ICommand cmd in _commands) cmd.Dispose();
+
+            (_commands, _currentIndex, Disposed) = (null, 0, true);
         }
     }
 }

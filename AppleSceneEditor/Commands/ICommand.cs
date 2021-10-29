@@ -1,7 +1,12 @@
+using System;
+
 namespace AppleSceneEditor.Commands
 {
-    public interface ICommand
+    //TODO: Add docs
+    public interface ICommand : IDisposable
     {
+        bool Disposed { get; }
+        
         void Execute();
         void Undo();
         void Redo();
