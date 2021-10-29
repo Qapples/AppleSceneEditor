@@ -257,8 +257,9 @@ namespace AppleSceneEditor
                     CommentHandling = JsonCommentHandling.Skip,
                     AllowTrailingCommas = true
                 });
-                
-                _jsonObjects.Add(new JsonObject(ref reader));
+
+                JsonObject? newObj = JsonObject.CreateFromJsonReader(ref reader);
+                if (newObj is not null) _jsonObjects.Add(newObj);
             }
         }
 
@@ -278,8 +279,8 @@ namespace AppleSceneEditor
                 AllowTrailingCommas = true
             });
             
-            JsonObject rootObject = new(ref reader);
-            JsonArray? prototypes = rootObject.FindArray("prototypes");
+            JsonObject? rootObject = JsonObject.CreateFromJsonReader(ref reader);
+            JsonArray? prototypes = rootObject?.FindArray("prototypes");
 
             if (prototypes is null)
             {
