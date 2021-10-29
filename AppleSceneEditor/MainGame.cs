@@ -41,8 +41,9 @@ namespace AppleSceneEditor
         private readonly string _uiPath;
         private readonly string _stylesheetPath;
         private readonly string _defaultWorldPath;
-        private readonly string _keybindConfigPath;
-        private readonly string _typeAliasesConfigPath;
+        private readonly string _configPath;
+
+        private Dictionary<string, JsonObject> _prototypes;
 #nullable enable
 
         private Scene? _currentScene;
@@ -51,7 +52,7 @@ namespace AppleSceneEditor
         private JsonObject? _currentJsonObject;
 
         private ISystem<GameTime>? _drawSystem;
-
+        
         public MainGame(string[] args)
         {
             string root = Path.Combine("..", "..", "..");
@@ -63,9 +64,8 @@ namespace AppleSceneEditor
             _uiPath = Path.Combine(Content.RootDirectory, "Menu.xmmp");
             _stylesheetPath = Path.Combine(Content.RootDirectory, "Stylesheets", "editor_ui_skin.xmms");
             _defaultWorldPath = Path.Combine(root, "Examples", "BasicWorld", "BasicWorld.world");
-            _keybindConfigPath = Path.Combine(root, "Config", "Keybinds.txt");
-            _typeAliasesConfigPath = Path.Combine(root, "Config", "TypeAliases.txt");
-
+            _configPath = Path.Combine(root, "Config");
+            
             StringComparison comparison = StringComparison.Ordinal;
             foreach (string arg in args)
             {
@@ -82,7 +82,7 @@ namespace AppleSceneEditor
                     if (arg.StartsWith("--ui_path=", comparison)) _uiPath = path;
                     if (arg.StartsWith("--stylesheet_path=", comparison)) _stylesheetPath = path;
                     if (arg.StartsWith("--default_world=", comparison)) _defaultWorldPath = path;
-                    if (arg.StartsWith("--keybind_config_path=", comparison)) _keybindConfigPath = path;
+                    if (arg.StartsWith("--config_path=", comparison)) _configPath = path;
                 }
                 catch (Exception e)
                 {
@@ -93,7 +93,7 @@ namespace AppleSceneEditor
             _uiPath = Path.GetFullPath(_uiPath);
             _stylesheetPath = Path.GetFullPath(_stylesheetPath);
             _defaultWorldPath = Path.GetFullPath(_defaultWorldPath);
-            _keybindConfigPath = Path.GetFullPath(_keybindConfigPath);
+            _configPath = Path.GetFullPath(_configPath);
         }
         
         protected override void Initialize()
@@ -113,15 +113,11 @@ namespace AppleSceneEditor
             Environment.ExternalTypes.Add($"{sceneNamespace}.Info.ScriptInfo, {sceneNamespace}", typeof(ScriptInfo));
             Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
 
-            Environment.LoadTypeAliasFileContents(File.ReadAllText(_typeAliasesConfigPath));
-
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
                 new FontSystem(), "Default");
             
             _jsonObjects = new List<JsonObject>();
-
-            Config.ParseKeybindConfigFile(File.ReadAllText(_keybindConfigPath));
 
             _graphics.PreferredBackBufferWidth = 1600;
             _graphics.PreferredBackBufferHeight = 900;
@@ -135,7 +131,17 @@ namespace AppleSceneEditor
             base.LoadContent();
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            
+            //load config
+            string typeAliasPath = Path.Combine(_configPath, "TypeAliases.txt");
+            string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
+            string prototypesPath = Path.Combine(_configPath, "ComponentPrototypes.json");
+            
+            Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
+            Config.ParseKeybindConfigFile(File.ReadAllText(keybindPath));
+            _prototypes = CreatePrototypesFromFile(prototypesPath) ?? new Dictionary<string, JsonObject>();
 
+            //load stylesheet
             string folder = Path.GetDirectoryName(Path.GetFullPath(_uiPath));
             PropertyGridSettings settings = new()
             {
@@ -151,6 +157,7 @@ namespace AppleSceneEditor
             _addComponentWindow = CreateNewComponentDialog();
             _alreadyExistsWindow = CreateAlreadyExistsDialog();
 
+            //load the UI
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
             _desktop = new Desktop
             {
@@ -181,6 +188,7 @@ namespace AppleSceneEditor
                 return true;
             });
 
+            //load the default world
             if (_defaultWorldPath is not null)
             {
                 DirectoryInfo? parentDirectory = Directory.GetParent(_defaultWorldPath);

@@ -1,0 +1,35 @@
+{
+  "prototypes": [
+    {
+      "$type": "ValueInfo",
+      "valueType": "System.Int32",
+      "value": 2
+    },
+    {
+      "$type": "TextureInfo",
+      "texturePath": {
+        "path": "",
+        "isContentPath": true
+      }
+    },
+    {
+      "$type": "MeshInfo",
+      "meshIndex": 0,
+      "skinIndex": 0,
+      "meshPath": {
+        "path": "",
+        "isContentPath": true
+      }
+    },
+    {
+      "$type": "CollisionBoxInfo",
+      "position": "5.1 5.3 132",
+      "halfExtent": "0 0 0",
+      "rotation": "0 0 0"
+    },
+    {
+      "$type": "ScriptInfo",
+      "name": ""
+    }
+  ]
+}

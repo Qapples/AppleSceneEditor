@@ -5,6 +5,7 @@ using System.Linq;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Systems;
 using AppleSerialization;
+using AppleSerialization.Json;
 using Myra.Graphics2D.UI.File;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
@@ -75,18 +76,16 @@ namespace AppleSceneEditor
             
             _addComponentWindow.ShowModal(_desktop);
         }
-        
 
         private void FinishButtonClick(string typeName)
         {
             const string methodName = nameof(MainGame) + "." + nameof(FinishButtonClick) + " (EditorEvents)";
-            Type? type = ConverterHelper.GetTypeFromString(typeName);
-            
+
             _addComponentWindow.Close();
 
-            if (_currentJsonObject is null || _mainPanelHandler is null || type is null) return;
+            if (_currentJsonObject is null || _mainPanelHandler is null) return;
 
-            if (!Prototypes.TryGetValue(type, out var prototype))
+            if (!_prototypes.TryGetValue(typeName, out var prototype))
             {
                 Debug.WriteLine($"{methodName}: cannot find component prototype of name {typeName}! Cannot create" +
                                 "new component");
@@ -104,7 +103,7 @@ namespace AppleSceneEditor
             }
 
             prototype.Parent = _mainPanelHandler.Components.Parent;
-            _mainPanelHandler.Components.Add(prototype);
+            _mainPanelHandler.Components.Add((JsonObject) prototype.Clone()); //clone should guarantee a JsonObject
             _mainPanelHandler.RebuildUI();
         }
     }

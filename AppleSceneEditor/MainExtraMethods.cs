@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using DefaultEcs;
 using GrappleFightNET5.Scenes;
 using Myra.Graphics2D.UI;
 using Myra.Utility;
+using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 //has to be in the AppleSceneEditor namespace for it to be a partial class of MainGame which is in that namespace
 namespace AppleSceneEditor
@@ -108,9 +110,9 @@ namespace AppleSceneEditor
             VerticalStackPanel stackPanel = new();
 
             ComboBox typeSelectionBox = new() {HorizontalAlignment = HorizontalAlignment.Center};
-            foreach (Type type in Prototypes.Keys)
+            foreach (string type in _prototypes.Keys)
             {
-                typeSelectionBox.Items.Add(new ListItem {Text = type.Name});
+                typeSelectionBox.Items.Add(new ListItem {Text = type});
             }
 
             TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
@@ -259,7 +261,48 @@ namespace AppleSceneEditor
                 _jsonObjects.Add(new JsonObject(ref reader));
             }
         }
-        
+
+        private Dictionary<string, JsonObject>? CreatePrototypesFromFile(string filePath)
+        {
+            const string methodName = nameof(MainGame) + "." + nameof(CreatePrototypesFromFile);
+
+            if (!File.Exists(filePath))
+            {
+                Debug.WriteLine($"{methodName}: cannot find file of path {filePath}");
+                return null;
+            }
+            
+            Utf8JsonReader reader = new(File.ReadAllBytes(filePath), new JsonReaderOptions
+            {
+                CommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
+            });
+            
+            JsonObject rootObject = new(ref reader);
+            JsonArray? prototypes = rootObject.FindArray("prototypes");
+
+            if (prototypes is null)
+            {
+                Debug.WriteLine($"{methodName}: cannot find JsonArray with name \"prototypes\"! Returning null.");
+                return null;
+            }
+
+            Dictionary<string, JsonObject> outDictionary = new();
+            
+            foreach (JsonObject obj in prototypes)
+            {
+                JsonProperty? typeProp = obj.FindProperty("$type");
+                if (typeProp?.ValueKind != JsonValueKind.String) continue;
+
+                //type should be string thanks to the check from above
+                string type = (string) typeProp.Value!;
+                
+                outDictionary.Add(type, obj);
+            }
+
+            return outDictionary;
+        }
+
         private static bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
         {
             try
