@@ -6,14 +6,14 @@ namespace AppleSceneEditor
 {
     public partial class MainGame
     {
-        private static readonly Dictionary<Type, JsonObject> Prototypes = new()
-        {
-            //TODO: fill
-        };
+        private static readonly Dictionary<Type, JsonObject> Prototypes = new();
 
+        /// <summary>
+        /// Static method that setups Prototypes.
+        /// </summary>
         static MainGame()
         {
-            
+            // 
         }
     }
 }

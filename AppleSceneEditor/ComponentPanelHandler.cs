@@ -55,7 +55,6 @@ namespace AppleSceneEditor
 
         public ComponentPanelHandler(Desktop desktop, JsonObject rootObject, StackPanel propertyStackPanel)
         {
-
             (Desktop, PropertyStackPanel, RootObject) = (desktop, propertyStackPanel, rootObject);
         }
         
