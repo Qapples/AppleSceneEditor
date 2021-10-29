@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using AppleSceneEditor.Commands;
 using AppleSceneEditor.Systems;
 using AppleSerialization;
 using AppleSerialization.Info;
@@ -52,6 +53,8 @@ namespace AppleSceneEditor
         private JsonObject? _currentJsonObject;
 
         private ISystem<GameTime>? _drawSystem;
+
+        private CommandStream _commands;
         
         public MainGame(string[] args)
         {
@@ -94,6 +97,8 @@ namespace AppleSceneEditor
             _stylesheetPath = Path.GetFullPath(_stylesheetPath);
             _defaultWorldPath = Path.GetFullPath(_defaultWorldPath);
             _configPath = Path.GetFullPath(_configPath);
+
+            _commands = new CommandStream();
         }
         
         protected override void Initialize()
@@ -214,6 +219,34 @@ namespace AppleSceneEditor
 
         protected override void UnloadContent()
         {
+            Debug.WriteLine("Unloading...");
+            
+            _spriteBatch.Dispose();
+            _graphics.Dispose();
+            
+            _project = null;
+            _desktop = null;
+
+            _addComponentWindow = null;
+            _alreadyExistsWindow = null;
+
+            _project = null;
+            
+            _currentScene?.Dispose();
+
+            _jsonObjects = null!;
+            _currentJsonObject = null;
+            
+            _drawSystem?.Dispose();
+
+            _commands.Dispose();
+
+            _mainPanelHandler = null;
+
+            Dispose();
+            GC.Collect();
+            
+            Debug.WriteLine("Unload complete.");
         }
 
         protected override void Update(GameTime gameTime)
