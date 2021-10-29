@@ -116,6 +116,8 @@ namespace AppleSceneEditor
                 if (widgets is null) continue;
 
                 //GetHeader should not return null here since $type is verified in CreateComponentWidgets
+                //CreateComponentGrid is basically the drop down menu. widgets are the actual UI elements the user can
+                //edit
                 PropertyStackPanel.AddChild(CreateComponentGrid(jsonObj, widgets, GetHeader(jsonObj)!));
             }
         }
@@ -186,6 +188,9 @@ namespace AppleSceneEditor
             {
                 JsonArray? componentArray = obj.Parent?.FindArray("components");
                 componentArray?.Remove(obj);
+                
+                outGrid.RemoveFromParent();
+                outGrid = null;
             };
 
             outGrid.AddChild(removeButton);
