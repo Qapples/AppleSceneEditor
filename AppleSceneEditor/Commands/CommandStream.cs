@@ -36,7 +36,7 @@ namespace AppleSceneEditor.Commands
 
         public void UndoCurrentCommand()
         {
-            if (_currentIndex == 0) return;
+            if (_currentIndex < 0) return;
             
             _commands[_currentIndex--].Undo();
         }

@@ -10,11 +10,23 @@ namespace AppleSceneEditor.Commands
         public bool Disposed { get; private set; }
         
         private JsonObject _obj;
+        
         private Grid _uiGrid;
+        private IMultipleItemsContainer? _uiGirdParent;
         
         public RemoveComponentCommand(JsonObject obj, Grid uiGrid)
         {
             (_obj, _uiGrid, Disposed) = (obj, uiGrid, false);
+
+            if (_uiGrid.Parent is IMultipleItemsContainer parent)
+            {
+                _uiGirdParent = parent;
+            }
+            else
+            {
+                Debug.WriteLine($"{nameof(RemoveComponentCommand)}: parent of provided uiGrid does not have a " +
+                                $"parent that implements {nameof(IMultipleItemsContainer)}! Will not be able to undo.");
+            }
         }
         
         public void Execute()
@@ -38,14 +50,7 @@ namespace AppleSceneEditor.Commands
             
             componentArray.Add(_obj);
 
-            if (_uiGrid.Parent is not IMultipleItemsContainer container)
-            {
-                Debug.WriteLine($"{methodName}: uiGrid's parent is either non-existent or not an instance " +
-                                $"IMultipleItemsContainer. Cannot re-add component.");
-                return;
-            }
-
-            container.AddChild(_uiGrid);
+            _uiGirdParent?.AddChild(_uiGrid);
         }
 
         public void Redo() => Execute();

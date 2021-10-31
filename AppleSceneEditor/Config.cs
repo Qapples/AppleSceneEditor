@@ -16,11 +16,6 @@ namespace AppleSceneEditor
     public static class Config
     {
         /// <summary>
-        /// Contains all the possible function names that can be associated with keybindings and be .
-        /// </summary>
-        public static readonly string[] ValidFunctionNames = {"save", "new", "open"};
-
-        /// <summary>
         /// A dictionary containing user changeable keybindings for specific functions like saving, opening a new file,
         /// etc. The key in this context is the name of the function defined in a config file.
         /// </summary>

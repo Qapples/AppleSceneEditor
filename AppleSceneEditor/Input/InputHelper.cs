@@ -51,7 +51,7 @@ namespace AppleSceneEditor.Input
         public static void Update(in KeyboardState currentState, Widget rootWidget, Scene currentScene, 
             CommandStream commands, object?[]? args = null)
         {
-            foreach (string functionName in Config.ValidFunctionNames)
+            foreach (string functionName in KeyFunctions.Keys)
             {
                 if (!Config.Keybinds.TryGetValue(functionName, out var keyLists))
                 {
