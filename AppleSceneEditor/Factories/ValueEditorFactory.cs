@@ -192,7 +192,7 @@ namespace AppleSceneEditor.Factories
             }
 
             Span<float> values = stackalloc float[vectorCount];
-            if (!ParseHelper.TryParseVector(in propertyValue, ref values))
+            if (!ParseHelper.TryParseVector(propertyValue, ref values))
             {
                 Debug.WriteLine($"{methodName}: can't parse property as space seperated vector float values! " +
                                 $"Returning null.");
