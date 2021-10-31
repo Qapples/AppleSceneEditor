@@ -256,7 +256,7 @@ namespace AppleSceneEditor
 
             if (_currentScene is not null)
             {
-                Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene,
+                Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene, _commands,
                     new object?[] {_mainPanelHandler, this});
             }
 

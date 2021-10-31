@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using AppleSceneEditor.Commands;
 using GrappleFightNET5.Scenes;
 using Myra.Graphics2D.UI;
 
@@ -11,7 +12,7 @@ namespace AppleSceneEditor.Input
     /// </summary>
     public static class KeybindMethods
     {
-        public static void Save(Widget root, Scene scene, object?[]? args)
+        public static void Save(Widget root, Scene scene, CommandStream commands, object?[]? args)
         {
             if (args is null)
             {
@@ -30,7 +31,7 @@ namespace AppleSceneEditor.Input
             handler.SaveToScene(scene);
         }
         
-        public static void New(Widget root, Scene scene, object?[]? args)
+        public static void New(Widget root, Scene scene, CommandStream commands, object?[]? args)
         {
             if (args is null)
             {
@@ -50,7 +51,7 @@ namespace AppleSceneEditor.Input
             game.MenuFileNew(null, null);
         }
 
-        public static void Open(Widget root, Scene scene, object?[]? args)
+        public static void Open(Widget root, Scene scene, CommandStream commands, object?[]? args)
         {
             if (args is null)
             {
@@ -68,6 +69,16 @@ namespace AppleSceneEditor.Input
             }
 
             game.MenuFileOpen(null, null);
+        }
+
+        public static void Undo(Widget root, Scene scene, CommandStream commands, object?[]? args)
+        {
+            //TODO: functionality
+        }
+
+        public static void Redo(Widget root, Scene scene, CommandStream commands, object?[]? args)
+        {
+            //TODO: functionality
         }
 
         private static T? FindArg<T>(object?[]? args) =>

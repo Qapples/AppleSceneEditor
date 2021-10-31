@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AppleSceneEditor.Commands;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
@@ -21,7 +22,7 @@ namespace AppleSceneEditor.Input
         /// <summary>
         /// Delegate of methods that are activated through keybindings.
         /// </summary>
-        public delegate void KeybindDelegate(Widget root, Scene scene, object?[]? args);
+        public delegate void KeybindDelegate(Widget root, Scene scene, CommandStream commands, object?[]? args);
 
         /// <summary>
         /// Defines the behavior of keybindings. The string key represents the name of the function and a
@@ -32,6 +33,8 @@ namespace AppleSceneEditor.Input
             {"save", KeybindMethods.Save},
             {"new", KeybindMethods.New},
             {"open", KeybindMethods.Open},
+            {"undo", KeybindMethods.Undo},
+            {"redo", KeybindMethods.Redo}
         };
 
         /// <summary>
@@ -43,9 +46,10 @@ namespace AppleSceneEditor.Input
         /// game. This is provided so that the functions in <see cref="KeyFunctions"/> can manipulate it for purposes
         /// like saving, opening a new file, etc.</param>
         /// <param name="currentScene">The current <see cref="Scene"/> that is active in the main game.</param>
+        /// <param name="commands"></param>
         /// <param name="args">Any additional arguments.</param>
-        public static void Update(in KeyboardState currentState, Widget rootWidget, Scene currentScene,
-            object?[]? args = null)
+        public static void Update(in KeyboardState currentState, Widget rootWidget, Scene currentScene, 
+            CommandStream commands, object?[]? args = null)
         {
             foreach (string functionName in Config.ValidFunctionNames)
             {
@@ -70,7 +74,7 @@ namespace AppleSceneEditor.Input
                             continue;
                         }
 
-                        keybindDelegate(rootWidget, currentScene, args);
+                        keybindDelegate(rootWidget, currentScene, commands, args);
                     }
                 }
             }
