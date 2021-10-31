@@ -195,7 +195,7 @@ namespace AppleSceneEditor
                         try
                         {
                             _mainPanelHandler =
-                                new ComponentPanelHandler(_desktop, selectedJsonObject, propertyStackPanel);
+                                new ComponentPanelHandler(_desktop, selectedJsonObject, propertyStackPanel, _commands);
                         }
                         catch (ComponentPanelHandler.ComponentsNotFoundException e)
                         {

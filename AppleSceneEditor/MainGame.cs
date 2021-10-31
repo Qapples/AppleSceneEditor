@@ -219,7 +219,7 @@ namespace AppleSceneEditor
 
         protected override void UnloadContent()
         {
-            Debug.WriteLine("Unloading...");
+            Debug.WriteLine($"Unloading. Data amount: {GC.GetTotalMemory(false)}");
             
             _spriteBatch.Dispose();
             _graphics.Dispose();
@@ -245,8 +245,8 @@ namespace AppleSceneEditor
 
             Dispose();
             GC.Collect();
-            
-            Debug.WriteLine("Unload complete.");
+
+            Debug.WriteLine($"Unload complete. Data amount: {GC.GetTotalMemory(false)}");
         }
 
         protected override void Update(GameTime gameTime)

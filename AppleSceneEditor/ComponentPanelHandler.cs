@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AppleSceneEditor.Commands;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
 using AppleSerialization;
@@ -51,11 +52,15 @@ namespace AppleSceneEditor
         public JsonArray Components { get; private set; }
         
         public StackPanel PropertyStackPanel { get; set; }
-        
 
-        public ComponentPanelHandler(Desktop desktop, JsonObject rootObject, StackPanel propertyStackPanel)
+        private CommandStream _commands;
+        
+        public ComponentPanelHandler(Desktop desktop, JsonObject rootObject, StackPanel propertyStackPanel,
+            CommandStream commands)
         {
-            (Desktop, PropertyStackPanel, RootObject) = (desktop, propertyStackPanel, rootObject);
+            //rootObject HAS to be set to last otherwise we will try building the UI when some fields have not
+            //initalized yet.
+            (Desktop, PropertyStackPanel, _commands, RootObject) = (desktop, propertyStackPanel, commands, rootObject);
         }
         
         //------------------
@@ -118,7 +123,7 @@ namespace AppleSceneEditor
                 //GetHeader should not return null here since $type is verified in CreateComponentWidgets
                 //CreateComponentGrid is basically the drop down menu. widgets are the actual UI elements the user can
                 //edit
-                PropertyStackPanel.AddChild(CreateComponentGrid(jsonObj, widgets, GetHeader(jsonObj)!));
+                PropertyStackPanel.AddChild(CreateComponentGrid(jsonObj, widgets, _commands, GetHeader(jsonObj)!));
             }
         }
         
@@ -129,7 +134,7 @@ namespace AppleSceneEditor
             return name;
         }
 
-        private static Grid CreateComponentGrid(JsonObject obj, Panel widgetsPanel, string header)
+        private static Grid CreateComponentGrid(JsonObject obj, Panel widgetsPanel, CommandStream commands, string header)
         {
             widgetsPanel.GridRow = 1;
             widgetsPanel.GridColumn = 1;
@@ -184,14 +189,7 @@ namespace AppleSceneEditor
                 GridColumn = 1
             };
 
-            removeButton.Click += (_, _) =>
-            {
-                JsonArray? componentArray = obj.Parent?.FindArray("components");
-                componentArray?.Remove(obj);
-                
-                outGrid.RemoveFromParent();
-                outGrid = null;
-            };
+            removeButton.Click += (_, _) => commands.AddCommandAndExecute(new RemoveComponentCommand(obj, outGrid));
 
             outGrid.AddChild(removeButton);
 

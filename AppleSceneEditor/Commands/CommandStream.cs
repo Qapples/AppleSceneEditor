@@ -13,7 +13,7 @@ namespace AppleSceneEditor.Commands
         
         public CommandStream()
         {
-            (_commands, _currentIndex, Disposed) = (new List<ICommand>(), 0, false);
+            (_commands, _currentIndex, Disposed) = (new List<ICommand>(), -1, false);
         }
 
         public void AddCommandAndExecute(ICommand command)
@@ -22,7 +22,11 @@ namespace AppleSceneEditor.Commands
             //after the current index as those commands are invalid since they're now based on outdated data.
             if (_currentIndex != _commands.Count - 1)
             {
-                _commands.RemoveRange(_currentIndex + 1, _commands.Count - _currentIndex);
+                for (int i = _commands.Count - 1; i > _currentIndex; i--)
+                {
+                    _commands[i].Dispose();
+                    _commands.RemoveAt(i);
+                }
             }
             
             _commands.Add(command);
@@ -48,7 +52,7 @@ namespace AppleSceneEditor.Commands
         {
             foreach (ICommand cmd in _commands) cmd.Dispose();
 
-            (_commands, _currentIndex, Disposed) = (null, 0, true);
+            (_commands, _currentIndex, Disposed) = (null!, 0, true);
         }
     }
 }
