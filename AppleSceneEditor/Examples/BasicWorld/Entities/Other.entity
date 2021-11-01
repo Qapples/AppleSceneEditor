@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "$type": "AppleSerialization.Info.ValueInfo, AppleSerialization",
+      "$type": "ValueInfo",
       "valueType": "System.Int32",
       "value": "4"
     }
