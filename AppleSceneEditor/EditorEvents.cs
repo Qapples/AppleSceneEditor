@@ -2,10 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Commands;
 using AppleSceneEditor.Systems;
-using AppleSerialization;
-using AppleSerialization.Json;
 using Myra.Graphics2D.UI.File;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
@@ -101,10 +99,8 @@ namespace AppleSceneEditor
 
                 return;
             }
-
-            prototype.Parent = _mainPanelHandler.Components.Parent;
-            _mainPanelHandler.Components.Add((JsonObject) prototype.Clone()); //clone should guarantee a JsonObject
-            _mainPanelHandler.RebuildUI();
+            
+            _commands.AddCommandAndExecute(new AddComponentCommand(prototype, _mainPanelHandler));
         }
     }
 }
