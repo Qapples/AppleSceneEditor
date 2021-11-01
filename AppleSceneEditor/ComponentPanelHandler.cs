@@ -112,11 +112,6 @@ namespace AppleSceneEditor
         {
             foreach (JsonObject jsonObj in Components)
             {
-                // IComponentWrapper? wrapper = ComponentWrapperExtensions.CreateFromObject(jsonObj, Desktop);
-                // if (wrapper is null) continue;
-                //
-                // PropertyStackPanel.AddChild(wrapper.UIPanel);
-
                 Panel? widgets = CreateComponentWidgets(jsonObj, Desktop);
                 if (widgets is null) continue;
 

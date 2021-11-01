@@ -261,7 +261,7 @@ namespace AppleSceneEditor
             }
 
             Input.InputHelper.PreviousKeyboardState = Keyboard.GetState();
-
+            
             base.Update(gameTime);
         }
 
