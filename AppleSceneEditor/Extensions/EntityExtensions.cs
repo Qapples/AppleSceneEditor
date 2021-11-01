@@ -49,9 +49,10 @@ namespace AppleSceneEditor.Extensions
         /// <returns><see cref="Nullable{Entity}"/> is returned. If generation is successful, then it contains the
         /// <see cref="Entity"/>. Otherwise, it contains null.</returns>
         public static Entity? GenerateEntity(this JsonObject rootObject, Scene scene, string? entityPath = null,
-            in JsonReaderOptions? readerOptions = null, JsonSerializerOptions? serializerOptions = null)
+            JsonReaderOptions? readerOptions = null, JsonSerializerOptions? serializerOptions = null)
         {
-            //remove any entities with the id beforehand
+            //remove any entities with the same id beforehand as we are going to replace it.
+            //cant use a reference because we are disposing the object if we find it and that causes unusual behavior.
             foreach (Entity entity in scene.Entities.GetEntities())
             {
                 if (entity.Get<string>() == rootObject.Name) entity.Dispose();
@@ -77,6 +78,7 @@ namespace AppleSceneEditor.Extensions
             {
                 Type componentType = component.GetType();
 
+                //this right here is wasteful of memory. not a huge deal though lol.
                 SetMethod.MakeGenericMethod(componentType).Invoke(outEntity, new[] {component});
             }
             

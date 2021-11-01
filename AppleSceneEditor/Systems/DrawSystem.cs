@@ -18,9 +18,8 @@ namespace AppleSceneEditor.Systems
     /// <summary>
     /// System responsible for drawing 3d objects.
     /// </summary>
-    //TODO: Use a different model class in the future.
     [With(typeof(Transform))]
-    [WithEither(typeof(Model), typeof(ComplexBox), typeof(MeshData))]
+    [WithEither(typeof(ComplexBox), typeof(MeshData))]
     public sealed class DrawSystem : AEntitySetSystem<GameTime>
     {
         private readonly GraphicsDevice _graphicsDevice;
@@ -41,19 +40,6 @@ namespace AppleSceneEditor.Systems
             //camera per world.
             ref var worldCam = ref World.Get<Camera>();
             ref var transform = ref entity.Get<Transform>();
-
-            //model drawing
-            if (entity.Has<Model>())
-            {
-                // all of the bone's are being manipulated accordingly, but Monogame isn't animating it correctly due to something being
-                // messed up in the .dae file being tested or Monogame's model implementation. The Model class in Monogame
-                // has a Meshes property, and each mesh in that property has a parent bone. Each Mesh has a parent bone
-                // property, but it only takes in account THAT bone and not any of it's descendants. Therefore, at least with
-                // the current model.dae file im testing, only one bone animation can be applied to the entire mesh.
-                var model = entity.Get<Model>();
-
-                model.Draw(transform.Matrix, worldCam.ViewMatrix, worldCam.ProjectionMatrix);
-            }
 
             if (entity.Has<MeshData>())
             {

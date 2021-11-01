@@ -84,6 +84,8 @@ namespace AppleSceneEditor
             _rootObject.GenerateEntity(scene, scene.ScenePath is null
                 ? null
                 : Path.Combine(scene.ScenePath, "Entities", $"{_rootObject.Name}.entity"));
+            
+            scene.Compile();
 
             return true;
         }

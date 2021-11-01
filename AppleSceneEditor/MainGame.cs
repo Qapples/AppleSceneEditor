@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text.Json;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.Systems;
 using AppleSerialization;
@@ -21,7 +20,6 @@ using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
 using Myra.Utility;
 using Environment = AppleSerialization.Environment;
-using JsonProperty = AppleSerialization.Json.JsonProperty;
 using Scene = GrappleFightNET5.Scenes.Scene;
 
 namespace AppleSceneEditor
@@ -116,6 +114,7 @@ namespace AppleSceneEditor
             Environment.ExternalTypes.Add($"{sceneNamespace}.Info.MeshInfo, {sceneNamespace}", typeof(MeshInfo));
             Environment.ExternalTypes.Add($"{sceneNamespace}.Info.TextureInfo, {sceneNamespace}", typeof(TextureInfo));
             Environment.ExternalTypes.Add($"{sceneNamespace}.Info.ScriptInfo, {sceneNamespace}", typeof(ScriptInfo));
+            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.TransformInfo, {sceneNamespace}", typeof(TransformInfo));
             Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
@@ -207,9 +206,11 @@ namespace AppleSceneEditor
                 {
                     _currentScene = new Scene(parentDirectory.FullName, GraphicsDevice, null,
                         _spriteBatch, true);
-                    GetJsonObjectsFromScene(parentDirectory.FullName);
                     
+                    GetJsonObjectsFromScene(parentDirectory.FullName);
                     InitUIFromScene(_currentScene);
+                    
+                    _currentScene.Compile();
                     
                     _drawSystem?.Dispose();
                     _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
@@ -223,7 +224,7 @@ namespace AppleSceneEditor
             
             _spriteBatch.Dispose();
             _graphics.Dispose();
-            
+
             _project = null;
             _desktop = null;
 
@@ -268,18 +269,21 @@ namespace AppleSceneEditor
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-            
-            //The depth buffer is changed everytime we use the spritebatch to draw 2d objects. So, we must "reset" the
-            //by setting the depth stencil state to it's default value before drawing any 3d objects. If we don't do
-            //this, then all the models will be drawn incorrectly.
-
-            if (_drawSystem is not null)
-            {
-                GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-                _drawSystem.Update(gameTime);
-            }
 
             _desktop.Render();
+            
+            if (_drawSystem is not null)
+            {
+                //The depth buffer is changed everytime we use the spritebatch to draw 2d objects. So, we must "reset" the
+                //by setting the depth stencil state to it's default value before drawing any 3d objects. If we don't do
+                //this, then all the models will be drawn incorrectly.
+                GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+                
+                //set the viewport so that the scene is drawn within the scene viewer
+
+                _drawSystem.Update(gameTime);
+            }
+            
             base.Draw(gameTime);
         }
     }

@@ -80,7 +80,7 @@ namespace AppleSceneEditor
                         return false;
                     }
 
-                    foreach (Entity entity in scene.Entities.GetEntities())
+                    foreach (ref readonly var entity in scene.Entities.GetEntities())
                     {
                         if (!entity.Has<string>()) continue;
 

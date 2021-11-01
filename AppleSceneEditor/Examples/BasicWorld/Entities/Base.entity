@@ -13,19 +13,17 @@
       }
     },
     {
-      "$type": "MeshInfo",
-      "meshIndex": 0,
-      "skinIndex": 0,
-      "meshPath": {
-        "path": "Textures/TestTexture.png",
-        "isContentPath": true
-      }
-    },
-    {
       "$type": "CollisionBoxInfo",
       "position": "5.1 5.3 132",
       "halfExtent": "0 0 0",
       "rotation": "0 0 0"
+    },
+    {
+      "$type": "TransformInfo",
+      "position": "3 0 0",
+      "scale": "1 1 1",
+      "rotation": "0 0 0",
+      "velocity": "0 0 0"
     }
   ],
   "id": "Base"
