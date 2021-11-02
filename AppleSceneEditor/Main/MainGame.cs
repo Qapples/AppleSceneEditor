@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using AppleSceneEditor.Commands;
+using AppleSceneEditor.Input;
 using AppleSceneEditor.Systems;
 using AppleSerialization;
 using AppleSerialization.Info;
@@ -10,6 +11,7 @@ using AppleSerialization.Json;
 using AssetManagementBase;
 using DefaultEcs.System;
 using FontStashSharp;
+using GrappleFightNET5.Components.Camera;
 using GrappleFightNET5.Scenes.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -53,6 +55,7 @@ namespace AppleSceneEditor
         private ISystem<GameTime>? _drawSystem;
 
         private CommandStream _commands;
+
         
         public MainGame(string[] args)
         {
@@ -158,16 +161,18 @@ namespace AppleSceneEditor
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
             Stylesheet.Current = stylesheet;
 
+            //create dialogs
             _addComponentWindow = CreateNewComponentDialog();
             _alreadyExistsWindow = CreateAlreadyExistsDialog();
 
-            //load the UI
+            //load the UI from the path define as _uiPath
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
             _desktop = new Desktop
             {
                 Root = _project.Root
             };
 
+            //add functionality to specific widgets.
             _project.Root.ProcessWidgets(widget =>
             {
                 if (widget.Id == "MainMenu")
@@ -207,11 +212,20 @@ namespace AppleSceneEditor
                     _currentScene = new Scene(parentDirectory.FullName, GraphicsDevice, null,
                         _spriteBatch, true);
                     
-                    GetJsonObjectsFromScene(parentDirectory.FullName);
+                    InitJsonFromScenePath(parentDirectory.FullName);
                     InitUIFromScene(_currentScene);
                     
                     _currentScene.Compile();
                     
+                    _currentScene.World.Set(new Camera
+                    {
+                        Position = Vector3.Zero,
+                        LookAt = new Vector3(0, 0, 20),
+                        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95),
+                            GraphicsDevice.DisplayMode.AspectRatio, 1, 1000),
+                        Sensitivity = 2f
+                    });
+
                     _drawSystem?.Dispose();
                     _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
                 }
@@ -255,13 +269,19 @@ namespace AppleSceneEditor
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
                 Keys.Escape)) Exit();
 
+            KeyboardState kbState = Keyboard.GetState();
+            MouseState mouseState = Mouse.GetState();
+
             if (_currentScene is not null)
             {
-                Input.InputHelper.Update(Keyboard.GetState(), _project.Root, _currentScene, _commands,
+                InputHelper.Update(kbState, _project.Root, _currentScene, _commands,
                     new object?[] {_mainPanelHandler, this});
+                
+                UpdateCamera(mouseState);
             }
-
-            Input.InputHelper.PreviousKeyboardState = Keyboard.GetState();
+            
+            InputHelper.PreviousKeyboardState = kbState;
+            _previousMouseState = mouseState;
             
             base.Update(gameTime);
         }
@@ -280,7 +300,6 @@ namespace AppleSceneEditor
                 GraphicsDevice.DepthStencilState = DepthStencilState.Default;
                 
                 //set the viewport so that the scene is drawn within the scene viewer
-
                 _drawSystem.Update(gameTime);
             }
             

@@ -48,7 +48,7 @@ namespace AppleSceneEditor.Input
         /// <param name="currentScene">The current <see cref="Scene"/> that is active in the main game.</param>
         /// <param name="commands"></param>
         /// <param name="args">Any additional arguments.</param>
-        public static void Update(in KeyboardState currentState, Widget rootWidget, Scene currentScene, 
+        public static void Update(KeyboardState currentState, Widget rootWidget, Scene currentScene, 
             CommandStream commands, object?[]? args = null)
         {
             foreach (string functionName in KeyFunctions.Keys)
@@ -65,7 +65,7 @@ namespace AppleSceneEditor.Input
                 //is something to fix later on.
                 foreach (List<Keys> keys in keyLists)
                 {
-                    if (keys.All(currentState.IsKeyDown) && !keys.All(PreviousKeyboardState.IsKeyDown))
+                    if (keys.All(k => currentState.IsKeyDown(k)) && !keys.All(k => currentState.IsKeyDown(k)))
                     {
                         if (!KeyFunctions.TryGetValue(functionName, out var keybindDelegate))
                         {

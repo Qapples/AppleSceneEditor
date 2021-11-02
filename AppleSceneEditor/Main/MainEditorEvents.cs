@@ -28,7 +28,7 @@ namespace AppleSceneEditor
 
                 _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
                     true);
-                GetJsonObjectsFromScene(Directory.GetParent(filePath)!.FullName);
+                InitJsonFromScenePath(Directory.GetParent(filePath)!.FullName);
 
                 if (_currentScene is not null)
                 {
@@ -54,7 +54,7 @@ namespace AppleSceneEditor
                 if (string.IsNullOrEmpty(folderPath)) return;
 
                 InitNewProject(folderPath);
-                GetJsonObjectsFromScene(folderPath);
+                InitJsonFromScenePath(folderPath);
 
                 if (_currentScene is not null)
                 {

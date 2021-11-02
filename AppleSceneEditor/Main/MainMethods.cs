@@ -14,12 +14,11 @@ using JsonProperty = AppleSerialization.Json.JsonProperty;
 //has to be in the AppleSceneEditor namespace for it to be a partial class of MainGame which is in that namespace
 namespace AppleSceneEditor
 {
+    //we separated the methods into a different file as both the main game logic (loading, updating, drawing, etc.) and
+    //the methods used to assist it (the methods declared here) are both going to be pretty large.
+    
     public partial class MainGame
     {
-        //-----------------------
-        // ADDITIONAL METHODS
-        //-----------------------
-
         private const string BaseEntityContents = @"{
     ""components"": [
         {
@@ -27,6 +26,10 @@ namespace AppleSceneEditor
     ],
     ""id"" : ""Base""
 }";
+        
+        //----------------
+        // Init methods
+        //----------------
 
         private void InitNewProject(string folderPath, int maxCapacity = 128)
         {
@@ -103,6 +106,10 @@ namespace AppleSceneEditor
             }
         }
 
+        //-----------------------------
+        // UI window creation methods
+        //-----------------------------
+        
         private Window CreateNewComponentDialog()
         {
             Panel panel = new();
@@ -154,9 +161,19 @@ namespace AppleSceneEditor
             
             return outWindow;
         }
+        
+        //---------------
+        // Update methods
+        //---------------
 
         private ComponentPanelHandler? _mainPanelHandler;
 
+        /// <summary>
+        /// Updates the properties viewer to display the components/properties of an entity of a specified ID.
+        /// </summary>
+        /// <param name="scene">The <see cref="Scene"/> instance whose <see cref="Scene.World"/> is where the desired
+        /// entity belongs to.</param>
+        /// <param name="entityId">The ID of the <see cref="Entity"/> to display it's components.</param>
         private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
         {
             const string methodName = nameof(MainGame) + "." + nameof(UpdatePropertyGridWithEntity);
@@ -220,31 +237,12 @@ namespace AppleSceneEditor
                 return true;
             });
         }
-
-        private static T? TryFindWidgetById<T>(Container container, string id) where T : class
-        {
-            T? output;
-
-            try
-            {
-                output = container.FindWidgetById(id) as T;
-
-                if (output is null)
-                {
-                    Debug.WriteLine($"{id} cannot be casted into an instance of {typeof(T)}");
-                    return null;
-                }
-            }
-            catch
-            {
-                Debug.WriteLine($"{typeof(T)} of ID {id} cannot be found.");
-                return null;
-            }
-
-            return output;
-        }
-
-        private void GetJsonObjectsFromScene(string scenePath)
+        
+        //--------------
+        // I/O methods
+        //--------------
+        
+        private void InitJsonFromScenePath(string scenePath)
         {
             string entitiesFolderPath = Path.Combine(scenePath, "Entities");
 
@@ -303,6 +301,10 @@ namespace AppleSceneEditor
 
             return outDictionary;
         }
+        
+        //------------------
+        // TryGet methods
+        //------------------
 
         private static bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
         {
@@ -316,6 +318,29 @@ namespace AppleSceneEditor
                 entity = new Entity();
                 return false;
             }
+        }
+        
+        private static T? TryFindWidgetById<T>(Container container, string id) where T : class
+        {
+            T? output;
+
+            try
+            {
+                output = container.FindWidgetById(id) as T;
+
+                if (output is null)
+                {
+                    Debug.WriteLine($"{id} cannot be casted into an instance of {typeof(T)}");
+                    return null;
+                }
+            }
+            catch
+            {
+                Debug.WriteLine($"{typeof(T)} of ID {id} cannot be found.");
+                return null;
+            }
+
+            return output;
         }
     }
 }

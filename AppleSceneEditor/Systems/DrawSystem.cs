@@ -81,7 +81,7 @@ namespace AppleSceneEditor.Systems
             if (entity.Has<ComplexBox>())
             {
                 ref var box = ref entity.Get<ComplexBox>();
-                box.Draw(Color.Red, in worldCam, _graphicsDevice);
+                //box.Draw(Color.Red, in worldCam, _graphicsDevice);
             }
         }
     }
