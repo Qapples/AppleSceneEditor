@@ -23,18 +23,30 @@ namespace AppleSceneEditor.Systems
     public sealed class DrawSystem : AEntitySetSystem<GameTime>
     {
         private readonly GraphicsDevice _graphicsDevice;
+        private readonly BasicEffect _boxEffect;
+        private readonly VertexBuffer _boxVertexBuffer;
 
         private static readonly RasterizerState
             SolidState = new() {FillMode = FillMode.Solid, CullMode = CullMode.None};
+
+        //we have to explicitly set each field in each constructor because C#. (can't use a separate method because I
+        //want the fields to be readonly)
+        //there should be 36 vertices in every ComplexBox when drawing them.
         
         public DrawSystem(World world, GraphicsDevice graphicsDevice) : base(world)
         {
             _graphicsDevice = graphicsDevice;
+            _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
+            _boxEffect = new BasicEffect(_graphicsDevice)
+                {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
         }
 
         public DrawSystem(World world, IParallelRunner runner, GraphicsDevice graphicsDevice) : base(world, runner)
         {
             _graphicsDevice = graphicsDevice;
+            _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
+            _boxEffect = new BasicEffect(_graphicsDevice)
+                {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
         }
 
         protected override void Update(GameTime gameTime, in Entity entity)
@@ -84,8 +96,14 @@ namespace AppleSceneEditor.Systems
             if (entity.Has<ComplexBox>())
             {
                 ref var box = ref entity.Get<ComplexBox>();
-                //box.Draw(Color.Red, in worldCam, _graphicsDevice);
+                box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
             }
+        }
+
+        public override void Dispose()
+        {
+            _boxVertexBuffer.Dispose();
+            _boxEffect.Dispose();
         }
     }
 }
