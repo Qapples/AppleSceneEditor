@@ -6,7 +6,7 @@ using DefaultEcs;
 using DefaultEcs.System;
 using DefaultEcs.Threading;
 using GrappleFightNET5.Components.Camera;
-using GrappleFightNET5.Components.Collision.ComplexBox;
+using GrappleFightNET5.Components.Collision;
 using GrappleFightNET5.Components.Events;
 using GrappleFightNET5.Components.Misc;
 using GrappleFightNET5.Components.Transform;
@@ -23,6 +23,9 @@ namespace AppleSceneEditor.Systems
     public sealed class DrawSystem : AEntitySetSystem<GameTime>
     {
         private readonly GraphicsDevice _graphicsDevice;
+
+        private static readonly RasterizerState
+            SolidState = new() {FillMode = FillMode.Solid, CullMode = CullMode.None};
         
         public DrawSystem(World world, GraphicsDevice graphicsDevice) : base(world)
         {
@@ -55,7 +58,7 @@ namespace AppleSceneEditor.Systems
                     ReadOnlySpan<ActiveAnimation> inAnimations =
                         CollectionsMarshal.AsSpan(animComponent.ActiveAnimations);
                     meshData.Draw(in transform.Matrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
-                        in inAnimations, ComplexBoxHelper.SolidState);
+                        in inAnimations, SolidState);
 
                     //update events if they have one.
                     if (entity.Has<AnimationEvents>())
@@ -74,7 +77,7 @@ namespace AppleSceneEditor.Systems
                 else
                 {
                     meshData.Draw(in transform.Matrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
-                        ReadOnlySpan<ActiveAnimation>.Empty, ComplexBoxHelper.SolidState);
+                        ReadOnlySpan<ActiveAnimation>.Empty, SolidState);
                 }
             }
 
