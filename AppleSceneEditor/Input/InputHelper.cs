@@ -65,7 +65,7 @@ namespace AppleSceneEditor.Input
                 //is something to fix later on.
                 foreach (List<Keys> keys in keyLists)
                 {
-                    if (keys.All(k => currentState.IsKeyDown(k)) && !keys.All(k => currentState.IsKeyDown(k)))
+                    if (VerifyKeys(ref currentState, keys))
                     {
                         if (!KeyFunctions.TryGetValue(functionName, out var keybindDelegate))
                         {
@@ -78,6 +78,18 @@ namespace AppleSceneEditor.Input
                     }
                 }
             }
+        }
+
+        private static bool VerifyKeys(ref KeyboardState state, List<Keys> keys)
+        {
+            bool previousKeysDown = false;
+            
+            foreach (Keys key in keys)
+            {
+                if (state.IsKeyUp(key)) return false;
+            }
+
+            return previousKeysDown;
         }
     }
 }

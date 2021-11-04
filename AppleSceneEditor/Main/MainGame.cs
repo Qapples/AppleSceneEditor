@@ -55,7 +55,6 @@ namespace AppleSceneEditor
         private ISystem<GameTime>? _drawSystem;
 
         private CommandStream _commands;
-
         
         public MainGame(string[] args)
         {
