@@ -55,6 +55,12 @@ namespace AppleSceneEditor
         private ISystem<GameTime>? _drawSystem;
 
         private CommandStream _commands;
+
+        private Viewport _sceneViewport;
+        private Viewport _overallViewport;
+
+        private Grid _mainGrid;
+        private HorizontalMenu _mainMenu;
         
         public MainGame(string[] args)
         {
@@ -129,6 +135,8 @@ namespace AppleSceneEditor
             _graphics.PreferredBackBufferHeight = 900;
             _graphics.ApplyChanges();
 
+            _overallViewport = GraphicsDevice.Viewport;
+
             base.Initialize();
         }
 
@@ -137,12 +145,12 @@ namespace AppleSceneEditor
             base.LoadContent();
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            
+
             //load config
             string typeAliasPath = Path.Combine(_configPath, "TypeAliases.txt");
             string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
             string prototypesPath = Path.Combine(_configPath, "ComponentPrototypes.json");
-            
+
             Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
             Config.ParseKeybindConfigFile(File.ReadAllText(keybindPath));
             _prototypes = CreatePrototypesFromFile(prototypesPath) ?? new Dictionary<string, JsonObject>();
@@ -154,7 +162,7 @@ namespace AppleSceneEditor
                 AssetManager = new AssetManager(new FileAssetResolver(folder)),
                 BasePath = folder
             };
-            
+
             Stylesheet stylesheet = _stylesheetPath is null
                 ? Stylesheet.Current
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
@@ -171,36 +179,64 @@ namespace AppleSceneEditor
                 Root = _project.Root
             };
 
-            //add functionality to specific widgets.
+            //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
+            //found, then we can no longer continue running and we must fire an exception.
+            List<string> missingWidgets = new() {"MainMenu", "MainPanel", "MainGrid"};
+            
             _project.Root.ProcessWidgets(widget =>
             {
-                if (widget.Id == "MainMenu")
+                switch (widget.Id)
                 {
-                    if (widget is not HorizontalMenu menu) return false;
+                    case "MainMenu":
+                    {
+                        if (widget is not HorizontalMenu menu) return false;
+                        
+                        MenuItem? fileItemOpen = menu.FindMenuItemById("MenuFileOpen");
+                        MenuItem? fileItemNew = menu.FindMenuItemById("MenuFileNew");
 
-                    MenuItem? fileItemOpen = menu.FindMenuItemById("MenuFileOpen");
-                    MenuItem? fileItemNew = menu.FindMenuItemById("MenuFileNew");
+                        if (fileItemOpen is not null) fileItemOpen.Selected += MenuFileOpen;
+                        if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
 
-                    if (fileItemOpen is not null) fileItemOpen.Selected += MenuFileOpen;
-                    if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
-                }
+                        _mainMenu = menu;
+                        missingWidgets.Remove("MainMenu");
 
-                if (widget.Id == "MainPanel")
-                {
-                    if (widget is not Panel panel) return false;
-                    if (panel.FindWidgetById("AddComponentButton") is not TextButton addButton) return false;
+                        break;
+                    }
+                    case "MainPanel":
+                    {
+                        if (widget is not Panel panel) return false;
+                        if (panel.FindWidgetById("AddComponentButton") is not TextButton addButton) return false;
 
-                    addButton.Click += AddComponentButtonClick;
+                        addButton.Click += AddComponentButtonClick;
+
+                        missingWidgets.Remove("MainPanel");
+                        
+                        break;
+                    }
+                    case "MainGrid":
+                    {
+                        if (widget is not Grid grid) return false;
+
+                        _mainGrid = grid;
+                        missingWidgets.Remove("MainGrid");
+                        
+                        break;
+                    }
                 }
 
                 return true;
             });
 
-            //load the default world
+            if (missingWidgets.Count > 0)
+            { 
+                throw new WidgetNotFoundException(missingWidgets.ToArray());
+            }
+
+            //load the default world (if provided)
             if (_defaultWorldPath is not null)
             {
                 DirectoryInfo? parentDirectory = Directory.GetParent(_defaultWorldPath);
-                
+
                 if (parentDirectory is null)
                 {
                     Debug.WriteLine($"Cant get parent directory from path when getting _defaultWorldPath: " +
@@ -258,9 +294,8 @@ namespace AppleSceneEditor
             _mainPanelHandler = null;
 
             Dispose();
-            GC.Collect();
 
-            Debug.WriteLine($"Unload complete. Data amount: {GC.GetTotalMemory(false)}");
+            Debug.WriteLine($"Unload complete. Data amount: {GC.GetTotalMemory(true)}");
         }
 
         protected override void Update(GameTime gameTime)
@@ -290,7 +325,20 @@ namespace AppleSceneEditor
             GraphicsDevice.Clear(Color.Black);
 
             _desktop.Render();
-            
+
+            //if scene port is uninitialized, then initialize it. (the desktop must first be rendered before the
+            //grid lines are initialized)
+            if (_sceneViewport.Width == 0 || _sceneViewport.Height == 0)
+            {
+                //there should be two x grid lines, and 1 y grid line bordering the scene viewer grid.
+                //y is the height of the main menu at the top of the screen.
+                var (x, x1) = (_mainGrid.GridLinesX[0], _mainGrid.GridLinesX[1]);
+                var (width, height) = (x1 - x, _mainGrid.GridLinesY[0]);
+                int y = _mainMenu.Bounds.Size.Y;
+
+                _sceneViewport = new Viewport(x, y, width, height);
+            }
+
             if (_drawSystem is not null)
             {
                 //The depth buffer is changed everytime we use the spritebatch to draw 2d objects. So, we must "reset" the
@@ -299,10 +347,28 @@ namespace AppleSceneEditor
                 GraphicsDevice.DepthStencilState = DepthStencilState.Default;
                 
                 //set the viewport so that the scene is drawn within the scene viewer
+                GraphicsDevice.Viewport = _sceneViewport;
+                
                 _drawSystem.Update(gameTime);
             }
-            
+
+            GraphicsDevice.Viewport = _overallViewport;
+
             base.Draw(gameTime);
+        }
+        
+        private class WidgetNotFoundException : Exception
+        {
+            private const string MessagePrefix = "The following widgets could not be found (by name):";
+            
+            public WidgetNotFoundException(string message) : base(message)
+            {
+            }
+
+            public WidgetNotFoundException(params string[] widgetNames) : base(
+                $"{MessagePrefix}: {string.Join(", ", widgetNames)}")
+            {
+            }
         }
     }
 }

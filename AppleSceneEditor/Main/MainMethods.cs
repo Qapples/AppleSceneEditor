@@ -184,7 +184,7 @@ namespace AppleSceneEditor
                 {
                     if (widget is not Grid grid) return false;
                     if (!TryGetEntityById(scene, entityId, out var entity)) return false;
-                    
+
                     StackPanel? propertyStackPanel = TryFindWidgetById<StackPanel>(grid, "PropertyStackPanel");
                     if (propertyStackPanel is null) return false;
 
