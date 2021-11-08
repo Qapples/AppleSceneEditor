@@ -8,10 +8,10 @@ namespace AppleSceneEditor.Extensions
     //TODO: Add docs
     public static class KeyboardExtensions
     {
-        public static KeyboardState ParseString(string str)
+        public static KeyboardState ParseKeyboardState(string str)
         {
 #if DEBUG
-            const string methodName = nameof(KeyboardExtensions) + "." + nameof(ParseString);
+            const string methodName = nameof(KeyboardExtensions) + "." + nameof(ParseKeyboardState);
 #endif
             
             string[] splitStr = str.Split(' ');
@@ -19,12 +19,13 @@ namespace AppleSceneEditor.Extensions
 
             for (int i = 0; i < splitStr.Length; i++)
             {
-                if (!TryParseKey(splitStr[i], out keys[i]))
+                if (TryParseKey(splitStr[i], out var key))
                 {
-                    keys[i] = Keys.None;
-
-                    Debug.WriteLine($"{methodName}: unable to parse key from string {str} at index {i}. Default " +
-                                    $"to Keys.None");
+                    keys[i] = key;
+                }
+                else
+                {
+                    Debug.WriteLine($"{methodName}: unable to parse key from string {str} at index {i}");
                 }
             }
 
