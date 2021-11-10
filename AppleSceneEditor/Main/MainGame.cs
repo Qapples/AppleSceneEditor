@@ -307,6 +307,8 @@ namespace AppleSceneEditor
             Debug.WriteLine($"Unload complete. Data amount: {afterMemoryCount}");
         }
 
+        private KeyboardState _previousKbState;
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
@@ -317,13 +319,13 @@ namespace AppleSceneEditor
 
             if (_currentScene is not null)
             {
-                IKeyCommand? command = _inputHandler.GetCommand(ref kbState);
+                IKeyCommand? command = _inputHandler.GetCommand(ref kbState, ref _previousKbState);
                 command?.Execute();
 
                 UpdateCamera(mouseState);
             }
-            
-            InputHelper.PreviousKeyboardState = kbState;
+
+            _previousKbState = kbState;
             _previousMouseState = mouseState;
             
             base.Update(gameTime);
