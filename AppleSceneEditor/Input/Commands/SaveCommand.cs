@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using GrappleFightNET5.Scenes;
 
 namespace AppleSceneEditor.Input.Commands

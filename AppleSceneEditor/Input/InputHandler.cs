@@ -22,8 +22,8 @@ namespace AppleSceneEditor.Input
             _commands = commands;
         }
 
-        public IKeyCommand? GetCommand(ref KeyboardState kbState) =>
-            _commands.TryGetValue(kbState, out var command) ? command : null;
+        public IKeyCommand? GetCommand(ref KeyboardState kbState, ref KeyboardState prevKbState) =>
+            kbState != prevKbState && _commands.TryGetValue(kbState, out var command) ? command : null;
 
         public void Dispose()
         {
