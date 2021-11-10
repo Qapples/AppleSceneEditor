@@ -16,8 +16,8 @@ namespace AppleSceneEditor
         {
             {"Move Forward", Keys.W},
             {"Move Backward", Keys.S},
-            {"Move Left", Keys.Left},
-            {"Move Right", Keys.Right},
+            {"Move Left", Keys.A},
+            {"Move Right", Keys.D},
         };
         
         private MouseState _previousMouseState;

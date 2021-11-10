@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
+using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Input;
+using AppleSceneEditor.Input.Commands;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
+using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
 using Myra.Utility;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
@@ -95,6 +100,12 @@ namespace AppleSceneEditor
 
                         stackPanel.AddChild(button);
                     }
+                    
+                    //init scene with base entity
+                    UpdatePropertyGridWithEntity(scene, "Base");
+                    
+                    //init _inputHelper here since by then all the fields should have been initialized so far.
+                    _inputHandler = CreateInputHandlerFromFile(Path.Combine(_configPath, "Keybinds.txt"));
                 }
 
                 return true;
@@ -261,16 +272,10 @@ namespace AppleSceneEditor
             }
         }
 
-        private Dictionary<string, JsonObject>? CreatePrototypesFromFile(string filePath)
+        private Dictionary<string, JsonObject> CreatePrototypesFromFile(string filePath)
         {
             const string methodName = nameof(MainGame) + "." + nameof(CreatePrototypesFromFile);
 
-            if (!File.Exists(filePath))
-            {
-                Debug.WriteLine($"{methodName}: cannot find file of path {filePath}");
-                return null;
-            }
-            
             Utf8JsonReader reader = new(File.ReadAllBytes(filePath), new JsonReaderOptions
             {
                 CommentHandling = JsonCommentHandling.Skip,
@@ -302,9 +307,66 @@ namespace AppleSceneEditor
             return outDictionary;
         }
         
+        private InputHandler CreateInputHandlerFromFile(string filePath)
+        {
+            const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlerFromFile);
+
+            Dictionary<KeyboardState, IKeyCommand> commands = new();
+            KeyboardState blankState = new();
+
+            using StreamReader reader = new(filePath, Encoding.ASCII);
+
+            string? line = reader.ReadLine();
+            while (line is not null)
+            {
+                int colonIndex = line.IndexOf(':');
+                
+                if (colonIndex > 0)
+                {
+                    //there should only be ONE space between the colon and the key. account for the space and colon by
+                    //adding two
+                    string funcName = line[..colonIndex];
+                    string keysStr = line[(colonIndex + 2)..];
+
+                    if (TryGetCommandFromFunctionName(funcName, out var command))
+                    {
+                        KeyboardState state = KeyboardExtensions.ParseKeyboardState(keysStr);
+                        if (state != blankState)
+                        {
+                            commands.Add(state, command);
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"{methodName}: cannot get function name from following line: {line}");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"{methodName}: cannot find func name behind colon in the following line of " +
+                                    $"file with name of \"{filePath}\": {line}. Skipping.");
+                }
+
+
+                line = reader.ReadLine();
+            }
+
+            return new InputHandler(commands);
+        }
+
         //------------------
         // TryGet methods
         //------------------
+
+        //We could handle this via parsing an external file but imo the user should have no control over this so
+        //we are hard coding this instead.
+        private bool TryGetCommandFromFunctionName(string funcName, out IKeyCommand command) => 
+            (command = funcName switch 
+            {
+                "save" when _mainPanelHandler is not null && _currentScene is not null =>
+                    new SaveCommand(_mainPanelHandler, _currentScene),
+                _ => new EmptyCommand()
+            }) is not EmptyCommand;
 
         private static bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
         {
