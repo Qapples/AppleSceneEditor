@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using AppleSceneEditor.Commands;
+using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Input;
+using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Systems;
 using AppleSerialization;
 using AppleSerialization.Info;
@@ -55,6 +57,7 @@ namespace AppleSceneEditor
         private ISystem<GameTime>? _drawSystem;
 
         private CommandStream _commands;
+        private InputHandler _inputHandler;
 
         private Viewport _sceneViewport;
         private Viewport _overallViewport;
@@ -150,10 +153,14 @@ namespace AppleSceneEditor
             string typeAliasPath = Path.Combine(_configPath, "TypeAliases.txt");
             string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
             string prototypesPath = Path.Combine(_configPath, "ComponentPrototypes.json");
+            
+            //ensure that these paths exist.
+            List<string> missingConfigFiles = new() { };
 
+            //inputhandler will be initialized later when a proper world is loaded and everything is set.
             Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
             Config.ParseKeybindConfigFile(File.ReadAllText(keybindPath));
-            _prototypes = CreatePrototypesFromFile(prototypesPath) ?? new Dictionary<string, JsonObject>();
+            _prototypes = CreatePrototypesFromFile(prototypesPath);
 
             //load stylesheet
             string folder = Path.GetDirectoryName(Path.GetFullPath(_uiPath));
@@ -269,7 +276,8 @@ namespace AppleSceneEditor
 
         protected override void UnloadContent()
         {
-            Debug.WriteLine($"Unloading. Data amount: {GC.GetTotalMemory(false)}");
+            long beforeMemoryCount = GC.GetTotalMemory(false);
+            Debug.WriteLine($"Unloading. Data amount: {beforeMemoryCount}");
             
             _spriteBatch.Dispose();
             _graphics.Dispose();
@@ -295,7 +303,8 @@ namespace AppleSceneEditor
 
             Dispose();
 
-            Debug.WriteLine($"Unload complete. Data amount: {GC.GetTotalMemory(true)}");
+            long afterMemoryCount = GC.GetTotalMemory(true);
+            Debug.WriteLine($"Unload complete. Data amount: {afterMemoryCount}");
         }
 
         protected override void Update(GameTime gameTime)
@@ -308,9 +317,9 @@ namespace AppleSceneEditor
 
             if (_currentScene is not null)
             {
-                InputHelper.Update(kbState, _project.Root, _currentScene, _commands,
-                    new object?[] {_mainPanelHandler, this});
-                
+                IKeyCommand? command = _inputHandler.GetCommand(ref kbState);
+                command?.Execute();
+
                 UpdateCamera(mouseState);
             }
             
@@ -355,20 +364,6 @@ namespace AppleSceneEditor
             GraphicsDevice.Viewport = _overallViewport;
 
             base.Draw(gameTime);
-        }
-        
-        private class WidgetNotFoundException : Exception
-        {
-            private const string MessagePrefix = "The following widgets could not be found (by name):";
-            
-            public WidgetNotFoundException(string message) : base(message)
-            {
-            }
-
-            public WidgetNotFoundException(params string[] widgetNames) : base(
-                $"{MessagePrefix}: {string.Join(", ", widgetNames)}")
-            {
-            }
         }
     }
 }
