@@ -13,7 +13,6 @@ namespace AppleSceneEditor.Exceptions
         public RequiredConfigFileNotFound(params string[] missingFileNames) : base(
             $"{MessagePrefix}: {string.Join(", ", missingFileNames)}")
         {
-            
         }
     }
 }
