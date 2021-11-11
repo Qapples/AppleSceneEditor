@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppleSceneEditor.Commands;
+using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
 using AppleSerialization;
@@ -24,11 +25,8 @@ namespace AppleSceneEditor
     /// Responsible for manipulating <see cref="StackPanel"/> instances so that they can be used to mainpulate the
     /// properties of entity components.
     /// </summary>
-    public partial class ComponentPanelHandler
+    public class ComponentPanelHandler : IDisposable
     {
-        private const int MaxTextLength = 25;
-        private const int DefaultTextBoxFontSize = 18;
-        private const int IndentationIncrement = 8;
         private const string ComponentGridId = "ComponentGrid";
 
         private JsonObject _rootObject;
@@ -93,17 +91,22 @@ namespace AppleSceneEditor
         /// <summary>
         /// Reconstructs and rebuilds any UI elements associated with this object.
         /// </summary>
-        /// <param name="rootObject">The <see cref="JsonObject"/> to display. If not set to, then an internal root
-        /// object will be used instead.</param>
-        public void RebuildUI(JsonObject? rootObject = null)
+        public void RebuildUI()
         {
-            rootObject ??= _rootObject;
-
             PropertyStackPanel.Widgets.Clear();
+
             //re-add the holder labels so that the first actual elements are not hidden by the options bar.
             PropertyStackPanel.AddChild(new Label {Text = "Holder"});
             
             BuildUI();
+        }
+
+        public void Dispose()
+        {
+            (_rootObject, Desktop, Components, PropertyStackPanel) = (null!, null!, null!, null!);
+            
+            _commands.Dispose();
+            _commands = null!;
         }
         
         //--------------------------
@@ -313,32 +316,5 @@ namespace AppleSceneEditor
         private static ParameterInfo[]? GetConstructorParamTypes(Type type) => (from ctor in type.GetConstructors()
             where ctor.GetCustomAttribute(typeof(JsonConstructorAttribute)) is not null
             select ctor).FirstOrDefault()?.GetParameters();
-        
-        public sealed class ComponentsNotFoundException : Exception
-        {
-            public ComponentsNotFoundException(string? entityId) : base(
-                $"Cannot find component array in Entity with an id of {entityId ?? "(Entity has no id)"}!")
-            {
-            }
-        }
-
-        //------------------
-        // Enums and misc.
-        //------------------
-
-        private enum JsonElementType
-        {
-            Property,
-            Array,
-            Object,
-        }
-
-        private enum JsonPropertyType
-        {
-            Boolean,
-            Integer,
-            Float,
-            String,
-        }
     }
 }
