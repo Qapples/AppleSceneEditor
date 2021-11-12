@@ -87,58 +87,6 @@ namespace AppleSceneEditor
         //-----------------------------
         // UI window creation methods
         //-----------------------------
-        
-        private Window CreateNewComponentDialog()
-        {
-            Panel panel = new();
-            Window outWindow = new() {Content = panel};
-            VerticalStackPanel stackPanel = new();
-
-            ComboBox typeSelectionBox = new() {HorizontalAlignment = HorizontalAlignment.Center};
-            foreach (string type in _prototypes.Keys)
-            {
-                typeSelectionBox.Items.Add(new ListItem {Text = type});
-            }
-
-            TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
-            TextButton cancelButton = new() {Text = "Cancel", HorizontalAlignment = HorizontalAlignment.Right};
-            
-            okButton.Click += (o, e) => FinishButtonClick(typeSelectionBox.SelectedItem.Text);
-            cancelButton.Click += (o, e) => outWindow.Close();
-
-            stackPanel.AddChild(new Label
-                {Text = "Select type of component", HorizontalAlignment = HorizontalAlignment.Center});
-            stackPanel.AddChild(typeSelectionBox);
-            stackPanel.AddChild(new HorizontalStackPanel
-                {Widgets = {okButton, cancelButton}, HorizontalAlignment = HorizontalAlignment.Right});
-            
-            panel.Widgets.Add(stackPanel);
-
-            return outWindow;
-        }
-
-        private Window CreateAlreadyExistsDialog()
-        {
-            Panel panel = new();
-            Window outWindow = new() {Content = panel};
-            VerticalStackPanel stackPanel = new();
-
-            stackPanel.AddChild(new Label
-            {
-                Text = "Cannot add component because another component of the same type already exists!",
-                StyleName = "small",
-                HorizontalAlignment = HorizontalAlignment.Center,
-            });
-            
-            TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
-            okButton.Click += (o, e) => outWindow.Close();
-
-            stackPanel.AddChild(okButton);
-            
-            panel.Widgets.Add(stackPanel);
-            
-            return outWindow;
-        }
 
         private FileDialog CreateOpenFileDialog()
         {

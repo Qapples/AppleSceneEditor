@@ -5,6 +5,7 @@ using System.IO;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Factories;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Systems;
@@ -177,8 +178,8 @@ namespace AppleSceneEditor
             Stylesheet.Current = stylesheet;
 
             //create dialogs
-            _addComponentWindow = CreateNewComponentDialog();
-            _alreadyExistsWindow = CreateAlreadyExistsDialog();
+            _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
+            _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
             _openFileDialog = CreateOpenFileDialog();
             _newFileDialog = CreateNewFileDialog();
 
