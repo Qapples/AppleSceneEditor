@@ -17,7 +17,6 @@ using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
 using Myra.Utility;
-using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 //has to be in the AppleSceneEditor namespace for it to be a partial class of MainGame which is in that namespace
 namespace AppleSceneEditor
@@ -27,44 +26,9 @@ namespace AppleSceneEditor
     
     public partial class MainGame
     {
-        private const string BaseEntityContents = @"{
-    ""components"": [
-        {
-        }
-    ],
-    ""id"" : ""Base""
-}";
-        
         //----------------
         // Init methods
         //----------------
-
-        private void InitNewProject(string folderPath, int maxCapacity = 128)
-        {
-            string worldPath = Path.Combine(folderPath, new DirectoryInfo(folderPath).Name + ".world");
-
-            //create paths
-            string entitiesPath = Path.Combine(folderPath, "Entities");
-            Directory.CreateDirectory(Path.Combine(folderPath, "Systems"));
-            Directory.CreateDirectory(Path.Combine(folderPath, "Entities"));
-            Directory.CreateDirectory(Path.Combine(folderPath, "Content"));
-
-            //create world file
-            using (StreamWriter writer = File.CreateText(worldPath))
-            {
-                writer.WriteLine("WorldMaxCapacity " + maxCapacity);
-                writer.Flush();
-            }
-
-            //add base entity
-            using (StreamWriter writer = File.CreateText(Path.Combine(entitiesPath, "BaseEntity")))
-            {
-                writer.WriteLine(BaseEntityContents);
-                writer.Flush();
-            }
-
-            _currentScene = new Scene(folderPath, GraphicsDevice, null, _spriteBatch, true);
-        }
 
         private void InitUIFromScene(Scene scene)
         {
@@ -189,7 +153,7 @@ namespace AppleSceneEditor
 
                 _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
                     true);
-                InitJsonFromScenePath(Directory.GetParent(filePath)!.FullName);
+                _jsonObjects = IOHelper.CreateJsonObjectsFromScene(Directory.GetParent(filePath)!.FullName);
 
                 if (_currentScene is not null)
                 {
@@ -214,8 +178,8 @@ namespace AppleSceneEditor
                 string folderPath = fileDialog.Folder;
                 if (string.IsNullOrEmpty(folderPath)) return;
 
-                InitNewProject(folderPath);
-                InitJsonFromScenePath(folderPath);
+                _currentScene = IOHelper.CreateNewScene(folderPath, _spriteBatch);
+                _jsonObjects = IOHelper.CreateJsonObjectsFromScene(folderPath);
 
                 if (_currentScene is not null)
                 {
@@ -304,65 +268,7 @@ namespace AppleSceneEditor
                 return true;
             });
         }
-        
-        //--------------
-        // I/O methods
-        //--------------
-        
-        private void InitJsonFromScenePath(string scenePath)
-        {
-            string entitiesFolderPath = Path.Combine(scenePath, "Entities");
 
-            if (!Directory.Exists(entitiesFolderPath)) return;
-
-            foreach (string entityPath in Directory.GetFiles(entitiesFolderPath))
-            {
-                Utf8JsonReader reader = new(File.ReadAllBytes(entityPath), new JsonReaderOptions
-                {
-                    CommentHandling = JsonCommentHandling.Skip,
-                    AllowTrailingCommas = true
-                });
-
-                JsonObject? newObj = JsonObject.CreateFromJsonReader(ref reader);
-                if (newObj is not null) _jsonObjects.Add(newObj);
-            }
-        }
-
-        private Dictionary<string, JsonObject> CreatePrototypesFromFile(string filePath)
-        {
-            const string methodName = nameof(MainGame) + "." + nameof(CreatePrototypesFromFile);
-
-            Utf8JsonReader reader = new(File.ReadAllBytes(filePath), new JsonReaderOptions
-            {
-                CommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true
-            });
-            
-            JsonObject? rootObject = JsonObject.CreateFromJsonReader(ref reader);
-            JsonArray? prototypes = rootObject?.FindArray("prototypes");
-
-            if (prototypes is null)
-            {
-                Debug.WriteLine($"{methodName}: cannot find JsonArray with name \"prototypes\"! Returning null.");
-                return null;
-            }
-
-            Dictionary<string, JsonObject> outDictionary = new();
-            
-            foreach (JsonObject obj in prototypes)
-            {
-                JsonProperty? typeProp = obj.FindProperty("$type");
-                if (typeProp?.ValueKind != JsonValueKind.String) continue;
-
-                //type should be string thanks to the check from above
-                string type = (string) typeProp.Value!;
-                
-                outDictionary.Add(type, obj);
-            }
-
-            return outDictionary;
-        }
-        
         //we can't have this method in InputHandler because it calls TryGetCommandFromFunctionName which uses private
         //fields from MainGame :(.
         private InputHandler CreateInputHandlerFromFile(string filePath)

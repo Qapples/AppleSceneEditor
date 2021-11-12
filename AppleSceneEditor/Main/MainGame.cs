@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.Exceptions;
+using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Systems;
@@ -160,7 +161,7 @@ namespace AppleSceneEditor
             //inputhandler will be initialized later when a proper world is loaded and everything is set.
             Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
             Config.ParseKeybindConfigFile(File.ReadAllText(keybindPath));
-            _prototypes = CreatePrototypesFromFile(prototypesPath);
+            _prototypes = IOHelper.CreatePrototypesFromFile(prototypesPath);
 
             //load stylesheet
             string folder = Path.GetDirectoryName(Path.GetFullPath(_uiPath));
@@ -255,8 +256,8 @@ namespace AppleSceneEditor
                 {
                     _currentScene = new Scene(parentDirectory.FullName, GraphicsDevice, null,
                         _spriteBatch, true);
-                    
-                    InitJsonFromScenePath(parentDirectory.FullName);
+
+                    _jsonObjects = IOHelper.CreateJsonObjectsFromScene(parentDirectory.FullName);
                     InitUIFromScene(_currentScene);
                     
                     _currentScene.Compile();
