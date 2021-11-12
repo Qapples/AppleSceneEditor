@@ -14,58 +14,18 @@ namespace AppleSceneEditor
         //-----------------
         // EVENT METHODS
         //-----------------
-        
+
+        private FileDialog _openFileDialog;
+        private FileDialog _newFileDialog;
+
         public void MenuFileOpen(object? sender, EventArgs? eventArgs)
         {
-            FileDialog fileDialog = new(FileDialogMode.OpenFile) {Filter = "*.world", Visible = true, Enabled = true};
-
-            fileDialog.Closed += (o, e) =>
-            {
-                if (!fileDialog.Result) return;
-
-                string filePath = fileDialog.FilePath;
-                if (string.IsNullOrEmpty(filePath)) return;
-
-                _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
-                    true);
-                InitJsonFromScenePath(Directory.GetParent(filePath)!.FullName);
-
-                if (_currentScene is not null)
-                {
-                    InitUIFromScene(_currentScene);
-                    
-                    _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
-                }
-            };
-
-            fileDialog.ShowModal(_desktop);
+            _openFileDialog.ShowModal(_desktop);
         }
 
         public void MenuFileNew(object? sender, EventArgs? eventArgs)
         {
-            FileDialog fileDialog = new(FileDialogMode.ChooseFolder) {Visible = true, Enabled = true};
-
-            fileDialog.Closed += (o, e) =>
-            {
-                if (!fileDialog.Result) return;
-
-                string folderPath = fileDialog.Folder;
-                if (string.IsNullOrEmpty(folderPath)) return;
-
-                InitNewProject(folderPath);
-                InitJsonFromScenePath(folderPath);
-
-                if (_currentScene is not null)
-                {
-                    InitUIFromScene(_currentScene);
-                    
-                    _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
-                }
-            };
-
-            fileDialog.ShowModal(_desktop);
+            _newFileDialog.ShowModal(_desktop);
         }
 
         private void AddComponentButtonClick(object? sender, EventArgs? eventArgs)

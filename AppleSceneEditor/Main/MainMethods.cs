@@ -8,11 +8,14 @@ using System.Text.Json;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
+using AppleSceneEditor.Exceptions;
+using AppleSceneEditor.Systems;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.File;
 using Myra.Utility;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
@@ -172,7 +175,60 @@ namespace AppleSceneEditor
             
             return outWindow;
         }
-        
+
+        private FileDialog CreateOpenFileDialog()
+        {
+            FileDialog fileDialog = new(FileDialogMode.ChooseFolder) {Enabled = true, Visible = true};
+            
+            fileDialog.Closed += (o, e) =>
+            {
+                if (!fileDialog.Result) return;
+
+                string filePath = fileDialog.FilePath;
+                if (string.IsNullOrEmpty(filePath)) return;
+
+                _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
+                    true);
+                InitJsonFromScenePath(Directory.GetParent(filePath)!.FullName);
+
+                if (_currentScene is not null)
+                {
+                    InitUIFromScene(_currentScene);
+                    
+                    _drawSystem?.Dispose();
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                }
+            };
+
+            return fileDialog;
+        }
+
+        private FileDialog CreateNewFileDialog()
+        {
+            FileDialog fileDialog = new(FileDialogMode.OpenFile) {Filter = "*.world", Enabled = true, Visible = true};
+            
+            fileDialog.Closed += (o, e) =>
+            {
+                if (!fileDialog.Result) return;
+
+                string folderPath = fileDialog.Folder;
+                if (string.IsNullOrEmpty(folderPath)) return;
+
+                InitNewProject(folderPath);
+                InitJsonFromScenePath(folderPath);
+
+                if (_currentScene is not null)
+                {
+                    InitUIFromScene(_currentScene);
+                    
+                    _drawSystem?.Dispose();
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                }
+            };
+
+            return fileDialog;
+        }
+
         //---------------
         // Update methods
         //---------------
@@ -225,7 +281,7 @@ namespace AppleSceneEditor
                             _mainPanelHandler =
                                 new ComponentPanelHandler(_desktop, selectedJsonObject, propertyStackPanel, _commands);
                         }
-                        catch (ComponentPanelHandler.ComponentsNotFoundException e)
+                        catch (ComponentsNotFoundException e)
                         {
                             Debug.WriteLine(e);
                             return false;
@@ -237,7 +293,7 @@ namespace AppleSceneEditor
                         {
                             _mainPanelHandler.RootObject = selectedJsonObject;
                         }
-                        catch (ComponentPanelHandler.ComponentsNotFoundException e)
+                        catch (ComponentsNotFoundException e)
                         {
                             Debug.WriteLine(e);
                             return false;
@@ -365,6 +421,8 @@ namespace AppleSceneEditor
             {
                 "save" when _mainPanelHandler is not null && _currentScene is not null =>
                     new SaveCommand(_mainPanelHandler, _currentScene),
+                "open" => new OpenCommand(this),
+                "new" => new NewCommand(this),
                 _ => new EmptyCommand()
             }) is not EmptyCommand;
 

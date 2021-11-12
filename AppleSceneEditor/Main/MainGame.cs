@@ -178,6 +178,8 @@ namespace AppleSceneEditor
             //create dialogs
             _addComponentWindow = CreateNewComponentDialog();
             _alreadyExistsWindow = CreateAlreadyExistsDialog();
+            _openFileDialog = CreateOpenFileDialog();
+            _newFileDialog = CreateNewFileDialog();
 
             //load the UI from the path define as _uiPath
             _project = Project.LoadFromXml(File.ReadAllText(_uiPath), settings.AssetManager, stylesheet);
@@ -288,6 +290,9 @@ namespace AppleSceneEditor
             _addComponentWindow = null;
             _alreadyExistsWindow = null;
 
+            _openFileDialog = null!;
+            _newFileDialog = null!;
+
             _project = null;
             
             _currentScene?.Dispose();
@@ -302,7 +307,7 @@ namespace AppleSceneEditor
             _mainPanelHandler = null;
 
             Dispose();
-
+            
             long afterMemoryCount = GC.GetTotalMemory(true);
             Debug.WriteLine($"Unload complete. Data amount: {afterMemoryCount}");
         }
