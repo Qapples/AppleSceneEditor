@@ -76,7 +76,7 @@ namespace AppleSceneEditor
                 {
                     if (widget is not Grid grid) return false;
 
-                    ScrollViewer? scrollViewer = TryFindWidgetById<ScrollViewer>(grid, "EntityScrollViewer");
+                    ScrollViewer? scrollViewer = grid.TryFindWidgetById<ScrollViewer>("EntityScrollViewer");
                     if (scrollViewer is null)
                     {
                         Debug.WriteLine("Can't find scrollviewer of ID \"EntityScrollViewer\"");
@@ -84,7 +84,7 @@ namespace AppleSceneEditor
                     }
 
                     VerticalStackPanel? stackPanel =
-                        TryFindWidgetById<VerticalStackPanel>(scrollViewer, "EntityStackPanel");
+                        scrollViewer.TryFindWidgetById<VerticalStackPanel>("EntityStackPanel");
                     if (stackPanel is null)
                     {
                         Debug.WriteLine("Can't find VerticalStackPanel with ID of \"EntityStackPanel\".");
@@ -252,7 +252,7 @@ namespace AppleSceneEditor
                     if (widget is not Grid grid) return false;
                     if (!EntityExtensions.TryGetEntityById(scene, entityId, out _)) return false;
 
-                    StackPanel? propertyStackPanel = TryFindWidgetById<StackPanel>(grid, "PropertyStackPanel");
+                    StackPanel? propertyStackPanel = grid.TryFindWidgetById<StackPanel>("PropertyStackPanel");
                     if (propertyStackPanel is null) return false;
 
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
@@ -418,8 +418,8 @@ namespace AppleSceneEditor
 
         //We could handle this via parsing an external file but imo the user should have no control over this so
         //we are hard coding this instead.
-        private bool TryGetCommandFromFunctionName(string funcName, out IKeyCommand command) => 
-            (command = funcName switch 
+        private bool TryGetCommandFromFunctionName(string funcName, out IKeyCommand command) =>
+            (command = funcName switch
             {
                 "save" when _mainPanelHandler is not null && _currentScene is not null =>
                     new SaveCommand(_mainPanelHandler, _currentScene),
@@ -429,28 +429,5 @@ namespace AppleSceneEditor
                 "redo" => new RedoCommand(_commands),
                 _ => new EmptyCommand()
             }) is not EmptyCommand;
-
-        private static T? TryFindWidgetById<T>(Container container, string id) where T : class
-        {
-            T? output;
-
-            try
-            {
-                output = container.FindWidgetById(id) as T;
-
-                if (output is null)
-                {
-                    Debug.WriteLine($"{id} cannot be casted into an instance of {typeof(T)}");
-                    return null;
-                }
-            }
-            catch
-            {
-                Debug.WriteLine($"{typeof(T)} of ID {id} cannot be found.");
-                return null;
-            }
-
-            return output;
-        }
     }
 }
