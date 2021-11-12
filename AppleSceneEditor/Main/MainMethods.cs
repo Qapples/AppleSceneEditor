@@ -423,6 +423,8 @@ namespace AppleSceneEditor
                     new SaveCommand(_mainPanelHandler, _currentScene),
                 "open" => new OpenCommand(this),
                 "new" => new NewCommand(this),
+                "undo" => new UndoCommand(_commands),
+                "redo" => new RedoCommand(_commands),
                 _ => new EmptyCommand()
             }) is not EmptyCommand;
 
