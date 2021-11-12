@@ -86,5 +86,19 @@ namespace AppleSceneEditor.Extensions
 
             return outEntity;
         }
+        
+        public static bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
+        {
+            try
+            {
+                entity = scene.EntityMap[entityId];
+                return true;
+            }
+            catch
+            {
+                entity = new Entity();
+                return false;
+            }
+        }
     }
 }

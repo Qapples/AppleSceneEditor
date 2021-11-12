@@ -250,7 +250,7 @@ namespace AppleSceneEditor
                 if (widget.Id == "MainGrid")
                 {
                     if (widget is not Grid grid) return false;
-                    if (!TryGetEntityById(scene, entityId, out var entity)) return false;
+                    if (!EntityExtensions.TryGetEntityById(scene, entityId, out _)) return false;
 
                     StackPanel? propertyStackPanel = TryFindWidgetById<StackPanel>(grid, "PropertyStackPanel");
                     if (propertyStackPanel is null) return false;
@@ -363,6 +363,8 @@ namespace AppleSceneEditor
             return outDictionary;
         }
         
+        //we can't have this method in InputHandler because it calls TryGetCommandFromFunctionName which uses private
+        //fields from MainGame :(.
         private InputHandler CreateInputHandlerFromFile(string filePath)
         {
             const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlerFromFile);
@@ -428,20 +430,6 @@ namespace AppleSceneEditor
                 _ => new EmptyCommand()
             }) is not EmptyCommand;
 
-        private static bool TryGetEntityById(Scene scene, string entityId, out Entity entity)
-        {
-            try
-            {
-                entity = scene.EntityMap[entityId];
-                return true;
-            }
-            catch
-            {
-                entity = new Entity();
-                return false;
-            }
-        }
-        
         private static T? TryFindWidgetById<T>(Container container, string id) where T : class
         {
             T? output;
