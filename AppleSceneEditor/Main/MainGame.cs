@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Extensions;
@@ -155,9 +156,16 @@ namespace AppleSceneEditor
             string typeAliasPath = Path.Combine(_configPath, "TypeAliases.txt");
             string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
             string prototypesPath = Path.Combine(_configPath, "ComponentPrototypes.json");
-            
+
             //ensure that these paths exist.
-            List<string> missingConfigFiles = new() { };
+            string[] missingConfigFiles = (from file in new[] {typeAliasPath, keybindPath, prototypesPath}
+                where !File.Exists(file)
+                select file).ToArray();
+
+            if (missingConfigFiles.Length > 0)
+            {
+                throw new RequiredConfigFileNotFoundException(missingConfigFiles);
+            }
 
             //inputhandler will be initialized later when a proper world is loaded and everything is set.
             Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
