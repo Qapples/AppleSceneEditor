@@ -9,6 +9,7 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Exceptions;
+using AppleSceneEditor.Input.Commands.Movement;
 using AppleSceneEditor.Systems;
 using AppleSerialization.Json;
 using DefaultEcs;
@@ -72,7 +73,8 @@ namespace AppleSceneEditor
                     UpdatePropertyGridWithEntity(scene, "Base");
                     
                     //init _inputHelper here since by then all the fields should have been initialized so far.
-                    _inputHandler = CreateInputHandlerFromFile(Path.Combine(_configPath, "Keybinds.txt"));
+                    (_notHeldInputHandler, _heldInputHandler) =
+                        CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
                 }
 
                 return true;
@@ -219,17 +221,76 @@ namespace AppleSceneEditor
 
         //we can't have this method in InputHandler because it calls TryGetCommandFromFunctionName which uses private
         //fields from MainGame :(.
-        private InputHandler CreateInputHandlerFromFile(string filePath)
+        public (InputHandler notHeldHandler, InputHandler heldHandler) CreateInputHandlersFromFile(string filePath)
         {
-            const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlerFromFile);
-
-            Dictionary<KeyboardState, IKeyCommand> commands = new();
-            KeyboardState blankState = new();
-
+#if DEBUG
+            const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlersFromFile);
+#endif
             using StreamReader reader = new(filePath, Encoding.ASCII);
 
+            InputHandler? notHeldHandler = null;
+            InputHandler? heldHandler = null;
+
+            //might be able to do this through regex but I'm too lazy to come up with a complicated regex query.
             string? line = reader.ReadLine();
             while (line is not null)
+            {
+                //# indicates a region. start looking for data after a region.
+                if (!string.IsNullOrEmpty(line) && line[0] == '#' && line[1..] is "HELD" or "NOTHELD")
+                {
+                    //#HELD indicates commands that activate when keys are pressed regardless if they were pressed the
+                    //previous frame (they can be held down)
+                    //#NOTHELD indicates the opposites (only actives once when the keys are first presssed)
+                    bool isHeld = line[1..] == "HELD";
+
+                    if (isHeld && heldHandler is null)
+                    {
+                        heldHandler = CreateInputHandlerFromStream(reader, true, out line);
+                    }
+                    else if (isHeld && heldHandler is not null)
+                    {
+                        Debug.WriteLine($"{methodName} (parse warning): multiple #HELD regions. Only returning" +
+                                        $"the first one.");
+                    }
+
+                    if (!isHeld && notHeldHandler is null)
+                    {
+                        notHeldHandler = CreateInputHandlerFromStream(reader, false, out line);
+                    }
+                    else if (!isHeld && notHeldHandler is not null)
+                    {
+                        Debug.WriteLine($"{methodName} (parse warning): multiple #NOTHELD regions. Only returning" +
+                                        $"the first one.");
+                    }
+                }
+                else
+                {
+                    line = reader.ReadLine();
+                }
+            }
+
+            if (heldHandler is null)
+            {
+                Debug.WriteLine($"{methodName}: did not find #HELD REGION! Returning an empty input handler.");
+            }
+
+            if (notHeldHandler is null)
+            {
+                Debug.WriteLine($"{methodName}: did not find #NOTHELD region! Returning an empty input handler.");
+            }
+
+            return (notHeldHandler ?? new InputHandler(false), heldHandler ?? new InputHandler(true));
+        }
+        
+        private InputHandler CreateInputHandlerFromStream(StreamReader reader, bool isHeld, out string? lastLine)
+        {
+            const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlerFromStream);
+
+            List<CommandEntry> commands = new();
+
+            //'#' indicates a region. stop searching when we hit a new region.
+            string? line;
+            while ((line = reader.ReadLine()) is not null && line[0] != '#')
             {
                 int colonIndex = line.IndexOf(':');
                 
@@ -242,10 +303,11 @@ namespace AppleSceneEditor
 
                     if (TryGetCommandFromFunctionName(funcName, out var command))
                     {
-                        KeyboardState state = KeyboardExtensions.ParseKeyboardState(keysStr);
-                        if (state != blankState)
+                        Keys[] keys = KeyboardExtensions.ParseKeyboardState(keysStr);
+                        
+                        if (keys.Length > 0)
                         {
-                            commands.Add(state, command);
+                            commands.Add(new CommandEntry(keys, command));
                         }
                     }
                     else
@@ -255,15 +317,13 @@ namespace AppleSceneEditor
                 }
                 else
                 {
-                    Debug.WriteLine($"{methodName}: cannot find func name behind colon in the following line of " +
-                                    $"file with name of \"{filePath}\": {line}. Skipping.");
+                    Debug.WriteLine($"{methodName}: cannot find func name behind colon in the following line: " +
+                                    $"{line}. Skipping.");
                 }
-
-
-                line = reader.ReadLine();
             }
 
-            return new InputHandler(commands);
+            lastLine = line;
+            return new InputHandler(commands, isHeld);
         }
 
         //------------------
@@ -281,7 +341,9 @@ namespace AppleSceneEditor
                 "new" => new NewCommand(this),
                 "undo" => new UndoCommand(_commands),
                 "redo" => new RedoCommand(_commands),
-                _ => new EmptyCommand()
+                "move_forward" when _currentScene is not null => 
+                    new MoveForwardCommand(_currentScene.World),
+                _ => IKeyCommand.EmptyCommand
             }) is not EmptyCommand;
     }
 }

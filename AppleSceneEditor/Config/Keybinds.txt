@@ -1,5 +1,8 @@
+#NOTHELD
 save: LeftControl S
 new: LeftControl N
 open: LeftControl O
 undo: LeftControl Z
 redo: LeftControl R
+#HELD
+move_forward: W

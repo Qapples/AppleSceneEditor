@@ -34,8 +34,8 @@ namespace AppleSceneEditor
             KeyboardState kbState = Keyboard.GetState();
             ref var camera = ref _currentScene.World.Get<Camera>();
 
-            if (kbState[_movementKeys["Move Forward"]] == KeyState.Down)
-                camera.Position += GetVelocityVector(Direction.Forward, (false, false, false), CameraSpeed);
+            // if (kbState[_movementKeys["Move Forward"]] == KeyState.Down)
+            //     camera.Position += GetVelocityVector(Direction.Forward, (false, false, false), CameraSpeed);
             if (kbState[_movementKeys["Move Backward"]] == KeyState.Down)
                 camera.Position += GetVelocityVector(Direction.Backwards, (false, false, false), CameraSpeed);
             if (kbState[_movementKeys["Move Left"]] == KeyState.Down)

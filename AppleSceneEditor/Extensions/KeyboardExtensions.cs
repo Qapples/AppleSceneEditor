@@ -8,7 +8,7 @@ namespace AppleSceneEditor.Extensions
     //TODO: Add docs
     public static class KeyboardExtensions
     {
-        public static KeyboardState ParseKeyboardState(string str)
+        public static Keys[] ParseKeyboardState(string str)
         {
 #if DEBUG
             const string methodName = nameof(KeyboardExtensions) + "." + nameof(ParseKeyboardState);
@@ -25,11 +25,13 @@ namespace AppleSceneEditor.Extensions
                 }
                 else
                 {
-                    Debug.WriteLine($"{methodName}: unable to parse key from string {str} at index {i}");
+                    Debug.WriteLine($"{methodName}: unable to parse key from string {str} at index {i}. " +
+                                    $"Returning empty array.");
+                    return Array.Empty<Keys>();
                 }
             }
 
-            return new KeyboardState(keys);
+            return keys;
         }
 
         public static bool TryParseKey(string str, out Keys key) => Enum.TryParse<Keys>(str, out key);

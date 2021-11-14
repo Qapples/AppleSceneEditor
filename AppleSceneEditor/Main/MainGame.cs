@@ -16,6 +16,7 @@ using AppleSerialization.Json;
 using AssetManagementBase;
 using DefaultEcs.System;
 using FontStashSharp;
+using GrappleFightNET5.Components;
 using GrappleFightNET5.Components.Camera;
 using GrappleFightNET5.Scenes.Info;
 using Microsoft.Xna.Framework;
@@ -60,7 +61,8 @@ namespace AppleSceneEditor
         private ISystem<GameTime>? _drawSystem;
 
         private CommandStream _commands;
-        private InputHandler _inputHandler;
+        private InputHandler _notHeldInputHandler;
+        private InputHandler _heldInputHandler;
 
         private Viewport _sceneViewport;
         private Viewport _overallViewport;
@@ -274,10 +276,16 @@ namespace AppleSceneEditor
                     _currentScene.World.Set(new Camera
                     {
                         Position = Vector3.Zero,
-                        LookAt = new Vector3(0, 0, 20),
-                        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95),
-                            GraphicsDevice.DisplayMode.AspectRatio, 1, 1000),
+                        LookAt = new Vector3(0f, 0f, 20f),
+                        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
+                            GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f),
                         Sensitivity = 2f
+                    });
+                    _currentScene.World.Set(new CameraProperties
+                    {
+                        YawDegrees = 0f,
+                        PitchDegrees = 0f,
+                        CameraSpeed = 0.5f
                     });
 
                     _drawSystem?.Dispose();
@@ -334,15 +342,21 @@ namespace AppleSceneEditor
 
             if (_currentScene is not null)
             {
-                IKeyCommand? command = _inputHandler.GetCommand(ref kbState, ref _previousKbState);
-                command?.Execute();
+                IKeyCommand[] commands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
+                foreach (IKeyCommand command in commands)
+                {
+                    if (command is not EmptyCommand)
+                    {
+                        command.Execute();
+                    }
+                }
 
                 UpdateCamera(mouseState);
             }
 
             _previousKbState = kbState;
             _previousMouseState = mouseState;
-            
+
             base.Update(gameTime);
         }
 
