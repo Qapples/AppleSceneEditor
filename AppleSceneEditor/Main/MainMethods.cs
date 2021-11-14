@@ -9,7 +9,6 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Exceptions;
-using AppleSceneEditor.Input.Commands.Movement;
 using AppleSceneEditor.Systems;
 using AppleSerialization.Json;
 using DefaultEcs;
@@ -341,8 +340,14 @@ namespace AppleSceneEditor
                 "new" => new NewCommand(this),
                 "undo" => new UndoCommand(_commands),
                 "redo" => new RedoCommand(_commands),
-                "move_forward" when _currentScene is not null => 
-                    new MoveForwardCommand(_currentScene.World),
+                "move_camera_forward" when _currentScene is not null => 
+                    new MoveCameraCommand(MovementHelper.Direction.Forward, _currentScene.World),
+                "move_camera_backward" when _currentScene is not null => 
+                    new MoveCameraCommand(MovementHelper.Direction.Backwards, _currentScene.World),
+                "move_camera_left" when _currentScene is not null => 
+                    new MoveCameraCommand(MovementHelper.Direction.Left, _currentScene.World),
+                "move_camera_right" when _currentScene is not null => 
+                    new MoveCameraCommand(MovementHelper.Direction.Right, _currentScene.World),
                 _ => IKeyCommand.EmptyCommand
             }) is not EmptyCommand;
     }

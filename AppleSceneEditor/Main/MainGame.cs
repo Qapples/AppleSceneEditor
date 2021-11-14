@@ -351,7 +351,13 @@ namespace AppleSceneEditor
                     }
                 }
 
-                UpdateCamera(mouseState);
+                //update camera
+                ref var properties = ref _currentScene.World.Get<CameraProperties>();
+                ref var camera = ref _currentScene.World.Get<Camera>();
+
+                properties.YawDegrees += (_previousMouseState.X - mouseState.X) / camera.Sensitivity;
+                properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
+                camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
             }
 
             _previousKbState = kbState;

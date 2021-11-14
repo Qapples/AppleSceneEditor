@@ -1,32 +1,33 @@
 using AppleSceneEditor.Extensions;
 using DefaultEcs;
 using GrappleFightNET5.Components.Camera;
+using Direction = AppleSceneEditor.Extensions.MovementHelper.Direction;
 
-namespace AppleSceneEditor.Input.Commands.Movement
+namespace AppleSceneEditor.Input.Commands
 {
-    public class MoveForwardCommand : IKeyCommand
+    public class MoveCameraCommand : IKeyCommand
     {
         public bool Disposed { get; private set; }
+        public Direction Direction { get; }
 
         private World _world;
-        
-        public MoveForwardCommand(World world)
+
+        public MoveCameraCommand(Direction direction, World world)
         {
-            _world = world;
-            Disposed = false;
+            (Direction, _world, Disposed) = (direction, world, false);
         }
 
         public void Execute()
         {
-            if (!_world.Has<Camera>()) return;
+            if (!_world.Has<Camera>() && !_world.Has<CameraProperties>()) return;
 
             ref var camera = ref _world.Get<Camera>();
             ref var properties = ref _world.Get<CameraProperties>();
             var (yawDegrees, pitchDegrees, cameraSpeed) =
                 (properties.YawDegrees, properties.PitchDegrees, properties.CameraSpeed);
-            
-            camera.Position += MovementHelper.GenerateVectorFromDirection(yawDegrees, pitchDegrees,
-                MovementHelper.Direction.Forward, (false, false, false), cameraSpeed);
+
+            camera.Position += MovementHelper.GenerateVectorFromDirection(yawDegrees, pitchDegrees, Direction,
+                (false, false, false), cameraSpeed);
         }
 
         public void Dispose()
