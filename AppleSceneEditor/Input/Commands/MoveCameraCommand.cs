@@ -1,6 +1,7 @@
 using AppleSceneEditor.Extensions;
 using DefaultEcs;
 using GrappleFightNET5.Components.Camera;
+using Microsoft.Xna.Framework;
 using Direction = AppleSceneEditor.Extensions.MovementHelper.Direction;
 
 namespace AppleSceneEditor.Input.Commands
@@ -26,8 +27,10 @@ namespace AppleSceneEditor.Input.Commands
             var (yawDegrees, pitchDegrees, cameraSpeed) =
                 (properties.YawDegrees, properties.PitchDegrees, properties.CameraSpeed);
 
-            camera.Position += MovementHelper.GenerateVectorFromDirection(yawDegrees, pitchDegrees, Direction,
-                (false, false, false), cameraSpeed);
+            camera.Position += Direction is Direction.Up or Direction.Down
+                ? Direction == Direction.Up ? Vector3.Up * cameraSpeed : Vector3.Down * cameraSpeed
+                : MovementHelper.GenerateVectorFromDirection(yawDegrees, pitchDegrees, Direction,
+                    (false, false, false), cameraSpeed);
         }
 
         public void Dispose()

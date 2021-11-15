@@ -348,6 +348,10 @@ namespace AppleSceneEditor
                     new MoveCameraCommand(MovementHelper.Direction.Left, _currentScene.World),
                 "move_camera_right" when _currentScene is not null => 
                     new MoveCameraCommand(MovementHelper.Direction.Right, _currentScene.World),
+                "move_camera_up" when _currentScene is not null => 
+                    new MoveCameraCommand(MovementHelper.Direction.Up, _currentScene.World),
+                "move_camera_down" when _currentScene is not null => 
+                    new MoveCameraCommand(MovementHelper.Direction.Down, _currentScene.World),
                 _ => IKeyCommand.EmptyCommand
             }) is not EmptyCommand;
     }

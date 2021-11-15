@@ -9,3 +9,5 @@ move_camera_forward: W
 move_camera_backward: S
 move_camera_left: A
 move_camera_right: D
+move_camera_up: Space
+move_camera_down: LeftShift
