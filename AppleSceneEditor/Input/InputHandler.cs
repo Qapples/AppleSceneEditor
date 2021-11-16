@@ -31,7 +31,13 @@ namespace AppleSceneEditor.Input
         public InputHandler(List<CommandEntry> commands, bool canBeHeld)
         {
             _commands = commands;
+            
+            //we have fill the array the old fashiuon 
             _outgoingCommands = new IKeyCommand[MaxCommandsActivated];
+            for (int i = 0; i < _outgoingCommands.Length; i++)
+            {
+                _outgoingCommands[i] = new EmptyCommand();
+            }
             
             CanBeHeld = canBeHeld;
             Disposed = false;

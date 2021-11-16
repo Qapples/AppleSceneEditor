@@ -171,7 +171,6 @@ namespace AppleSceneEditor
 
             //inputhandler will be initialized later when a proper world is loaded and everything is set.
             Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
-            Config.ParseKeybindConfigFile(File.ReadAllText(keybindPath));
             _prototypes = IOHelper.CreatePrototypesFromFile(prototypesPath);
 
             //load stylesheet
@@ -321,6 +320,8 @@ namespace AppleSceneEditor
             _drawSystem?.Dispose();
 
             _commands.Dispose();
+            _notHeldInputHandler.Dispose();
+            _heldInputHandler.Dispose();
 
             _mainPanelHandler = null;
 
@@ -331,6 +332,7 @@ namespace AppleSceneEditor
         }
 
         private KeyboardState _previousKbState;
+        private MouseState _previousMouseState;
 
         protected override void Update(GameTime gameTime)
         {
@@ -345,7 +347,7 @@ namespace AppleSceneEditor
                 IKeyCommand[] commands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
                 foreach (IKeyCommand command in commands)
                 {
-                    if (command is not EmptyCommand)
+                    if (command is not EmptyCommand or MoveCameraCommand)
                     {
                         command.Execute();
                     }
@@ -354,7 +356,7 @@ namespace AppleSceneEditor
                 //update camera
                 ref var properties = ref _currentScene.World.Get<CameraProperties>();
                 ref var camera = ref _currentScene.World.Get<Camera>();
-
+                
                 properties.YawDegrees += (_previousMouseState.X - mouseState.X) / camera.Sensitivity;
                 properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
                 camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
