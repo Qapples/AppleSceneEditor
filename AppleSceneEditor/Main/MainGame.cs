@@ -218,6 +218,8 @@ namespace AppleSceneEditor
                         if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
 
                         _mainMenu = menu;
+                        _mainMenu.AcceptsKeyboardFocus = true;
+
                         missingWidgets.Remove("MainMenu");
 
                         break;
@@ -228,6 +230,7 @@ namespace AppleSceneEditor
                         if (panel.FindWidgetById("AddComponentButton") is not TextButton addButton) return false;
 
                         addButton.Click += AddComponentButtonClick;
+                        panel.AcceptsKeyboardFocus = true;
 
                         missingWidgets.Remove("MainPanel");
                         
@@ -238,6 +241,8 @@ namespace AppleSceneEditor
                         if (widget is not Grid grid) return false;
 
                         _mainGrid = grid;
+                        _mainGrid.AcceptsKeyboardFocus = true;
+                        
                         missingWidgets.Remove("MainGrid");
                         
                         break;
@@ -347,19 +352,24 @@ namespace AppleSceneEditor
                 IKeyCommand[] commands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
                 foreach (IKeyCommand command in commands)
                 {
-                    if (command is not EmptyCommand or MoveCameraCommand)
-                    {
+                    if (command is not EmptyCommand &&
+                        (command is not MoveCameraCommand || _mainGrid.IsKeyboardFocused))
+                    { 
                         command.Execute();
                     }
                 }
-
-                //update camera
-                ref var properties = ref _currentScene.World.Get<CameraProperties>();
-                ref var camera = ref _currentScene.World.Get<Camera>();
                 
-                properties.YawDegrees += (_previousMouseState.X - mouseState.X) / camera.Sensitivity;
-                properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
-                camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
+                
+                //update camera
+                if (_mainGrid.IsKeyboardFocused)
+                {
+                    ref var properties = ref _currentScene.World.Get<CameraProperties>();
+                    ref var camera = ref _currentScene.World.Get<Camera>();
+
+                    properties.YawDegrees += (_previousMouseState.X - mouseState.X) / camera.Sensitivity;
+                    properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
+                    camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
+                }
             }
 
             _previousKbState = kbState;

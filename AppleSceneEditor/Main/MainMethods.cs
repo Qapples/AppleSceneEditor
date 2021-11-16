@@ -55,6 +55,8 @@ namespace AppleSceneEditor
                         return false;
                     }
 
+                    stackPanel.AcceptsKeyboardFocus = true;
+
                     foreach (ref readonly var entity in scene.Entities.GetEntities())
                     {
                         if (!entity.Has<string>()) continue;
@@ -167,6 +169,8 @@ namespace AppleSceneEditor
 
                     StackPanel? propertyStackPanel = grid.TryFindWidgetById<StackPanel>("PropertyStackPanel");
                     if (propertyStackPanel is null) return false;
+                    
+                    propertyStackPanel.AcceptsKeyboardFocus = true;
 
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
                     //so we're gonna have to make a new ComponentPanelHandler on the spot.

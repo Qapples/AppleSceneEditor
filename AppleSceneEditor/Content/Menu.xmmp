@@ -2,7 +2,7 @@
   <Project.ExportOptions Namespace="MyraPad.UI" Class="StudioWidget" OutputPath="C:/Projects/Myra/src/MyraPad/UI"/>
   
   <Panel Id="MainPanel">
-    <Grid ShowGridLines="True" ColumnSpacing="1" RowSpacing="1" Id="MainGrid">
+    <Grid ShowGridLines="True" ColumnSpacing="1" RowSpacing="1" Id="MainGrid" FocusedBorder="#5BC6FAFF">
       <Grid.RowsProportions>
         <!--File viewer proportion-->
         <Proportion Type="Part" Value="2.75"/>
@@ -32,27 +32,15 @@
 
       <!--List of entities. The "holder" label is there to ensure that the entities go past the toolbar and are visible.
       -->
-      <ScrollViewer Id="EntityScrollViewer">
+      <ScrollViewer Id="EntityScrollViewer" FocusedBorder="#5BC6FAFF">
         <VerticalStackPanel Id="EntityStackPanel">
           <Label Text="Holder"/>
           <!--ENTITIES-->
         </VerticalStackPanel>
       </ScrollViewer>
 
-      <ScrollViewer GridColumn="2" Id="PropertyScrollViewer">
-<!--        <HorizontalSplitPane Id="PropertySplitPane">-->
-<!--          <Grid RowSpacing="8" Id="NameGrid">-->
-<!--            <VerticalStackPanel Id="NameStackPanel">-->
-<!--              <Label Text="Holder"/>-->
-<!--            </VerticalStackPanel>-->
-<!--          </Grid>-->
-<!--          <Grid RowSpacing="8" Id="ValueGrid">-->
-<!--            <VerticalStackPanel Id="ValueStackPanel">-->
-<!--              <Label Text="Holder"/>-->
-<!--            </VerticalStackPanel>-->
-<!--          </Grid>-->
-<!--        </HorizontalSplitPane>-->
-        <VerticalStackPanel Id="PropertyStackPanel"/>
+      <ScrollViewer GridColumn="2" Id="PropertyScrollViewer" FocusedBorder="#5BC6FAFF">
+        <VerticalStackPanel Id="PropertyStackPanel" />
       </ScrollViewer>
     </Grid>
 
