@@ -342,7 +342,7 @@ namespace AppleSceneEditor
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
-                Keys.Escape)) Exit();
+                Keys.OemTilde)) Exit();
 
             KeyboardState kbState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
@@ -350,16 +350,20 @@ namespace AppleSceneEditor
             if (_currentScene is not null)
             {
                 IKeyCommand[] commands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
-                foreach (IKeyCommand command in commands)
+
+                if (commands.Length > 0)
                 {
-                    if (command is not EmptyCommand &&
-                        (command is not MoveCameraCommand || _mainGrid.IsKeyboardFocused))
-                    { 
-                        command.Execute();
+                    foreach (IKeyCommand command in commands)
+                    {
+                        if (command is not EmptyCommand &&
+                            (command is not MoveCameraCommand || _mainGrid.IsKeyboardFocused))
+                        {
+                            command.Execute();
+                        }
                     }
                 }
-                
-                
+
+
                 //update camera
                 if (_mainGrid.IsKeyboardFocused)
                 {
