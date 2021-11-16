@@ -66,6 +66,7 @@ namespace AppleSceneEditor.Input
                         return _outgoingCommands;
                     }
 
+                    _outgoingCommands[index].Dispose();
                     _outgoingCommands[index++] = command.Command;
                 }
             }
@@ -76,6 +77,7 @@ namespace AppleSceneEditor.Input
             //clean up the last commands as they might have been set beforehand
             for (; index < MaxCommandsActivated; index++)
             {
+                _outgoingCommands[index].Dispose();
                 _outgoingCommands[index] = IKeyCommand.EmptyCommand;
             }
 
