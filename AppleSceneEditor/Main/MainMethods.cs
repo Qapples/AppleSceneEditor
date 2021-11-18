@@ -344,6 +344,7 @@ namespace AppleSceneEditor
                 "new" => new NewCommand(this),
                 "undo" => new UndoCommand(_commands),
                 "redo" => new RedoCommand(_commands),
+                "unfocus" => new UnfocusCommand(_mainGrid),
                 "move_camera_forward" when _currentScene is not null => 
                     new MoveCameraCommand(MovementHelper.Direction.Forward, _currentScene.World),
                 "move_camera_backward" when _currentScene is not null => 

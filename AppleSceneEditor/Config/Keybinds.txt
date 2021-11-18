@@ -4,6 +4,7 @@ new: LeftControl N
 open: LeftControl O
 undo: LeftControl Z
 redo: LeftControl R
+unfocus: Escape
 #HELD
 move_camera_forward: W
 move_camera_backward: S

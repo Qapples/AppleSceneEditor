@@ -349,14 +349,27 @@ namespace AppleSceneEditor
 
             if (_currentScene is not null)
             {
-                IKeyCommand[] commands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
+                IKeyCommand[] heldCommands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
+                IKeyCommand[] notHeldCommand = _notHeldInputHandler.GetCommands(ref kbState, ref _previousKbState);
 
-                if (commands.Length > 0)
+                if (heldCommands.Length > 0)
                 {
-                    foreach (IKeyCommand command in commands)
+                    foreach (IKeyCommand command in heldCommands)
                     {
                         if (command is not EmptyCommand &&
                             (command is not MoveCameraCommand || _mainGrid.IsKeyboardFocused))
+                        {
+                            command.Execute();
+                        }
+                    }
+                }
+
+                if (notHeldCommand.Length > 0)
+                {
+                    foreach (IKeyCommand command in notHeldCommand)
+                    {
+                        //we don't have to check for MoveCameraCommand here because it will always be a held command.
+                        if (command is not EmptyCommand)
                         {
                             command.Execute();
                         }
