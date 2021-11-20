@@ -1,0 +1,31 @@
+<Project>
+    <VerticalStackPanel Id="MainPanel">
+        <VerticalStackPanel.Proportions>
+            <Proportion Type="Auto"/>
+            <Proportion Type="Fill"/>
+        </VerticalStackPanel.Proportions>
+        
+        <!--Horizontal Menu Tabs-->
+        <HorizontalMenu Id="PanelSelectionMenu">
+            <MenuItem Text="Keybinds" Id="KeyindsMenuItem" _PanelId="KeybindPanel"/>
+        </HorizontalMenu>
+        
+        <!-- Panels -->
+        <Panel Id="KeybindPanel">
+            <HorizontalSplitPane Id="KeybindPane">
+                <Grid RowSpacing="8">
+                    <VerticalStackPanel Id="KeybindNameStack">
+                        <Label Text="Name"/>
+                    </VerticalStackPanel>
+                </Grid>
+                <Grid RowSpacing="8">
+                    <VerticalStackPanel Id="KeybindValueStack">
+                        <Label Text="Value"/>
+                    </VerticalStackPanel>
+                    <VerticalSlider HorizontalAlignment="Right" Name="KeybindSlider"/>
+                </Grid>
+            </HorizontalSplitPane>
+        </Panel>
+        
+    </VerticalStackPanel>
+</Project>

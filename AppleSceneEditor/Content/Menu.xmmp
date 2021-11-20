@@ -51,10 +51,11 @@
         <Proportion Type="Fill"/>
       </VerticalStackPanel.Proportions>
       <HorizontalMenu Id="MainMenu">
-        <MenuItem Text="&amp;File" Id="MenuFile">
+        <MenuItem Text="File" Id="MenuFile">
           <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen"/>
           <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew"/>
         </MenuItem>
+        <MenuItem Text="&amp;Settings" ShortcutText="Ctrl+Alt+S" Id="SettingsMenuOpen"/>
       </HorizontalMenu>
     </VerticalStackPanel>
   </Panel>

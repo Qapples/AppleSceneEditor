@@ -28,6 +28,11 @@ namespace AppleSceneEditor
             _newFileDialog.ShowModal(_desktop);
         }
 
+        public void SettingsMenuOpen(object? sender, EventArgs? eventArgs)
+        {
+            _settingsWindow.ShowModal(_desktop);
+        }
+
         private void AddComponentButtonClick(object? sender, EventArgs? eventArgs)
         {
             if (_currentJsonObject is null) return;

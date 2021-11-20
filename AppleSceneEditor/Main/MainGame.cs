@@ -43,6 +43,7 @@ namespace AppleSceneEditor
 
         private Window _addComponentWindow;
         private Window _alreadyExistsWindow;
+        private Window _settingsWindow;
         
         //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
         private readonly string _uiPath;
@@ -154,10 +155,11 @@ namespace AppleSceneEditor
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            //load config
+            //paths
             string typeAliasPath = Path.Combine(_configPath, "TypeAliases.txt");
             string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
             string prototypesPath = Path.Combine(_configPath, "ComponentPrototypes.json");
+            string settingsMenuPath = Path.Combine(Content.RootDirectory, "Settings.xmmp");
 
             //ensure that these paths exist.
             string[] missingConfigFiles = (from file in new[] {typeAliasPath, keybindPath, prototypesPath}
@@ -189,6 +191,8 @@ namespace AppleSceneEditor
             //create dialogs
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
+            _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(settingsMenuPath);
+            
             _openFileDialog = CreateOpenFileDialog();
             _newFileDialog = CreateNewFileDialog();
 
@@ -213,9 +217,11 @@ namespace AppleSceneEditor
                         
                         MenuItem? fileItemOpen = menu.FindMenuItemById("MenuFileOpen");
                         MenuItem? fileItemNew = menu.FindMenuItemById("MenuFileNew");
+                        MenuItem? settingsMenuOpen = menu.FindMenuItemById("SettingsMenuOpen");
 
                         if (fileItemOpen is not null) fileItemOpen.Selected += MenuFileOpen;
                         if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
+                        if (settingsMenuOpen is not null) settingsMenuOpen.Selected += SettingsMenuOpen;
 
                         _mainMenu = menu;
                         _mainMenu.AcceptsKeyboardFocus = true;
