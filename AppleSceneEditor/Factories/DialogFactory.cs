@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Myra.Graphics2D.UI;
+using SettingsPanelInitializer = AppleSceneEditor.Factories.SettingsPanelInitializers.SettingsPanelInitializer;
 
 namespace AppleSceneEditor.Factories
 {
@@ -51,18 +52,54 @@ namespace AppleSceneEditor.Factories
                 StyleName = "small",
                 HorizontalAlignment = HorizontalAlignment.Center,
             });
-            
+
             TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
             okButton.Click += (o, e) => outWindow.Close();
 
             stackPanel.AddChild(okButton);
-            
+
             panel.Widgets.Add(stackPanel);
-            
+
             return outWindow;
         }
 
-        public static Window CreateSettingsDialogFromFile(string filePath)
+        public static Window CreateSetKeybindDialog(Dictionary<string, string> keybindDict, string keybindName)
+        {
+            Label currentKeybindLabel = new() {HorizontalAlignment = HorizontalAlignment.Center};
+            TextButton cancelButton = new()
+                {Text = "Cancel", Id = "CancelButton", HorizontalAlignment = HorizontalAlignment.Right};
+            TextButton okButton = new()
+                {Text = "OK", Id = "OkButton", HorizontalAlignment = HorizontalAlignment.Right};
+
+            VerticalStackPanel panel = new()
+            {
+                Widgets =
+                {
+                    new Label
+                    {
+                        Text = "Press the keys you want to set the keybind to (press escape to clear):",
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    },
+                    currentKeybindLabel,
+                    new HorizontalStackPanel {Widgets = {cancelButton, okButton}}
+                },
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+
+            Window outWindow = new() {Content = panel};
+
+            outWindow.KeyDown += (_, keys) => currentKeybindLabel.Text += keys.Data + " ";
+            cancelButton.Click += (_, _) => outWindow.Close();
+            okButton.Click += (_, _) =>
+            {
+                keybindDict[keybindName] = currentKeybindLabel.Text.Trim();
+                outWindow.Close();
+            };
+
+            return outWindow;
+        }
+
+        public static Window CreateSettingsDialogFromFile(Desktop desktop, string filePath, string configDirectory)
         {
 #if DEBUG
             const string methodName = nameof(DialogFactory) + "." + nameof(CreateAlreadyExistsDialog);
@@ -83,25 +120,31 @@ namespace AppleSceneEditor.Factories
                 }
             }
 
-            //add functionality for switching panels via the menu.
+            //add functionality for switching panels via the menu and initialize menus.
             Menu panelSelectionMenu = (Menu) root.FindWidgetById("PanelSelectionMenu");
             foreach (var menuItem in panelSelectionMenu.Items)
             {
                 MenuItem item = (MenuItem) menuItem;
-
-                item.Selected += (_, _) =>
+                if (!item.UserData.TryGetValue("_PanelId", out var panelName))
                 {
-                    if (!item.UserData.TryGetValue("_PanelId", out var panelName))
-                    {
-                        Debug.WriteLine($"{methodName} (item selected): PanelSelectionMenu item with id " +
-                                        $"{item.Id} does not have a \"_PanelID\" entry! Ignoring.");
-                        return;
-                    }
-                    
-                    UpdatePanelVisibility(mainPanel, (Panel) mainPanel.FindWidgetById(panelName));
-                };
-            }
+                    Debug.WriteLine($"{methodName} (item selected): PanelSelectionMenu item with id " +
+                                    $"{item.Id} does not have a \"_PanelID\" entry! Ignoring.");
+                    continue;
+                }
 
+                SettingsPanelInitializer? initializer = GetSettingsPanelInitializer(panelName);
+                if (initializer is null)
+                {
+                    Debug.WriteLine($"{methodName} (item selected): panel of name {panelName} does NOT have an" +
+                                    " initializer! Ignoring.");
+                    continue;
+                }
+
+                Panel selectedPanel = (Panel) mainPanel.FindWidgetById(panelName);
+                initializer(selectedPanel, desktop, configDirectory);
+                item.Selected += (_, _) => UpdatePanelVisibility(mainPanel, selectedPanel);
+            }
+            
             return outWindow;
         }
 
@@ -112,14 +155,14 @@ namespace AppleSceneEditor.Factories
         /// for one specified panel.
         /// </summary>
         /// <remarks>This method performs a REFERENCE comparison, not an ID comparison!</remarks>
-        /// <param name="panels"><see cref="IMultipleItemsContainer"/> with the <see cref="Panel"/> instances to make
+        /// <param name="panelsContainer"><see cref="IMultipleItemsContainer"/> with the <see cref="Panel"/> instances to make
         /// visibile/invisible</param>
         /// <param name="panel">The <see cref="Panel"/> to make visible while the other panels are invisible</param>
-        private static void UpdatePanelVisibility(IMultipleItemsContainer panels, Panel panel)
+        private static void UpdatePanelVisibility(IMultipleItemsContainer panelsContainer, Panel panel)
         {
             (panel.Visible, panel.Enabled) = (true, true);
             
-            foreach (Widget widget in panels.Widgets)
+            foreach (Widget widget in panelsContainer.Widgets)
             {
                 if (widget is Panel p && p != panel)
                 {
@@ -127,5 +170,11 @@ namespace AppleSceneEditor.Factories
                 }
             }
         }
+
+        private static SettingsPanelInitializer? GetSettingsPanelInitializer(string panelName) => panelName switch
+        {
+            "KeybindPanel" => SettingsPanelInitializers.KeybindsPanelInitializer,
+            _ => null
+        };
     }
 }

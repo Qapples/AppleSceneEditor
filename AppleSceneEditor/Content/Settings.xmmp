@@ -9,22 +9,23 @@
         <HorizontalMenu Id="PanelSelectionMenu">
             <MenuItem Text="Keybinds" Id="KeyindsMenuItem" _PanelId="KeybindPanel"/>
         </HorizontalMenu>
-        
+
         <!-- Panels -->
         <Panel Id="KeybindPanel">
-            <HorizontalSplitPane Id="KeybindPane">
-                <Grid RowSpacing="8">
-                    <VerticalStackPanel Id="KeybindNameStack">
-                        <Label Text="Name"/>
-                    </VerticalStackPanel>
-                </Grid>
-                <Grid RowSpacing="8">
-                    <VerticalStackPanel Id="KeybindValueStack">
-                        <Label Text="Value"/>
-                    </VerticalStackPanel>
-                    <VerticalSlider HorizontalAlignment="Right" Name="KeybindSlider"/>
-                </Grid>
-            </HorizontalSplitPane>
+            <ScrollViewer>
+                <HorizontalSplitPane Id="KeybindPane">
+                    <Grid RowSpacing="8">
+                        <VerticalStackPanel Id="KeybindNameStack">
+                            <!-- KEYBIND NAMES GO HERE -->
+                        </VerticalStackPanel>
+                    </Grid>
+                    <Grid RowSpacing="8">
+                        <VerticalStackPanel Id="KeybindValueStack">
+                            <!-- KEYBIND VALUES GO HERE -->
+                        </VerticalStackPanel>
+                    </Grid>
+                </HorizontalSplitPane>
+            </ScrollViewer>
         </Panel>
         
     </VerticalStackPanel>

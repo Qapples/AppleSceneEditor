@@ -188,11 +188,6 @@ namespace AppleSceneEditor
                 : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
             Stylesheet.Current = stylesheet;
 
-            //create dialogs
-            _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
-            _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
-            _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(settingsMenuPath);
-            
             _openFileDialog = CreateOpenFileDialog();
             _newFileDialog = CreateNewFileDialog();
 
@@ -202,6 +197,11 @@ namespace AppleSceneEditor
             {
                 Root = _project.Root
             };
+            
+            //create dialogs
+            _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
+            _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
+            _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(_desktop, settingsMenuPath, _configPath);
 
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
@@ -307,7 +307,7 @@ namespace AppleSceneEditor
         protected override void UnloadContent()
         {
             long beforeMemoryCount = GC.GetTotalMemory(false);
-            Debug.WriteLine($"Unloading. Data amount: {beforeMemoryCount}");
+            Debug.WriteLine($"Unloading. Data amount:       {beforeMemoryCount}");
             
             _spriteBatch.Dispose();
             _graphics.Dispose();

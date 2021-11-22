@@ -77,7 +77,7 @@ namespace AppleSceneEditor.Extensions
 
             return outList;
         }
-        
+
         private const string BaseEntityContents = @"{
     ""components"": [
         {
