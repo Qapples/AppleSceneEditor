@@ -8,7 +8,7 @@ namespace AppleSceneEditor.Input
 {
     public class InputHandler : IDisposable
     {
-        private List<CommandEntry> _commands;
+        private Dictionary<string, CommandEntry> _commands;
         private IKeyCommand[] _outgoingCommands;
 
         private static readonly IKeyCommand[] EmptyCommands = Array.Empty<IKeyCommand>();
@@ -24,11 +24,11 @@ namespace AppleSceneEditor.Input
         private const string MaxCmdName = nameof(MaxCommandsActivated);
 #endif
         
-        public InputHandler(bool canBeHeld) : this(new List<CommandEntry>(), canBeHeld)
+        public InputHandler(bool canBeHeld) : this(new Dictionary<string, CommandEntry>(), canBeHeld)
         {
         }
 
-        public InputHandler(List<CommandEntry> commands, bool canBeHeld)
+        public InputHandler(Dictionary<string, CommandEntry> commands, bool canBeHeld)
         {
             _commands = commands;
             
@@ -55,7 +55,7 @@ namespace AppleSceneEditor.Input
 
             int index = 0;
             
-            foreach (CommandEntry command in _commands)
+            foreach (CommandEntry command in _commands.Values)
             {
                 if (AllKeysPressed(ref kbState, command.Keys))
                 {
@@ -82,9 +82,23 @@ namespace AppleSceneEditor.Input
             return _outgoingCommands;
         }
 
+        public void UpdateCommandKeys(string commandName, params Keys[] keys)
+        {
+#if DEBUG
+            const string methodName = nameof(InputHandler) + "." + nameof(UpdateCommandKeys);
+#endif
+            if (!_commands.TryGetValue(commandName, out var oldCmd))
+            {
+                Debug.WriteLine($"{methodName}: cannot find and update command of name {commandName}!");
+                return;
+            }
+
+            _commands[commandName] = new CommandEntry(keys, oldCmd.Command);
+        }
+
         public void Dispose()
         {
-            foreach (CommandEntry command in _commands)
+            foreach (CommandEntry command in _commands.Values)
             {
                 command.Command.Dispose();
             }

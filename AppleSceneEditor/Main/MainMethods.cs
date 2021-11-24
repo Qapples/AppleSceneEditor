@@ -289,7 +289,7 @@ namespace AppleSceneEditor
         {
             const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlerFromStream);
 
-            List<CommandEntry> commands = new();
+            Dictionary<string, CommandEntry> commands = new();
 
             //'#' indicates a region. stop searching when we hit a new region.
             string? line;
@@ -310,7 +310,7 @@ namespace AppleSceneEditor
                         
                         if (keys.Length > 0)
                         {
-                            commands.Add(new CommandEntry(keys, command));
+                            commands[funcName] = new CommandEntry(keys, command);
                         }
                     }
                     else
