@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AppleSceneEditor.Commands;
+using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
@@ -14,9 +15,9 @@ using AppleSerialization;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using AssetManagementBase;
+using DefaultEcs;
 using DefaultEcs.System;
 using FontStashSharp;
-using GrappleFightNET5.Components;
 using GrappleFightNET5.Components.Camera;
 using GrappleFightNET5.Scenes.Info;
 using Microsoft.Xna.Framework;
@@ -83,7 +84,7 @@ namespace AppleSceneEditor
             _stylesheetPath = Path.Combine(Content.RootDirectory, "Stylesheets", "editor_ui_skin.xmms");
             _defaultWorldPath = Path.Combine(root, "Examples", "BasicWorld", "BasicWorld.world");
             _configPath = Path.Combine(root, "Config");
-            
+
             StringComparison comparison = StringComparison.Ordinal;
             foreach (string arg in args)
             {
@@ -355,6 +356,8 @@ namespace AppleSceneEditor
 
             if (_currentScene is not null)
             {
+                World world = _currentScene.World;
+                
                 IKeyCommand[] heldCommands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
                 IKeyCommand[] notHeldCommand = _notHeldInputHandler.GetCommands(ref kbState, ref _previousKbState);
 
@@ -382,16 +385,35 @@ namespace AppleSceneEditor
                     }
                 }
 
-
+                //throw out a select entity command on left mouse click. this is temporary.
+                if (mouseState.LeftButton == ButtonState.Pressed &&
+                    _previousMouseState.LeftButton == ButtonState.Released)
+                {
+                    new SelectEntityCommand(world, GraphicsDevice).Execute();
+                }
+                
                 //update camera
                 if (_mainGrid.IsKeyboardFocused)
                 {
-                    ref var properties = ref _currentScene.World.Get<CameraProperties>();
-                    ref var camera = ref _currentScene.World.Get<Camera>();
+                    ref var properties = ref world.Get<CameraProperties>();
+                    ref var camera = ref world.Get<Camera>();
 
                     properties.YawDegrees += (_previousMouseState.X - mouseState.X) / camera.Sensitivity;
                     properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
                     camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
+                }
+                
+                //account for flags
+                
+                //SelectedEntityFlag indicates that an entity needs to be selected. 
+                if (world.Has<SelectedEntityFlag>())
+                {
+                    ref var flag = ref world.Get<SelectedEntityFlag>();
+                    
+                    //the selected entity should have a string id
+                    SelectEntity(_currentScene, flag.SelectedEntity.Get<string>());
+                    
+                    world.Remove<SelectedEntityFlag>();
                 }
             }
 
@@ -429,7 +451,7 @@ namespace AppleSceneEditor
                 
                 //set the viewport so that the scene is drawn within the scene viewer
                 GraphicsDevice.Viewport = _sceneViewport;
-                
+
                 _drawSystem.Update(gameTime);
             }
 

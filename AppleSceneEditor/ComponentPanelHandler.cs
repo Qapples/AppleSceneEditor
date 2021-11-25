@@ -17,8 +17,6 @@ using Microsoft.Xna.Framework;
 using Myra.Graphics2D.UI.Styles;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
-
-//TODO: Overall: Reduce line count and verbosity. Feel like I can do a bit better here in terms of this.
 namespace AppleSceneEditor
 {
     /// <summary>

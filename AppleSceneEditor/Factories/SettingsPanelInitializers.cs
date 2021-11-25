@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 using Myra.Graphics2D.UI;
 
@@ -71,7 +69,7 @@ namespace AppleSceneEditor.Factories
 
                 if (!p.IsKeyboardFocused)
                 {
-                    await WriteKeybindsToFile(nameKeybindDict, keybindsPath);
+                    await WriteKeybindsToFile(nameKeybindDict, keybindsPath).ConfigureAwait(false);
                 }
             };
         }
@@ -84,11 +82,11 @@ namespace AppleSceneEditor.Factories
             {
                 if (name is "#HELD" or "#NOTHELD")
                 {
-                    await writer.WriteLineAsync(name);
+                    await writer.WriteLineAsync(name).ConfigureAwait(false);
                 }
                 else
                 {
-                    await writer.WriteLineAsync($"{name}: {keybind}");
+                    await writer.WriteLineAsync($"{name}: {keybind}").ConfigureAwait(false);
                 }
             }
         }

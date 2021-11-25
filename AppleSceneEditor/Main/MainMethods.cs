@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
@@ -57,21 +58,24 @@ namespace AppleSceneEditor
 
                     stackPanel.AcceptsKeyboardFocus = true;
 
-                    foreach (ref readonly var entity in scene.Entities.GetEntities())
+                    foreach (Entity entity in scene.Entities.GetEntities())
                     {
                         if (!entity.Has<string>()) continue;
 
                         //can't use ref due to closure
                         var id = entity.Get<string>();
-
+                        
+                        //when a user presses an "EntityButton", then that entity will be selected. We can signify
+                        //through the world of the currentScene that we want to select an entity by giving the world
+                        //a SelectedEntityFlag component containing the Entity we want to select.
                         TextButton button = new() {Text = id, Id = "EntityButton_" + id};
-                        button.TouchDown += (o, e) => UpdatePropertyGridWithEntity(scene, id);
+                        button.TouchDown += (_, _) => _currentScene?.World.Set(new SelectedEntityFlag(entity));
 
                         stackPanel.AddChild(button);
                     }
                     
                     //init scene with base entity
-                    UpdatePropertyGridWithEntity(scene, "Base");
+                    SelectEntity(scene, "Base");
                     
                     //init _inputHelper here since by then all the fields should have been initialized so far.
                     (_notHeldInputHandler, _heldInputHandler) =
@@ -156,9 +160,9 @@ namespace AppleSceneEditor
         /// <param name="scene">The <see cref="Scene"/> instance whose <see cref="Scene.World"/> is where the desired
         /// entity belongs to.</param>
         /// <param name="entityId">The ID of the <see cref="Entity"/> to display it's components.</param>
-        private void UpdatePropertyGridWithEntity(Scene scene, string entityId)
+        private void SelectEntity(Scene scene, string entityId)
         {
-            const string methodName = nameof(MainGame) + "." + nameof(UpdatePropertyGridWithEntity);
+            const string methodName = nameof(MainGame) + "." + nameof(SelectEntity);
             
             _desktop.Root.ProcessWidgets(widget =>
             {

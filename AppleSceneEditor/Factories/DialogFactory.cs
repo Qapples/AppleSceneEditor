@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using AppleSceneEditor.Input;
 using Myra.Graphics2D.UI;
 using SettingsPanelInitializer = AppleSceneEditor.Factories.SettingsPanelInitializers.SettingsPanelInitializer;
 
@@ -66,10 +67,8 @@ namespace AppleSceneEditor.Factories
         public static Window CreateSetKeybindDialog(Dictionary<string, string> keybindDict, string keybindName)
         {
             Label currentKeybindLabel = new() {HorizontalAlignment = HorizontalAlignment.Center};
-            TextButton cancelButton = new()
-                {Text = "Cancel", Id = "CancelButton", HorizontalAlignment = HorizontalAlignment.Right};
-            TextButton okButton = new()
-                {Text = "OK", Id = "OkButton", HorizontalAlignment = HorizontalAlignment.Right};
+            TextButton cancelButton = new() {Text = "Cancel", Id = "CancelButton"};
+            TextButton okButton = new() {Text = "OK", Id = "OkButton"};
 
             VerticalStackPanel panel = new()
             {
@@ -81,9 +80,9 @@ namespace AppleSceneEditor.Factories
                         HorizontalAlignment = HorizontalAlignment.Center
                     },
                     currentKeybindLabel,
-                    new HorizontalStackPanel {Widgets = {cancelButton, okButton}}
+                    new HorizontalStackPanel
+                        {Widgets = {cancelButton, okButton}, HorizontalAlignment = HorizontalAlignment.Right}
                 },
-                HorizontalAlignment = HorizontalAlignment.Right
             };
 
             Window outWindow = new() {Content = panel};
@@ -144,7 +143,7 @@ namespace AppleSceneEditor.Factories
                 initializer(selectedPanel, desktop, configDirectory);
                 item.Selected += (_, _) => UpdatePanelVisibility(mainPanel, selectedPanel);
             }
-            
+
             return outWindow;
         }
 

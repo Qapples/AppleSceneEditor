@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using AppleScene.Helpers;
 using AppleScene.Rendering;
@@ -12,6 +13,7 @@ using GrappleFightNET5.Components.Misc;
 using GrappleFightNET5.Components.Transform;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace AppleSceneEditor.Systems
 {
