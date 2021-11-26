@@ -385,14 +385,6 @@ namespace AppleSceneEditor
                     }
                 }
 
-                //throw out a select entity command on left mouse click. this is temporary.
-                if (mouseState.LeftButton == ButtonState.Pressed &&
-                    _previousMouseState.LeftButton == ButtonState.Released)
-                {
-                    using var selectCmd = new SelectEntityCommand(world, GraphicsDevice);
-                    selectCmd.Execute();
-                }
-                
                 //update camera
                 if (_mainGrid.IsKeyboardFocused && GlobalFlag.IsFlagRaised(GlobalFlags.UserControllingSceneViewer))
                 {
@@ -402,6 +394,15 @@ namespace AppleSceneEditor
                     properties.YawDegrees += (_previousMouseState.X - mouseState.X) / camera.Sensitivity;
                     properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
                     camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
+                }
+                
+                //if the user clicks the mouse within the scene editor while not moving the camera then indicate
+                //that we want to select an entity. this is likely to be temporary
+                if (_mainGrid.IsKeyboardFocused && !GlobalFlag.IsFlagRaised(GlobalFlags.UserControllingSceneViewer) &&
+                    mouseState.LeftButton == ButtonState.Pressed &&
+                    _previousMouseState.LeftButton == ButtonState.Released)
+                {
+                    GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, true);
                 }
                 
                 //account for flags

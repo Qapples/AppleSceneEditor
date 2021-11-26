@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using AppleScene.Helpers;
 using AppleScene.Rendering;
+using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
 using DefaultEcs.System;
 using DefaultEcs.Threading;
@@ -99,6 +100,29 @@ namespace AppleSceneEditor.Systems
             {
                 ref var box = ref entity.Get<ComplexBox>();
                 box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
+                
+                if (GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay))
+                {
+                    //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer)
+                    MouseState mouseState = Mouse.GetState();
+                    Viewport viewport = _graphicsDevice.Viewport;
+                    Vector3 source = new Vector3(mouseState.X, mouseState.Y, 0.5f);
+
+                    Ray ray = new Ray(worldCam.Position,
+                        viewport.Unproject(source, worldCam.ProjectionMatrix, worldCam.ViewMatrix,
+                            Matrix.CreateWorld(worldCam.Position, Vector3.Forward, Vector3.Up)));
+
+                    float? intercept = box.Intersects(ray);
+
+                    if (intercept is not null)
+                    {
+                        //raise a "selectedEntityFlag" by adding a component which let's everyone that has access to our
+                        //world know that we have selected an entity.
+                        World.Set(new SelectedEntityFlag(entity));
+                    }
+
+                    GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, false);
+                }
             }
         }
 
