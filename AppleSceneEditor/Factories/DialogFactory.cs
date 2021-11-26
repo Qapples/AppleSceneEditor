@@ -92,6 +92,7 @@ namespace AppleSceneEditor.Factories
             okButton.Click += (_, _) =>
             {
                 keybindDict[keybindName] = currentKeybindLabel.Text.Trim();
+                GlobalFlag.SetFlag(GlobalFlags.KeybindUpdated, true);
                 outWindow.Close();
             };
 
@@ -143,6 +144,22 @@ namespace AppleSceneEditor.Factories
                 initializer(selectedPanel, desktop, configDirectory);
                 item.Selected += (_, _) => UpdatePanelVisibility(mainPanel, selectedPanel);
             }
+            
+            //when the window closes set every panel to disabled and invisible as a way of signifying that the window
+            //has closed.
+            outWindow.Closed += (window, _) =>
+            {
+                //the window parameter represents outWindow as an object, and the outWindow's content is a stack panel.
+                StackPanel panel = (StackPanel) ((Window) window).Content;
+
+                foreach (Widget widget in panel.Widgets)
+                {
+                    if (widget is Panel p)
+                    {
+                        (p.Visible, p.Enabled) = (false, false);
+                    }
+                }
+            };
 
             return outWindow;
         }

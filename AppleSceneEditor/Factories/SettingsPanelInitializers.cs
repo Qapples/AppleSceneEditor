@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Myra.Graphics2D.UI;
@@ -63,12 +64,15 @@ namespace AppleSceneEditor.Factories
             }
 
             //Save whenever the panel loses focus (i.e. the user clicks on another tab or closes it)
-            panel.KeyboardFocusChanged += async (o, _) =>
+            panel.EnabledChanged += async (o, _) =>
             {
                 Panel p = (Panel) o!;
 
-                if (!p.IsKeyboardFocused)
+                if (!p.Enabled && GlobalFlag.IsFlagRaised(GlobalFlags.KeybindUpdated))
                 {
+                    Debug.WriteLine($"Writing keybinds to file {keybindsPath}");
+                    GlobalFlag.SetFlag(GlobalFlags.KeybindUpdated, false);
+                    
                     await WriteKeybindsToFile(nameKeybindDict, keybindsPath).ConfigureAwait(false);
                 }
             };
