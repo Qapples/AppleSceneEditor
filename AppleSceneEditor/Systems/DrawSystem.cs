@@ -106,9 +106,9 @@ namespace AppleSceneEditor.Systems
                     //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer)
                     MouseState mouseState = Mouse.GetState();
                     Viewport viewport = _graphicsDevice.Viewport;
-                    Vector3 source = new Vector3(mouseState.X, mouseState.Y, 0.5f);
+                    Vector3 source = new(mouseState.X, mouseState.Y, 0.5f);
 
-                    Ray ray = new Ray(worldCam.Position,
+                    Ray ray = new(worldCam.Position,
                         viewport.Unproject(source, worldCam.ProjectionMatrix, worldCam.ViewMatrix,
                             Matrix.CreateWorld(worldCam.Position, Vector3.Forward, Vector3.Up)));
 

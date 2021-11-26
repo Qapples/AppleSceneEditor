@@ -14,7 +14,9 @@ using AppleSceneEditor.Systems;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
 using Myra.Utility;
@@ -176,7 +178,7 @@ namespace AppleSceneEditor
 
                     StackPanel? propertyStackPanel = grid.TryFindWidgetById<StackPanel>("PropertyStackPanel");
                     if (propertyStackPanel is null) return false;
-                    
+
                     propertyStackPanel.AcceptsKeyboardFocus = true;
 
                     //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
@@ -197,7 +199,7 @@ namespace AppleSceneEditor
                     }
 
                     _currentJsonObject = selectedJsonObject;
-                    
+
                     if (_mainPanelHandler is null)
                     {
                         try
@@ -222,6 +224,24 @@ namespace AppleSceneEditor
                             Debug.WriteLine(e);
                             return false;
                         }
+                    }
+
+                    //highlight the entity in the entity viewer
+                    VerticalStackPanel? stackPanel =
+                        grid.TryFindWidgetById<VerticalStackPanel>("EntityStackPanel");
+                    if (stackPanel is null)
+                    {
+                        Debug.WriteLine("Can't find VerticalStackPanel with ID of \"EntityStackPanel\".");
+                        return false;
+                    }
+
+                    foreach (Widget panelWidget in stackPanel.Widgets)
+                    {
+                        if (panelWidget is not TextButton button) continue;
+
+                        int entityIdIndex = button.Id.IndexOf('_') + 1;
+                        button.Background =
+                            new SolidBrush(button.Id[entityIdIndex..] == entityId ? Color.SkyBlue : Color.Gray);
                     }
                 }
 
