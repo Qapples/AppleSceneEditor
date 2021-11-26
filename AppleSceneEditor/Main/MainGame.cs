@@ -361,12 +361,15 @@ namespace AppleSceneEditor
                 IKeyCommand[] heldCommands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
                 IKeyCommand[] notHeldCommand = _notHeldInputHandler.GetCommands(ref kbState, ref _previousKbState);
 
+                bool cameraMovementActive = _mainGrid.IsKeyboardFocused &&
+                                            GlobalFlag.IsFlagRaised(GlobalFlags.UserControllingSceneViewer);
+
                 if (heldCommands.Length > 0)
                 {
                     foreach (IKeyCommand command in heldCommands)
                     {
                         if (command is not EmptyCommand &&
-                            (command is not MoveCameraCommand || _mainGrid.IsKeyboardFocused))
+                            (command is not MoveCameraCommand || cameraMovementActive))
                         {
                             command.Execute();
                         }
@@ -385,8 +388,8 @@ namespace AppleSceneEditor
                     }
                 }
 
-                //update camera
-                if (_mainGrid.IsKeyboardFocused && GlobalFlag.IsFlagRaised(GlobalFlags.UserControllingSceneViewer))
+                //update camera movement rotation. Camera movement is handled via commands (handled above).
+                if (cameraMovementActive)
                 {
                     ref var properties = ref world.Get<CameraProperties>();
                     ref var camera = ref world.Get<Camera>();
