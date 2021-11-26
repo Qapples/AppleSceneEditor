@@ -5,6 +5,7 @@ open: LeftControl O
 undo: LeftControl Z
 redo: LeftControl R
 unfocus: Escape
+engage_scene_viewer_camera_movement: C
 #HELD
 move_camera_forward: W
 move_camera_backward: S

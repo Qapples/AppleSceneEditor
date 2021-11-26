@@ -15,7 +15,9 @@ namespace AppleSceneEditor.Input.Commands
 
         public void Execute()
         {
+            //"OnGotKeyboardFocus" causes IsKeyboardFocused to be false. Weird method naming.
             _mainGrid.OnLostKeyboardFocus();
+            GlobalFlag.SetFlag(GlobalFlags.UserControllingSceneViewer, false);
         }
 
         public void Dispose()

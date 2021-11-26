@@ -394,7 +394,7 @@ namespace AppleSceneEditor
                 }
                 
                 //update camera
-                if (_mainGrid.IsKeyboardFocused)
+                if (_mainGrid.IsKeyboardFocused && GlobalFlag.IsFlagRaised(GlobalFlags.UserControllingSceneViewer))
                 {
                     ref var properties = ref world.Get<CameraProperties>();
                     ref var camera = ref world.Get<Camera>();
