@@ -389,7 +389,8 @@ namespace AppleSceneEditor
                 if (mouseState.LeftButton == ButtonState.Pressed &&
                     _previousMouseState.LeftButton == ButtonState.Released)
                 {
-                    new SelectEntityCommand(world, GraphicsDevice).Execute();
+                    using var selectCmd = new SelectEntityCommand(world, GraphicsDevice);
+                    selectCmd.Execute();
                 }
                 
                 //update camera

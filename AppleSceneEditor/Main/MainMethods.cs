@@ -155,11 +155,14 @@ namespace AppleSceneEditor
         private ComponentPanelHandler? _mainPanelHandler;
 
         /// <summary>
-        /// Updates the properties viewer to display the components/properties of an entity of a specified ID.
+        /// Selects the entity that has a specified ID. Selecting an entity involves: <br/>
+        /// Updating the properties viewer to display the components/properties of an entity of a specified ID <br/>
+        /// Highlighting the entity in the entity viewer and in the scene viewer <br/>
+        /// Transformations will be applied to selected entity (if applicable)
         /// </summary>
         /// <param name="scene">The <see cref="Scene"/> instance whose <see cref="Scene.World"/> is where the desired
         /// entity belongs to.</param>
-        /// <param name="entityId">The ID of the <see cref="Entity"/> to display it's components.</param>
+        /// <param name="entityId">The ID of the <see cref="Entity"/> to select.</param>
         private void SelectEntity(Scene scene, string entityId)
         {
             const string methodName = nameof(MainGame) + "." + nameof(SelectEntity);
