@@ -72,6 +72,12 @@ namespace AppleSceneEditor
                         //a SelectedEntityFlag component containing the Entity we want to select.
                         TextButton button = new() {Text = id, Id = "EntityButton_" + id};
                         button.TouchDown += (_, _) => _currentScene?.World.Set(new SelectedEntityFlag(entity));
+                        
+                        //the base entity should be selected by default
+                        if (string.Equals(id, "base", StringComparison.OrdinalIgnoreCase))
+                        {
+                            _currentScene?.World.Set(new SelectedEntityFlag(entity));
+                        }
 
                         stackPanel.AddChild(button);
                     }

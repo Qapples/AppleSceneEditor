@@ -17,5 +17,10 @@ namespace AppleSceneEditor
         /// within the world
         /// </summary>
         FireEntitySelectionRay = 0b100,
+        
+        /// <summary>
+        /// Indicates that a NEW entity has just been selected and things need to be updated.
+        /// </summary>
+        EntitySelected = 0b1000,
     }
 }

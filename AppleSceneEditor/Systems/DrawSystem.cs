@@ -29,19 +29,23 @@ namespace AppleSceneEditor.Systems
         private readonly BasicEffect _boxEffect;
         private readonly VertexBuffer _boxVertexBuffer;
 
+        private ComplexBox _xAxisBox;
+        private ComplexBox _yAxisBox;
+        private ComplexBox _zAxisBox;
+
+        //0 means no axis is selected, 1 is x-axis, 2 is y-axis, and 3 is z-axis
+        private int _axisSelectedFlag;
+
+        private MouseState _previousMouseState;
+
         private static readonly RasterizerState
             SolidState = new() {FillMode = FillMode.Solid, CullMode = CullMode.None};
 
-        //we have to explicitly set each field in each constructor because C#. (can't use a separate method because I
-        //want the fields to be readonly)
         //there should be 36 vertices in every ComplexBox when drawing them.
-        
-        public DrawSystem(World world, GraphicsDevice graphicsDevice) : base(world)
+
+        public DrawSystem(World world, GraphicsDevice graphicsDevice) : this(world, new DefaultParallelRunner(1),
+            graphicsDevice)
         {
-            _graphicsDevice = graphicsDevice;
-            _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
-            _boxEffect = new BasicEffect(_graphicsDevice)
-                {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
         }
 
         public DrawSystem(World world, IParallelRunner runner, GraphicsDevice graphicsDevice) : base(world, runner)
@@ -50,6 +54,20 @@ namespace AppleSceneEditor.Systems
             _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
             _boxEffect = new BasicEffect(_graphicsDevice)
                 {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
+
+            _xAxisBox = new ComplexBox
+            {
+                Center = Vector3.Zero,
+                DrawType = DrawType.Solid,
+                HalfExtent = new Vector3(5f, 0.5f, 0.5f),
+                Rotation = Quaternion.Identity
+            };
+
+            _yAxisBox = _xAxisBox;
+            _yAxisBox.HalfExtent = new Vector3(0.5f, 5f, 0.5f);
+
+            _zAxisBox = _xAxisBox;
+            _zAxisBox.HalfExtent = new Vector3(0.5f, 0.5f, 5f);
         }
 
         protected override void Update(GameTime gameTime, in Entity entity)
@@ -100,31 +118,97 @@ namespace AppleSceneEditor.Systems
             {
                 ref var box = ref entity.Get<ComplexBox>();
                 box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
+
+                bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay);
                 
-                if (GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay))
+                if (fireRayFlag)
                 {
-                    //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer)
-                    MouseState mouseState = Mouse.GetState();
-                    Viewport viewport = _graphicsDevice.Viewport;
-                    Vector3 source = new(mouseState.X, mouseState.Y, 0.5f);
-
-                    Ray ray = new(worldCam.Position,
-                        viewport.Unproject(source, worldCam.ProjectionMatrix, worldCam.ViewMatrix,
-                            Matrix.CreateWorld(worldCam.Position, Vector3.Forward, Vector3.Up)));
-
-                    float? intercept = box.Intersects(ray);
+                    //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer
+                    float? intercept = FireRay(ref worldCam, ref box);
 
                     if (intercept is not null)
                     {
                         //raise a "selectedEntityFlag" by adding a component which let's everyone that has access to our
                         //world know that we have selected an entity.
                         World.Set(new SelectedEntityFlag(entity));
+                        GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
                     }
 
                     GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, false);
                 }
+
+                //handle the x, y, and z complex boxes which can be used by the user within the scene editor to
+                //manipulate the transform of entities.
+                //lots of repeating code here...
+                if (World.Has<SelectedEntityFlag>())
+                {
+                    Entity selectedEntity = World.Get<SelectedEntityFlag>().SelectedEntity;
+                    MouseState mouseState = Mouse.GetState();
+
+                    if (selectedEntity.Has<Transform>() && selectedEntity == entity)
+                    {
+                        ref var selectedTransform = ref selectedEntity.Get<Transform>();
+
+                        _xAxisBox.Center = selectedTransform.Matrix.Translation;
+                        _yAxisBox.Center = selectedTransform.Matrix.Translation;
+                        _zAxisBox.Center = selectedTransform.Matrix.Translation;
+
+                        _xAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
+                        _yAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Green, ref worldCam, null, _boxVertexBuffer);
+                        _zAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Blue, ref worldCam, null, _boxVertexBuffer);
+
+                        if (fireRayFlag && _axisSelectedFlag == 0)
+                        {
+                            int xHit = FireRayHit(ref worldCam, ref _xAxisBox) ? 1 : 0;
+                            int yHit = FireRayHit(ref worldCam, ref _yAxisBox) ? 1 : 0;
+                            int zHit = FireRayHit(ref worldCam, ref _zAxisBox) ? 1 : 0;
+                            
+                            //there must be only one axis hit in order for it to be selected (avoid situations where 
+                            //more than one axis is hit)
+                            if (xHit + yHit + zHit < 2)
+                            {
+                                _axisSelectedFlag = (xHit) + (yHit * 1) + (zHit * 2);
+                                Debug.WriteLine($"Hit on axis: {_axisSelectedFlag}");
+                            }
+                        }
+                        else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
+                        {
+                            int movementValue = mouseState.Y - _previousMouseState.Y;
+
+                            Vector3 movementVector = Vector3.Zero;
+                            if (_axisSelectedFlag == 1) movementVector.X = movementValue;
+                            if (_axisSelectedFlag == 2) movementVector.Y = movementValue;
+                            if (_axisSelectedFlag == 3) movementVector.Z = movementValue;
+
+                            selectedTransform.Matrix += Matrix.CreateTranslation(movementVector);
+                            Debug.WriteLine("Move matrix: " + movementVector);
+                        }
+                        else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
+                        {
+                            _axisSelectedFlag = 0;
+                            Debug.WriteLine("Released");
+                        }
+                    }
+
+                    _previousMouseState = mouseState;
+                }
             }
         }
+
+        private float? FireRay(ref Camera camera, ref ComplexBox box)
+        {
+            MouseState mouseState = Mouse.GetState();
+            Viewport viewport = _graphicsDevice.Viewport;
+            Vector3 source = new(mouseState.X, mouseState.Y, 0.5f);
+            
+            Ray ray = new(camera.Position,
+                viewport.Unproject(source, camera.ProjectionMatrix, camera.ViewMatrix,
+                    Matrix.CreateWorld(camera.Position, Vector3.Forward, Vector3.Up)));
+
+            return box.Intersects(ray);
+        }
+
+        private bool FireRayHit(ref Camera camera, ref ComplexBox box) => FireRay(ref camera, ref box) is not null;
 
         public override void Dispose()
         {

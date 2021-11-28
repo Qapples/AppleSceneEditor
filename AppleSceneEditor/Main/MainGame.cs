@@ -19,6 +19,7 @@ using DefaultEcs;
 using DefaultEcs.System;
 using FontStashSharp;
 using GrappleFightNET5.Components.Camera;
+using GrappleFightNET5.Components.Collision;
 using GrappleFightNET5.Scenes.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -71,7 +72,7 @@ namespace AppleSceneEditor
 
         private Grid _mainGrid;
         private HorizontalMenu _mainMenu;
-        
+       
         public MainGame(string[] args)
         {
             string root = Path.Combine("..", "..", "..");
@@ -146,7 +147,7 @@ namespace AppleSceneEditor
             _graphics.ApplyChanges();
 
             _overallViewport = GraphicsDevice.Viewport;
-
+            
             base.Initialize();
         }
 
@@ -284,6 +285,7 @@ namespace AppleSceneEditor
                     
                     _currentScene.Compile();
                     
+                    //initialize world-wide components
                     _currentScene.World.Set(new Camera
                     {
                         Position = Vector3.Zero,
@@ -292,6 +294,7 @@ namespace AppleSceneEditor
                             GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f),
                         Sensitivity = 2f
                     });
+                    
                     _currentScene.World.Set(new CameraProperties
                     {
                         YawDegrees = 0f,
@@ -411,14 +414,14 @@ namespace AppleSceneEditor
                 //account for flags
                 
                 //SelectedEntityFlag indicates that an entity needs to be selected. 
-                if (world.Has<SelectedEntityFlag>())
+                if (GlobalFlag.IsFlagRaised(GlobalFlags.EntitySelected))
                 {
                     ref var flag = ref world.Get<SelectedEntityFlag>();
                     
                     //the selected entity should have a string id
                     SelectEntity(_currentScene, flag.SelectedEntity.Get<string>());
                     
-                    world.Remove<SelectedEntityFlag>();
+                    GlobalFlag.SetFlag(GlobalFlags.EntitySelected, false);
                 }
             }
 
@@ -433,6 +436,8 @@ namespace AppleSceneEditor
             GraphicsDevice.Clear(Color.Black);
 
             _desktop.Render();
+            
+            Debug.WriteLine(gameTime.ElapsedGameTime.Milliseconds);
 
             //if scene port is uninitialized, then initialize it. (the desktop must first be rendered before the
             //grid lines are initialized)
