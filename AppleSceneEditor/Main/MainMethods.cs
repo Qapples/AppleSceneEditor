@@ -123,7 +123,7 @@ namespace AppleSceneEditor
                     InitUIFromScene(_currentScene);
                     
                     _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice, _commands);
                 }
             };
 
@@ -149,7 +149,7 @@ namespace AppleSceneEditor
                     InitUIFromScene(_currentScene);
                     
                     _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice, _commands);
                 }
             };
 

@@ -303,7 +303,7 @@ namespace AppleSceneEditor
                     });
 
                     _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice);
+                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice, _commands);
                 }
             }
         }
@@ -436,8 +436,6 @@ namespace AppleSceneEditor
             GraphicsDevice.Clear(Color.Black);
 
             _desktop.Render();
-            
-            Debug.WriteLine(gameTime.ElapsedGameTime.Milliseconds);
 
             //if scene port is uninitialized, then initialize it. (the desktop must first be rendered before the
             //grid lines are initialized)

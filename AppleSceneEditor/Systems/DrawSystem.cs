@@ -1,8 +1,8 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using AppleScene.Helpers;
 using AppleScene.Rendering;
+using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
 using DefaultEcs.System;
@@ -25,9 +25,10 @@ namespace AppleSceneEditor.Systems
     [WithEither(typeof(ComplexBox), typeof(MeshData))]
     public sealed class DrawSystem : AEntitySetSystem<GameTime>
     {
-        private readonly GraphicsDevice _graphicsDevice;
-        private readonly BasicEffect _boxEffect;
-        private readonly VertexBuffer _boxVertexBuffer;
+        private GraphicsDevice _graphicsDevice;
+        private BasicEffect _boxEffect;
+        private VertexBuffer _boxVertexBuffer;
+        private CommandStream _commands;
 
         private ComplexBox _xAxisBox;
         private ComplexBox _yAxisBox;
@@ -37,23 +38,26 @@ namespace AppleSceneEditor.Systems
         private int _axisSelectedFlag;
 
         private MouseState _previousMouseState;
+        private Transform _previousTransform;
 
         private static readonly RasterizerState
             SolidState = new() {FillMode = FillMode.Solid, CullMode = CullMode.None};
 
         //there should be 36 vertices in every ComplexBox when drawing them.
 
-        public DrawSystem(World world, GraphicsDevice graphicsDevice) : this(world, new DefaultParallelRunner(1),
-            graphicsDevice)
+        public DrawSystem(World world, GraphicsDevice graphicsDevice, CommandStream commandStream) : this(world,
+            new DefaultParallelRunner(1), graphicsDevice, commandStream)
         {
         }
 
-        public DrawSystem(World world, IParallelRunner runner, GraphicsDevice graphicsDevice) : base(world, runner)
+        public DrawSystem(World world, IParallelRunner runner, GraphicsDevice graphicsDevice,
+            CommandStream commandStream) : base(world, runner)
         {
             _graphicsDevice = graphicsDevice;
             _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
             _boxEffect = new BasicEffect(_graphicsDevice)
                 {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
+            _commands = commandStream;
 
             _xAxisBox = new ComplexBox
             {
@@ -168,6 +172,7 @@ namespace AppleSceneEditor.Systems
                             if (xHit + yHit + zHit < 2)
                             {
                                 _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
+                                _previousTransform = selectedTransform;
                             }
                         }
                         else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
@@ -183,6 +188,8 @@ namespace AppleSceneEditor.Systems
                         }
                         else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
                         {
+                            _commands.AddCommandAndExecute(new ChangeTransformCommand(entity, _previousTransform,
+                                selectedTransform));
                             _axisSelectedFlag = 0;
                         }
                     }
@@ -211,6 +218,8 @@ namespace AppleSceneEditor.Systems
         {
             _boxVertexBuffer.Dispose();
             _boxEffect.Dispose();
+
+            (_boxVertexBuffer, _boxEffect, _graphicsDevice, _commands) = (null!, null!, null!, null!);
         }
     }
 }

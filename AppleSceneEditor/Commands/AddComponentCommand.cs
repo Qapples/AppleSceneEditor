@@ -4,7 +4,7 @@ using AppleSerialization.Json;
 
 namespace AppleSceneEditor.Commands
 {
-    public class AddComponentCommand : ICommand
+    public class AddComponentCommand : IEditorCommand
     {
         public bool Disposed { get; private set; }
 
