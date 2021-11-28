@@ -20,7 +20,7 @@
     },
     {
       "$type": "TransformInfo",
-      "position": "0 0 0",
+      "position": "10 0 0",
       "scale": "1 1 1",
       "rotation": "0 0 0",
       "velocity": "0 0 0"

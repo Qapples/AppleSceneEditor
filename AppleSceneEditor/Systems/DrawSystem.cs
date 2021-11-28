@@ -167,8 +167,7 @@ namespace AppleSceneEditor.Systems
                             //more than one axis is hit)
                             if (xHit + yHit + zHit < 2)
                             {
-                                _axisSelectedFlag = (xHit) + (yHit * 1) + (zHit * 2);
-                                Debug.WriteLine($"Hit on axis: {_axisSelectedFlag}");
+                                _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
                             }
                         }
                         else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
@@ -180,13 +179,11 @@ namespace AppleSceneEditor.Systems
                             if (_axisSelectedFlag == 2) movementVector.Y = movementValue;
                             if (_axisSelectedFlag == 3) movementVector.Z = movementValue;
 
-                            selectedTransform.Matrix += Matrix.CreateTranslation(movementVector);
-                            Debug.WriteLine("Move matrix: " + movementVector);
+                            selectedTransform.Matrix += Matrix.CreateTranslation(movementVector * 0.25f);
                         }
                         else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
                         {
                             _axisSelectedFlag = 0;
-                            Debug.WriteLine("Released");
                         }
                     }
 
