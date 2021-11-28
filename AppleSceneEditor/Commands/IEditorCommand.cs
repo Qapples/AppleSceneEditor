@@ -3,7 +3,7 @@ using System;
 namespace AppleSceneEditor.Commands
 {
     //TODO: Add docs
-    public interface ICommand : IDisposable
+    public interface IEditorCommand : IDisposable
     {
         bool Disposed { get; }
         

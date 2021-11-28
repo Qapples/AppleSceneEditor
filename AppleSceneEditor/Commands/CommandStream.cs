@@ -8,15 +8,15 @@ namespace AppleSceneEditor.Commands
     {
         public bool Disposed { get; private set; }
         
-        private List<ICommand> _commands;
+        private List<IEditorCommand> _commands;
         private int _currentIndex;
         
         public CommandStream()
         {
-            (_commands, _currentIndex, Disposed) = (new List<ICommand>(), -1, false);
+            (_commands, _currentIndex, Disposed) = (new List<IEditorCommand>(), -1, false);
         }
 
-        public void AddCommandAndExecute(ICommand command)
+        public void AddCommandAndExecute(IEditorCommand command)
         {
             //if we do a new command when the current index is not at the end of the list then we must remove everything
             //after the current index as those commands are invalid since they're now based on outdated data.
@@ -50,7 +50,7 @@ namespace AppleSceneEditor.Commands
 
         public void Dispose()
         {
-            foreach (ICommand cmd in _commands) cmd.Dispose();
+            foreach (IEditorCommand cmd in _commands) cmd.Dispose();
 
             (_commands, _currentIndex, Disposed) = (null!, 0, true);
         }

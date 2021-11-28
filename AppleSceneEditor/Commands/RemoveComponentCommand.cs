@@ -7,7 +7,7 @@ using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.Commands
 {
-    public class RemoveComponentCommand : ICommand
+    public class RemoveComponentCommand : IEditorCommand
     {
         public bool Disposed { get; private set; }
         

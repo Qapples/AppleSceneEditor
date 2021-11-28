@@ -21,14 +21,14 @@ namespace AppleSceneEditorTests
 #if DEBUG
             const string methodInfo = nameof(CommandTests) + "." + nameof(DisposeTest);
 #endif
-            List<Type> commandTypes = GetImplementers(typeof(ICommand));
+            List<Type> commandTypes = GetImplementers(typeof(IEditorCommand));
 
             foreach (Type type in commandTypes)
             {
-                if (type == typeof(ICommand)) continue;
+                if (type == typeof(IEditorCommand)) continue;
 
                 //verify that each constructor set's dispose to false
-                ICommand? instance = null;
+                IEditorCommand? instance = null;
                 foreach (ConstructorInfo constructor in type.GetConstructors())
                 {
                     //most constructors aren't equipped to handle null cases so try and create blank objects
@@ -61,7 +61,7 @@ namespace AppleSceneEditorTests
                         }
                     }
                     
-                    instance = (ICommand) constructor.Invoke(paramVals);
+                    instance = (IEditorCommand) constructor.Invoke(paramVals);
                     
                     Assert.True(!instance.Disposed, $"{constructor} does not set disposed to false!");
                 }
