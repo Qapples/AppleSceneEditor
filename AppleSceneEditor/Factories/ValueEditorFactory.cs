@@ -19,6 +19,10 @@ namespace AppleSceneEditor.Factories
     public static class ValueEditorFactory
     {
         private const int MaxTextLength = 25;
+        
+        //-----------------
+        // PUBLIC METHODS
+        //-----------------
      
         public static CheckBox? CreateBooleanEditor(JsonProperty property)
         {
@@ -200,31 +204,29 @@ namespace AppleSceneEditor.Factories
             }
             
             //this method changes the data in the JsonProperty according to the data the user enters in the UI.
-            void TextChangedMethod(object? boxObj, ValueChangedEventArgs<string> args, JsonProperty tempProperty,
+            void ValueChangingMethod(object? boxObj, ValueChangingEventArgs<string> args, JsonProperty tempProperty,
                 TextBox[] otherBoxes)
             {
                 if (boxObj is not TextBox box) return;
-
-                if (!float.TryParse(args.NewValue, out _))
+                
+                if (string.IsNullOrWhiteSpace(args.NewValue))
                 {
-                    box.Text = args.OldValue;
+                    args.NewValue = "0";
+                    box.CursorPosition = 1;
+                    box.SelectAll();
+                    
                     return;
                 }
-
-                if (string.IsNullOrEmpty(args.NewValue))
+                
+                if (!float.TryParse(args.NewValue, out _))
                 {
-                    box.Text = "0";
-
-                    box.CursorPosition = 1;
+                    args.Cancel = true;
+                    return;
                 }
-
-                StringBuilder valueBuilder = new();
-                foreach (TextBox otherBox in otherBoxes) valueBuilder.Append(otherBox.Text + " ");
-                valueBuilder.Remove(valueBuilder.Length - 1, 1);
-
-                tempProperty.Value = valueBuilder.ToString();
+                
+                UpdateJsonVectorProperty(tempProperty, otherBoxes);
             }
-
+            
             Label[] labels = valueNames.Select(s => new Label {Text = $"{s}: "}).ToArray();
             TextBox[] boxes = new TextBox[vectorCount];
             HorizontalStackPanel outStackPanel = new() {Widgets = {new Label {Text = $"{property.Name}: "}}};
@@ -233,7 +235,7 @@ namespace AppleSceneEditor.Factories
             for (int i = 0; i < vectorCount; i++)
             {
                 boxes[i] = new TextBox {Text = values[i].ToString()};
-                boxes[i].TextChanged += (o, a) => TextChangedMethod(o, a, property, boxes);
+                boxes[i].ValueChanging += (o, args) => ValueChangingMethod(o, args, property, boxes);
 
                 //ensure that there is a space between each value
                 if (i > 0)
@@ -247,6 +249,23 @@ namespace AppleSceneEditor.Factories
 
             return outStackPanel;
         }
+        
+        //-------------------
+        // PRIVATE METHODS
+        //-------------------
+
+        private static void UpdateJsonVectorProperty(JsonProperty property, TextBox[] boxes)
+        {
+            StringBuilder valueBuilder = new();
+            foreach (TextBox otherBox in boxes) valueBuilder.Append(otherBox.Text + " ");
+            valueBuilder.Remove(valueBuilder.Length - 1, 1);
+            property.Value = valueBuilder.ToString();
+        }
+        
+        
+        //-------
+        // MISC
+        //-------
 
         public enum VectorType
         {

@@ -473,7 +473,7 @@ namespace AppleSceneEditor
             }
 
             GraphicsDevice.Viewport = _overallViewport;
-
+            
             base.Draw(gameTime);
         }
     }
