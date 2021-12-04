@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using AppleSceneEditor.ComponentFlags;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using DefaultEcs;
@@ -51,11 +52,28 @@ namespace AppleSceneEditor.Extensions
         public static Entity? GenerateEntity(this JsonObject rootObject, Scene scene, string? entityPath = null,
             JsonReaderOptions? readerOptions = null, JsonSerializerOptions? serializerOptions = null)
         {
+            World world = scene.World;
+            
+            //if we have a selected entity flag, make sure that we transfer that flag over to the new entity
+            bool isSelectedEntity = false;
+
             //remove any entities with the same id beforehand as we are going to replace it.
             //cant use a reference because we are disposing the object if we find it and that causes unusual behavior.
             foreach (Entity entity in scene.Entities.GetEntities())
             {
-                if (entity.Get<string>() == rootObject.Name) entity.Dispose();
+                if (entity.Get<string>() == rootObject.Name)
+                {
+                    //is this the selected entity flag?
+                    if (world.Has<SelectedEntityFlag>() && world.Get<SelectedEntityFlag>().SelectedEntity == entity)
+                    {
+                        isSelectedEntity = true;
+                    }
+
+                    entity.Dispose();
+
+                    //there should only be one match
+                    break;
+                }
             }
 
             string objectContents = rootObject.GenerateJsonText();
@@ -72,7 +90,7 @@ namespace AppleSceneEditor.Extensions
                 return null;
             }
 
-            Entity outEntity = scene.World.CreateEntity();
+            Entity outEntity = world.CreateEntity();
 
             foreach (object component in entityInfo.Components)
             {
@@ -83,6 +101,11 @@ namespace AppleSceneEditor.Extensions
             }
             
             outEntity.Set(entityInfo.Id);
+
+            if (isSelectedEntity)
+            {
+                world.Set(new SelectedEntityFlag(outEntity));
+            }
 
             return outEntity;
         }
