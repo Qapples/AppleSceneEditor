@@ -150,51 +150,57 @@ namespace AppleSceneEditor.Systems
                     if (selectedEntity.Has<Transform>() && selectedEntity == entity)
                     {
                         ref var selectedTransform = ref selectedEntity.Get<Transform>();
-
-                        _xAxisBox.Center = selectedTransform.Matrix.Translation;
-                        _yAxisBox.Center = selectedTransform.Matrix.Translation;
-                        _zAxisBox.Center = selectedTransform.Matrix.Translation;
-
-                        _xAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
-                        _yAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Green, ref worldCam, null, _boxVertexBuffer);
-                        _zAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Blue, ref worldCam, null, _boxVertexBuffer);
-
-                        if (fireRayFlag && _axisSelectedFlag == 0)
-                        {
-                            int xHit = FireRayHit(ref worldCam, ref _xAxisBox) ? 1 : 0;
-                            int yHit = FireRayHit(ref worldCam, ref _yAxisBox) ? 1 : 0;
-                            int zHit = FireRayHit(ref worldCam, ref _zAxisBox) ? 1 : 0;
-                            
-                            //there must be only one axis hit in order for it to be selected (avoid situations where 
-                            //more than one axis is hit)
-                            if (xHit + yHit + zHit < 2)
-                            {
-                                _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
-                                _previousTransform = selectedTransform;
-                            }
-                        }
-                        else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
-                        {
-                            int movementValue = mouseState.Y - _previousMouseState.Y;
-
-                            Vector3 movementVector = Vector3.Zero;
-                            if (_axisSelectedFlag == 1) movementVector.X = movementValue;
-                            if (_axisSelectedFlag == 2) movementVector.Y = movementValue;
-                            if (_axisSelectedFlag == 3) movementVector.Z = movementValue;
-
-                            selectedTransform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
-                        }
-                        else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
-                        {
-                            _commands.AddCommandAndExecute(new ChangeTransformCommand(entity, _previousTransform,
-                                selectedTransform));
-                            World.Set(new EntityTransformChangedFlag(entity, _previousTransform));
-                            _axisSelectedFlag = 0;
-                        }
+                        
+                        DrawXyzAxis(ref selectedTransform, ref worldCam, ref mouseState, fireRayFlag, selectedEntity);
                     }
 
                     _previousMouseState = mouseState;
                 }
+            }
+        }
+
+        private void DrawXyzAxis(ref Transform transform, ref Camera worldCam, ref MouseState mouseState,
+            bool isRayFired, Entity selectedEntity)
+        {
+            _xAxisBox.Center = transform.Matrix.Translation;
+            _yAxisBox.Center = transform.Matrix.Translation;
+            _zAxisBox.Center = transform.Matrix.Translation;
+
+            _xAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
+            _yAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Green, ref worldCam, null, _boxVertexBuffer);
+            _zAxisBox.Draw(_graphicsDevice, _boxEffect, Color.Blue, ref worldCam, null, _boxVertexBuffer);
+
+            if (isRayFired && _axisSelectedFlag == 0)
+            {
+                int xHit = FireRayHit(ref worldCam, ref _xAxisBox) ? 1 : 0;
+                int yHit = FireRayHit(ref worldCam, ref _yAxisBox) ? 1 : 0;
+                int zHit = FireRayHit(ref worldCam, ref _zAxisBox) ? 1 : 0;
+
+                //there must be only one axis hit in order for it to be selected (avoid situations where 
+                //more than one axis is hit)
+                if (xHit + yHit + zHit < 2)
+                {
+                    _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
+                    _previousTransform = transform;
+                }
+            }
+            else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
+            {
+                int movementValue = mouseState.Y - _previousMouseState.Y;
+
+                Vector3 movementVector = Vector3.Zero;
+                if (_axisSelectedFlag == 1) movementVector.X = movementValue;
+                if (_axisSelectedFlag == 2) movementVector.Y = movementValue;
+                if (_axisSelectedFlag == 3) movementVector.Z = movementValue;
+
+                transform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
+            }
+            else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
+            {
+                _commands.AddCommandAndExecute(new ChangeTransformCommand(selectedEntity, _previousTransform,
+                    transform));
+                World.Set(new EntityTransformChangedFlag(selectedEntity, _previousTransform));
+                _axisSelectedFlag = 0;
             }
         }
 
