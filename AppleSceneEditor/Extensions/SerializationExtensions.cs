@@ -1,9 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using AppleSerialization;
 using AppleSerialization.Json;
-using GrappleFightNET5.Components.Transform;
+using GrappleFightNET5.Components;
 using Microsoft.Xna.Framework;
 
 namespace AppleSceneEditor.Extensions

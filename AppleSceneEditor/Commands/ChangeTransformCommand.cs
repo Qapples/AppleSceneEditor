@@ -1,6 +1,6 @@
 using DefaultEcs;
+using GrappleFightNET5.Components;
 using GrappleFightNET5.Components.Collision;
-using GrappleFightNET5.Components.Transform;
 
 namespace AppleSceneEditor.Commands
 {

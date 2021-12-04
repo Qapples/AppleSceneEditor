@@ -1,5 +1,5 @@
 using DefaultEcs;
-using GrappleFightNET5.Components.Transform;
+using GrappleFightNET5.Components;
 
 namespace AppleSceneEditor.ComponentFlags
 {

@@ -1,4 +1,4 @@
-using GrappleFightNET5.Components.Camera;
+using GrappleFightNET5.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

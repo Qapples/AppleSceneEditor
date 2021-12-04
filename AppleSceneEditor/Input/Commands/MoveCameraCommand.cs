@@ -1,6 +1,6 @@
 using AppleSceneEditor.Extensions;
 using DefaultEcs;
-using GrappleFightNET5.Components.Camera;
+using GrappleFightNET5.Components;
 using Microsoft.Xna.Framework;
 using Direction = AppleSceneEditor.Extensions.MovementHelper.Direction;
 
