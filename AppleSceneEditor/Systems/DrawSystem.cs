@@ -184,7 +184,7 @@ namespace AppleSceneEditor.Systems
                             if (_axisSelectedFlag == 2) movementVector.Y = movementValue;
                             if (_axisSelectedFlag == 3) movementVector.Z = movementValue;
 
-                            selectedTransform.Matrix += Matrix.CreateTranslation(movementVector * 0.25f);
+                            selectedTransform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
                         }
                         else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
                         {
