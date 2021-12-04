@@ -190,6 +190,7 @@ namespace AppleSceneEditor.Systems
                         {
                             _commands.AddCommandAndExecute(new ChangeTransformCommand(entity, _previousTransform,
                                 selectedTransform));
+                            World.Set(new EntityTransformChangedFlag(entity, _previousTransform));
                             _axisSelectedFlag = 0;
                         }
                     }

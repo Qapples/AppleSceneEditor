@@ -360,7 +360,7 @@ namespace AppleSceneEditor
             if (_currentScene is not null)
             {
                 World world = _currentScene.World;
-                
+
                 IKeyCommand[] heldCommands = _heldInputHandler.GetCommands(ref kbState, ref _previousKbState);
                 IKeyCommand[] notHeldCommand = _notHeldInputHandler.GetCommands(ref kbState, ref _previousKbState);
 
@@ -401,7 +401,7 @@ namespace AppleSceneEditor
                     properties.PitchDegrees += (_previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
                     camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
                 }
-                
+
                 //if the user clicks the mouse within the scene editor while not moving the camera then indicate
                 //that we want to select an entity. this is likely to be temporary
                 if (_mainGrid.IsKeyboardFocused && !GlobalFlag.IsFlagRaised(GlobalFlags.UserControllingSceneViewer) &&
@@ -410,18 +410,28 @@ namespace AppleSceneEditor
                 {
                     GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, true);
                 }
-                
+
                 //account for flags
-                
+
                 //SelectedEntityFlag indicates that an entity needs to be selected. 
                 if (GlobalFlag.IsFlagRaised(GlobalFlags.EntitySelected))
                 {
                     ref var flag = ref world.Get<SelectedEntityFlag>();
-                    
+
                     //the selected entity should have a string id
                     SelectEntity(_currentScene, flag.SelectedEntity.Get<string>());
-                    
+
                     GlobalFlag.SetFlag(GlobalFlags.EntitySelected, false);
+                }
+
+                if (world.Has<EntityTransformChangedFlag>() && _currentJsonObject is not null)
+                {
+                    var flag = world.Get<EntityTransformChangedFlag>();
+
+                    _currentJsonObject.UpdateTransform(flag.CurrentTransform);
+                    _mainPanelHandler?.RebuildUI();
+
+                    world.Remove<EntityTransformChangedFlag>();
                 }
             }
 
