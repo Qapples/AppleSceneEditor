@@ -77,7 +77,7 @@ namespace AppleSceneEditor.Systems
             //get the camera from the world. The camera can be apart of any entity, but there should be only one
             //camera per world.
             ref var worldCam = ref World.Get<Camera>();
-            //ref var axisType = ref World.Get<AxisType>();
+            ref var axisType = ref World.Get<AxisType>();
             ref var transform = ref entity.Get<Transform>();
 
             if (entity.Has<MeshData>())
@@ -151,8 +151,18 @@ namespace AppleSceneEditor.Systems
                     if (selectedEntity.Has<Transform>() && selectedEntity == entity)
                     {
                         ref var selectedTransform = ref selectedEntity.Get<Transform>();
-                        
-                        DrawXyzAxis(ref selectedTransform, ref worldCam, ref mouseState, fireRayFlag, selectedEntity);
+
+                        switch (axisType)
+                        {
+                            case AxisType.Move:
+                                DrawAndHandleXyzAxis(ref selectedTransform, ref worldCam, ref mouseState, fireRayFlag,
+                                    selectedEntity);
+                                break;
+                            case AxisType.Rotation:
+                            case AxisType.Scale:
+                            default:
+                                break;
+                        }
                     }
 
                     _previousMouseState = mouseState;
@@ -160,7 +170,7 @@ namespace AppleSceneEditor.Systems
             }
         }
 
-        private void DrawXyzAxis(ref Transform transform, ref Camera worldCam, ref MouseState mouseState,
+        private void DrawAndHandleXyzAxis(ref Transform transform, ref Camera worldCam, ref MouseState mouseState,
             bool isRayFired, Entity selectedEntity)
         {
             _xAxisBox.Center = transform.Matrix.Translation;

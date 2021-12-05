@@ -57,6 +57,8 @@ namespace AppleSceneEditor
                 PitchDegrees = 0f,
                 CameraSpeed = 0.5f
             });
+            
+            scene.World.Set(AxisType.Move);
 
             _drawSystem?.Dispose();
             _drawSystem = new DrawSystem(scene.World, GraphicsDevice, _commands);
