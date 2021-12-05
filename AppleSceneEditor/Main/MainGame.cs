@@ -24,6 +24,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Myra;
+using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
@@ -206,7 +207,7 @@ namespace AppleSceneEditor
 
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
-            List<string> missingWidgets = new() {"MainMenu", "MainPanel", "MainGrid"};
+            List<string> missingWidgets = new() {"MainMenu", "MainPanel", "MainGrid", "ToolMenu"};
             
             _project.Root.ProcessWidgets(widget =>
             {
@@ -251,6 +252,62 @@ namespace AppleSceneEditor
                         _mainGrid.AcceptsKeyboardFocus = true;
                         
                         missingWidgets.Remove("MainGrid");
+                        
+                        break;
+                    }
+                    case "ToolMenu":
+                    {
+                        if (widget is not StackPanel toolPanel) return false;
+
+                        ImageButton? moveToolButton = toolPanel.FindWidgetById("MoveToolButton") as ImageButton;
+                        ImageButton? rotateToolButton = toolPanel.FindWidgetById("RotateToolButton") as ImageButton;
+                        ImageButton? scaleToolButton = toolPanel.FindWidgetById("ScaleToolButton") as ImageButton;
+
+                        if (moveToolButton is null || rotateToolButton is null || scaleToolButton is null)
+                        {
+                            throw new WidgetIsIncorrectTypeException(typeof(ImageButton),
+                                ("MoveToolButton", moveToolButton), ("RotateToolButton", rotateToolButton),
+                                ("ScaleToolButton", scaleToolButton));
+                        }
+
+                        SolidBrush selectedBrush = new(Color.SkyBlue);
+
+                        moveToolButton.Click += (o, _) =>
+                        {
+                            if (o is not ImageButton button) return;
+
+                            _currentScene?.World.Set(AxisType.Move);
+
+                            button.Background = selectedBrush;
+                            rotateToolButton.Background = null;
+                            scaleToolButton.Background = null;
+                        };
+                        
+                        rotateToolButton.Click += (o, _) =>
+                        {
+                            if (o is not ImageButton button) return;
+
+                            _currentScene?.World.Set(AxisType.Rotation);
+
+                            moveToolButton.Background = null;
+                            button.Background = selectedBrush;
+                            scaleToolButton.Background = null;
+                        };
+                        
+                        scaleToolButton.Click += (o, _) =>
+                        {
+                            if (o is not ImageButton button) return;
+
+                            _currentScene?.World.Set(AxisType.Scale);
+
+                            moveToolButton.Background = null;
+                            rotateToolButton.Background = null;
+                            button.Background = selectedBrush;
+                        };
+
+                        toolPanel.AcceptsKeyboardFocus = true;
+
+                        missingWidgets.Remove("ToolMenu");
                         
                         break;
                     }

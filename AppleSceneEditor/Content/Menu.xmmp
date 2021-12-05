@@ -52,7 +52,7 @@
       <MenuItem Text="&amp;Settings" ShortcutText="Ctrl+Alt+S" Id="SettingsMenuOpen"/>
     </HorizontalMenu>
     
-    <HorizontalStackPanel Spacing="10" HorizontalAlignment="Right">
+    <HorizontalStackPanel Id="ToolMenu" Spacing="10" HorizontalAlignment="Right">
       <ImageButton Image="Textures/MoveTool.png" Id="MoveToolButton"/>
       <ImageButton Image="Textures/RotateTool.png" Id="RotateToolButton"/>
       <ImageButton Image="Textures/ScaleTool.png" Id="ScaleToolButton"/>
