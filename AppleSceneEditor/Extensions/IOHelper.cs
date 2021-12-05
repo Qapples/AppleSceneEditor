@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -88,9 +89,12 @@ namespace AppleSceneEditor.Extensions
 
         //we're accepting a spritebatch instead of a graphics device since spriteBatch includes a reference to it's 
         //graphics device and we need both either way to create a new scene.
-        public static Scene CreateNewScene(string folderPath, SpriteBatch spriteBatch,
+        public static bool CreateNewScene(string folderPath, SpriteBatch spriteBatch,
             int maxEntityCapacity = 128)
         {
+#if DEBUG
+            const string methodName = nameof(IOHelper) + "." + nameof(CreateNewScene);
+#endif
             string worldPath = Path.Combine(folderPath, new DirectoryInfo(folderPath).Name + ".world");
 
             //create paths
@@ -100,20 +104,28 @@ namespace AppleSceneEditor.Extensions
             Directory.CreateDirectory(Path.Combine(folderPath, "Content"));
 
             //create world file
-            using (StreamWriter writer = File.CreateText(worldPath))
+            try
             {
-                writer.WriteLine($"WorldMaxCapacity: {maxEntityCapacity}");
-                writer.Flush();
+                using (StreamWriter writer = File.CreateText(worldPath))
+                {
+                    writer.WriteLine($"WorldMaxCapacity: {maxEntityCapacity}");
+                    writer.Flush();
+                }
+
+                //add base entity
+                using (StreamWriter writer = File.CreateText(Path.Combine(entitiesPath, "BaseEntity")))
+                {
+                    writer.WriteLine(BaseEntityContents);
+                    writer.Flush();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"{methodName}: failed to create scene at {folderPath}. Exception:\n{e}");
+                return false;
             }
 
-            //add base entity
-            using (StreamWriter writer = File.CreateText(Path.Combine(entitiesPath, "BaseEntity")))
-            {
-                writer.WriteLine(BaseEntityContents);
-                writer.Flush();
-            }
-
-            return new Scene(folderPath, spriteBatch.GraphicsDevice, null, spriteBatch, true);
+            return true;
         }
     }
 }

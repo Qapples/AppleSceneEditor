@@ -34,7 +34,7 @@ namespace AppleSceneEditor.Systems
 
         //0 means no axis is selected, 1 is x-axis, 2 is y-axis, and 3 is z-axis
         private int _axisSelectedFlag;
-
+        
         private MouseState _previousMouseState;
         private Transform _previousTransform;
 
@@ -77,6 +77,7 @@ namespace AppleSceneEditor.Systems
             //get the camera from the world. The camera can be apart of any entity, but there should be only one
             //camera per world.
             ref var worldCam = ref World.Get<Camera>();
+            //ref var axisType = ref World.Get<AxisType>();
             ref var transform = ref entity.Get<Transform>();
 
             if (entity.Has<MeshData>())

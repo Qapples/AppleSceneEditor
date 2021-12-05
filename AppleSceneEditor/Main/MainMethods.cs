@@ -13,6 +13,7 @@ using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Systems;
 using AppleSerialization.Json;
 using DefaultEcs;
+using GrappleFightNET5.Components;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -33,8 +34,33 @@ namespace AppleSceneEditor
         // Init methods
         //----------------
 
-        private void InitUIFromScene(Scene scene)
+        private Scene? InitScene(string sceneDirectory)
         {
+            Scene scene = new(sceneDirectory, GraphicsDevice, null, _spriteBatch, true);
+            _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
+            
+            scene.Compile();
+            
+            //initialize world-wide components
+            scene.World.Set(new Camera
+            {
+                Position = Vector3.Zero,
+                LookAt = new Vector3(0f, 0f, 20f),
+                ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
+                    GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f),
+                Sensitivity = 2f
+            });
+                    
+            scene.World.Set(new CameraProperties
+            {
+                YawDegrees = 0f,
+                PitchDegrees = 0f,
+                CameraSpeed = 0.5f
+            });
+
+            _drawSystem?.Dispose();
+            _drawSystem = new DrawSystem(scene.World, GraphicsDevice, _commands);
+
             //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
             //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.
             bool result = _desktop.Root.ProcessWidgets(widget =>
@@ -71,12 +97,12 @@ namespace AppleSceneEditor
                         //through the world of the currentScene that we want to select an entity by giving the world
                         //a SelectedEntityFlag component containing the Entity we want to select.
                         TextButton button = new() {Text = id, Id = "EntityButton_" + id};
-                        button.TouchDown += (_, _) => _currentScene?.World.Set(new SelectedEntityFlag(entity));
+                        button.TouchDown += (_, _) => scene?.World.Set(new SelectedEntityFlag(entity));
                         
                         //the base entity should be selected by default
                         if (string.Equals(id, "base", StringComparison.OrdinalIgnoreCase))
                         {
-                            _currentScene?.World.Set(new SelectedEntityFlag(entity));
+                            scene?.World.Set(new SelectedEntityFlag(entity));
                         }
 
                         stackPanel.AddChild(button);
@@ -84,10 +110,6 @@ namespace AppleSceneEditor
                     
                     //init scene with base entity
                     SelectEntity(scene, "Base");
-                    
-                    //init _inputHelper here since by then all the fields should have been initialized so far.
-                    (_notHeldInputHandler, _heldInputHandler) =
-                        CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
                 }
 
                 return true;
@@ -95,8 +117,11 @@ namespace AppleSceneEditor
 
             if (!result)
             {
-                Debug.WriteLine("Error was encountered in InitUIFromScene. Use debugger.");
+                Debug.WriteLine($"Error was encountered in {nameof(InitScene)}. Use debugger.");
+                return null;
             }
+
+            return scene;
         }
 
         //-----------------------------
@@ -114,17 +139,7 @@ namespace AppleSceneEditor
                 string filePath = fileDialog.FilePath;
                 if (string.IsNullOrEmpty(filePath)) return;
 
-                _currentScene = new Scene(Directory.GetParent(filePath)!.FullName, GraphicsDevice, null, _spriteBatch,
-                    true);
-                _jsonObjects = IOHelper.CreateJsonObjectsFromScene(Directory.GetParent(filePath)!.FullName);
-
-                if (_currentScene is not null)
-                {
-                    InitUIFromScene(_currentScene);
-                    
-                    _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice, _commands);
-                }
+                _currentScene = InitScene(Directory.GetParent(filePath)!.FullName);
             };
 
             return fileDialog;
@@ -140,16 +155,10 @@ namespace AppleSceneEditor
 
                 string folderPath = fileDialog.Folder;
                 if (string.IsNullOrEmpty(folderPath)) return;
-
-                _currentScene = IOHelper.CreateNewScene(folderPath, _spriteBatch);
-                _jsonObjects = IOHelper.CreateJsonObjectsFromScene(folderPath);
-
-                if (_currentScene is not null)
+                
+                if (IOHelper.CreateNewScene(folderPath, _spriteBatch))
                 {
-                    InitUIFromScene(_currentScene);
-                    
-                    _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice, _commands);
+                    InitScene(folderPath);
                 }
             };
 

@@ -276,33 +276,11 @@ namespace AppleSceneEditor
                 }
                 else
                 {
-                    _currentScene = new Scene(parentDirectory.FullName, GraphicsDevice, null,
-                        _spriteBatch, true);
-
-                    _jsonObjects = IOHelper.CreateJsonObjectsFromScene(parentDirectory.FullName);
-                    InitUIFromScene(_currentScene);
+                    _currentScene = InitScene(parentDirectory.FullName);
                     
-                    _currentScene.Compile();
-                    
-                    //initialize world-wide components
-                    _currentScene.World.Set(new Camera
-                    {
-                        Position = Vector3.Zero,
-                        LookAt = new Vector3(0f, 0f, 20f),
-                        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
-                            GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f),
-                        Sensitivity = 2f
-                    });
-                    
-                    _currentScene.World.Set(new CameraProperties
-                    {
-                        YawDegrees = 0f,
-                        PitchDegrees = 0f,
-                        CameraSpeed = 0.5f
-                    });
-
-                    _drawSystem?.Dispose();
-                    _drawSystem = new DrawSystem(_currentScene.World, GraphicsDevice, _commands);
+                    //init _inputHelper here since by then all the fields should have been initialized so far.
+                    (_notHeldInputHandler, _heldInputHandler) =
+                        CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
                 }
             }
         }
