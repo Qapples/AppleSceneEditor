@@ -28,7 +28,7 @@
       </HorizontalStackPanel>
       <Label Text="Properties Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5" GridColumn="2" StyleName="small"/>
 
-      <Label Text="File Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" GridColumn="1" GridRow="1" Opacity="0.5"/>
+      <Label Text="File Viewer" HforizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" GridColumn="1" GridRow="1" Opacity="0.5"/>
 
       <!--List of entities. The "holder" label is there to ensure that the entities go past the toolbar and are visible.
       -->
@@ -44,19 +44,18 @@
       </ScrollViewer>
     </Grid>
 
-    <VerticalStackPanel>
-      <VerticalStackPanel.Proportions>
-        <Proportion Type="Auto"/>
-        <Proportion Type="Auto"/>
-        <Proportion Type="Fill"/>
-      </VerticalStackPanel.Proportions>
-      <HorizontalMenu Id="MainMenu">
-        <MenuItem Text="File" Id="MenuFile">
-          <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen"/>
-          <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew"/>
-        </MenuItem>
-        <MenuItem Text="&amp;Settings" ShortcutText="Ctrl+Alt+S" Id="SettingsMenuOpen"/>
-      </HorizontalMenu>
-    </VerticalStackPanel>
+    <HorizontalMenu Id="MainMenu">
+      <MenuItem Text="File" Id="MenuFile">
+        <MenuItem Text="&amp;Open" ShortcutText="Ctrl+O" Id="MenuFileOpen"/>
+        <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew"/>
+      </MenuItem>
+      <MenuItem Text="&amp;Settings" ShortcutText="Ctrl+Alt+S" Id="SettingsMenuOpen"/>
+    </HorizontalMenu>
+    
+    <HorizontalStackPanel Spacing="10" HorizontalAlignment="Right">
+      <ImageButton Image="Textures/MoveTool.png" Id="MoveToolButton"/>
+      <ImageButton Image="Textures/RotateTool.png" Id="RotateToolButton"/>
+      <ImageButton Image="Textures/ScaleTool.png" Id="ScaleToolButton"/>
+    </HorizontalStackPanel>
   </Panel>
 </Project>
