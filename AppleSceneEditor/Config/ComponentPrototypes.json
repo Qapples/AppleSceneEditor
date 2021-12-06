@@ -3,7 +3,7 @@
     {
       "$type": "ValueInfo",
       "valueType": "System.Int32",
-      "value": 2
+      "value": "2"
     },
     {
       "$type": "TextureInfo",
