@@ -32,11 +32,6 @@ namespace AppleSceneEditor.Commands
         private void MoveEntity(ref Transform transform)
         {
             _entity.Set(transform);
-
-            if (_entity.Has<ComplexBox>())
-            {
-                _entity.Get<ComplexBox>().Center = transform.Matrix.Translation;
-            }
         }
 
         public void Dispose()

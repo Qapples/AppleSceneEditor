@@ -48,11 +48,11 @@ namespace AppleSceneEditor.Systems
             CommandStream commandStream) : base(world, runner)
         {
             _graphicsDevice = graphicsDevice;
-            
+
             _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
             _boxEffect = new BasicEffect(_graphicsDevice)
                 {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
-            
+
             _commands = commandStream;
 
             _moveAxis = new MoveAxis(world, graphicsDevice);
@@ -106,14 +106,19 @@ namespace AppleSceneEditor.Systems
             if (entity.Has<ComplexBox>())
             {
                 ref var box = ref entity.Get<ComplexBox>();
-                box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref worldCam, null, _boxVertexBuffer);
+
+                transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+
+                box.Draw(_graphicsDevice, _boxEffect, position, rotation, Color.Red, ref worldCam, null,
+                    _boxVertexBuffer);
 
                 bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay);
-                
+
                 if (fireRayFlag)
                 {
                     //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer
-                    float? intercept = worldCam.FireRay(box, _graphicsDevice.Viewport);
+                    Viewport viewport = _graphicsDevice.Viewport;
+                    float? intercept = worldCam.FireRay(ref box, ref position, ref rotation, ref viewport);
 
                     if (intercept is not null)
                     {

@@ -30,10 +30,10 @@ namespace AppleSceneEditor.Systems.Axis
             
             _xAxisBox = new ComplexBox
             {
-                Center = Vector3.Zero,
+                CenterOffset = Vector3.Zero,
+                RotationOffset = Quaternion.Identity,
                 DrawType = DrawType.Solid,
                 HalfExtent = new Vector3(5f, 0.5f, 0.5f),
-                Rotation = Quaternion.Identity
             };
 
             _yAxisBox = _xAxisBox;
@@ -45,27 +45,27 @@ namespace AppleSceneEditor.Systems.Axis
 
         public void Draw(Effect effect, VertexBuffer buffer, ref Transform transform, ref Camera worldCam)
         {
-            _xAxisBox.Center = transform.Matrix.Translation;
-            _yAxisBox.Center = transform.Matrix.Translation;
-            _zAxisBox.Center = transform.Matrix.Translation;
+            transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
 
-            _xAxisBox.Draw(GraphicsDevice, effect, Color.Red, ref worldCam, null, buffer);
-            _yAxisBox.Draw(GraphicsDevice, effect, Color.Green, ref worldCam, null, buffer);
-            _zAxisBox.Draw(GraphicsDevice, effect, Color.Blue, ref worldCam, null, buffer);
+            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, null, buffer);
+            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, null, buffer);
+            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, null, buffer);
         }
 
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,
             Entity selectedEntity)
         {
             ref var transform = ref selectedEntity.Get<Transform>();
-            
+
             if (isRayFired && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
-                
-                int xHit = worldCam.FireRayHit(_xAxisBox, viewport) ? 1 : 0;
-                int yHit = worldCam.FireRayHit(_yAxisBox, viewport) ? 1 : 0;
-                int zHit = worldCam.FireRayHit(_zAxisBox, viewport) ? 1 : 0;
+
+                transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+
+                int xHit = worldCam.FireRayHit(ref _xAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
+                int yHit = worldCam.FireRayHit(ref _yAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
+                int zHit = worldCam.FireRayHit(ref _zAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
 
                 //there must be only one axis hit in order for it to be selected (avoid situations where 
                 //more than one axis is hit)
