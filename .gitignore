@@ -21,6 +21,10 @@ riderModule.iml
 **/.idea/**/sqlDataSources.xml
 **/.idea/**/dynamic.xml
 
+**/.idea/.idea.AppleSceneEditor/
+**/.idea/.idea.AppleSceneEditor/.idea
+.idea/
+
 # Rider
 # Rider auto-generates .iml files, and contentModel.xml
 **/.idea/**/*.iml
