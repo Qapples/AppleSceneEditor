@@ -79,10 +79,13 @@ namespace AppleSceneEditor.Systems.Axis
             {
                 int movementValue = mouseState.Y - _previousMouseState.Y;
 
-                Vector3 movementVector = Vector3.Zero;
-                if (_axisSelectedFlag == 1) movementVector.X = movementValue;
-                if (_axisSelectedFlag == 2) movementVector.Y = movementValue;
-                if (_axisSelectedFlag == 3) movementVector.Z = movementValue;
+                Vector3 movementVector = _axisSelectedFlag switch
+                {
+                    1 => new Vector3(movementValue, 0f, 0f),
+                    2 => new Vector3(0f, movementValue, 0f),
+                    3 => new Vector3(0f, 0f, movementValue),
+                    _ => Vector3.Zero
+                };
 
                 transform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
             }

@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
@@ -58,7 +60,7 @@ namespace AppleSceneEditor.Systems.Axis
             Entity selectedEntity)
         {
             ref var transform = ref selectedEntity.Get<Transform>();
-
+            
             if (isRayFired && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
@@ -79,8 +81,8 @@ namespace AppleSceneEditor.Systems.Axis
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
-                int movementValue = mouseState.Y - _previousMouseState.Y;
-
+                float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
+                
                 Vector3 movementAxis = _axisSelectedFlag switch
                 {
                     1 => Vector3.Up,      //yaw,

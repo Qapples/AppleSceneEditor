@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using AppleScene.Helpers;
 using AppleScene.Rendering;
@@ -30,6 +31,7 @@ namespace AppleSceneEditor.Systems
         private CommandStream _commands;
 
         private MoveAxis _moveAxis;
+        private RotateAxis _rotateAxis;
 
         private MouseState _previousMouseState;
         private Transform _previousTransform;
@@ -56,6 +58,7 @@ namespace AppleSceneEditor.Systems
             _commands = commandStream;
 
             _moveAxis = new MoveAxis(world, graphicsDevice);
+            _rotateAxis = new RotateAxis(world, graphicsDevice);
         }
 
         protected override void Update(GameTime gameTime, in Entity entity)
@@ -143,21 +146,17 @@ namespace AppleSceneEditor.Systems
                     {
                         ref var selectedTransform = ref selectedEntity.Get<Transform>();
 
-                        IEditorCommand? axisHandleCommand = null;
-
-                        switch (axisType)
+                        IAxis? currentAxis = axisType switch
                         {
-                            case AxisType.Move:
-                                _moveAxis.Draw(_boxEffect, _boxVertexBuffer, ref selectedTransform, ref worldCam);
-                                axisHandleCommand = _moveAxis.HandleInput(ref mouseState, ref worldCam, fireRayFlag,
-                                    selectedEntity);
-                                break;
-                            case AxisType.Rotation:
-                            case AxisType.Scale:
-                            default:
-                                break;
-                        }
+                            AxisType.Move => _moveAxis,
+                            AxisType.Rotation => _rotateAxis,
+                            _ => null
+                        };
 
+                        currentAxis?.Draw(_boxEffect, _boxVertexBuffer, ref selectedTransform, ref worldCam);
+                        IEditorCommand? axisHandleCommand = currentAxis?.HandleInput(ref mouseState, ref worldCam,
+                            fireRayFlag, selectedEntity);
+                            
                         if (axisHandleCommand is not null)
                         {
                             _commands.AddCommandAndExecute(axisHandleCommand);
