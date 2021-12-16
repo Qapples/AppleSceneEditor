@@ -82,16 +82,20 @@ namespace AppleSceneEditor.Systems.Axis
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
                 float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
-                
+
                 Vector3 movementAxis = _axisSelectedFlag switch
                 {
-                    1 => Vector3.Up,      //yaw,
-                    2 => Vector3.Right,   //pitch
+                    1 => Vector3.Up, //yaw,
+                    2 => Vector3.Right, //pitch
                     3 => Vector3.Forward, //roll
                     _ => Vector3.Zero
                 };
 
-                transform.Matrix *= Matrix.CreateFromAxisAngle(movementAxis, movementValue);
+                //Make the box rotate on its center rather than the center of the world.
+                Vector3 translation = transform.Matrix.Translation;
+                transform.Matrix *= Matrix.CreateTranslation(-translation) *
+                                    Matrix.CreateFromAxisAngle(movementAxis, movementValue) *
+                                    Matrix.CreateTranslation(translation);
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {
