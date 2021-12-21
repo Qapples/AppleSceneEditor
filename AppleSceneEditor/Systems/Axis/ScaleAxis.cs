@@ -150,6 +150,13 @@ namespace AppleSceneEditor.Systems.Axis
                                    Matrix.CreateScale(scale + scaleAxis) *
                                    Matrix.CreateFromQuaternion(rotation) *
                                    Matrix.CreateTranslation(position);
+
+                if (selectedEntity.Has<ComplexBox>())
+                {
+                    ref var box = ref selectedEntity.Get<ComplexBox>();
+
+                    box.HalfExtent += scaleAxis;
+                }
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {
