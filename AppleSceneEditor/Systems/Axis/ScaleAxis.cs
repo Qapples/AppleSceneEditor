@@ -110,7 +110,7 @@ namespace AppleSceneEditor.Systems.Axis
         {
             ref var transform = ref selectedEntity.Get<Transform>();
 
-            if (true && _axisSelectedFlag == 0)
+            if (isRayFired && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
 
@@ -132,7 +132,6 @@ namespace AppleSceneEditor.Systems.Axis
                 {
                     _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
                     _previousTransform = transform;
-                    Debug.WriteLine($"scale axis hit: {_axisSelectedFlag}");
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
@@ -163,8 +162,7 @@ namespace AppleSceneEditor.Systems.Axis
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
-            {
-                World.Set(new EntityTransformChangedFlag(selectedEntity, _previousTransform));
+            { 
                 _axisSelectedFlag = 0;
 
                 return new ChangeTransformCommand(selectedEntity, _previousTransform, transform);

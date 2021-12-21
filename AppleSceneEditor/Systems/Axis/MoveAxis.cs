@@ -99,12 +99,9 @@ namespace AppleSceneEditor.Systems.Axis
                 };
 
                 transform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
-
-                Debug.WriteLine($"position: {position}\nrotation: {rotation}\nscale: {scale}\n");
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {
-                World.Set(new EntityTransformChangedFlag(selectedEntity, _previousTransform));
                 _axisSelectedFlag = 0;
 
                 return new ChangeTransformCommand(selectedEntity, _previousTransform, transform);

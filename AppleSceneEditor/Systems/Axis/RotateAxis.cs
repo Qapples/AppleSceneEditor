@@ -109,7 +109,6 @@ namespace AppleSceneEditor.Systems.Axis
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {
-                World.Set(new EntityTransformChangedFlag(selectedEntity, _previousTransform));
                 _axisSelectedFlag = 0;
 
                 return new ChangeTransformCommand(selectedEntity, _previousTransform, transform);
