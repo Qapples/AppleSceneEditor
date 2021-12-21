@@ -32,6 +32,7 @@ namespace AppleSceneEditor.Systems
 
         private MoveAxis _moveAxis;
         private RotateAxis _rotateAxis;
+        private ScaleAxis _scaleAxis;
 
         private MouseState _previousMouseState;
         private Transform _previousTransform;
@@ -59,6 +60,7 @@ namespace AppleSceneEditor.Systems
 
             _moveAxis = new MoveAxis(world, graphicsDevice);
             _rotateAxis = new RotateAxis(world, graphicsDevice);
+            _scaleAxis = new ScaleAxis(world, graphicsDevice);
         }
 
         protected override void Update(GameTime gameTime, in Entity entity)
@@ -112,7 +114,7 @@ namespace AppleSceneEditor.Systems
 
                 transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
 
-                box.Draw(_graphicsDevice, _boxEffect, position, rotation, Color.Red, ref worldCam, null,
+                box.Draw(_graphicsDevice, _boxEffect, position, rotation, Color.Red, ref worldCam, true, null,
                     _boxVertexBuffer);
 
                 bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay);
@@ -150,6 +152,7 @@ namespace AppleSceneEditor.Systems
                         {
                             AxisType.Move => _moveAxis,
                             AxisType.Rotation => _rotateAxis,
+                            AxisType.Scale => _scaleAxis,
                             _ => null
                         };
 

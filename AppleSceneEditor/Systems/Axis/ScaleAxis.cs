@@ -9,12 +9,14 @@ using Microsoft.Xna.Framework.Input;
 
 namespace AppleSceneEditor.Systems.Axis
 {
-    public class MoveAxis : IAxis
+    public class ScaleAxis : IAxis
     {
         public World World { get; private set; }
         
         public GraphicsDevice GraphicsDevice { get; private set; }
 
+        private VertexPositionColor[] _axisLines;
+        
         private ComplexBox _xAxisBox;
         private ComplexBox _yAxisBox;
         private ComplexBox _zAxisBox;
@@ -23,33 +25,71 @@ namespace AppleSceneEditor.Systems.Axis
 
         private Transform _previousTransform;
         private MouseState _previousMouseState;
-
-        public MoveAxis(World world, GraphicsDevice graphicsDevice)
+        
+        public ScaleAxis(World world, GraphicsDevice graphicsDevice)
         {
             (GraphicsDevice, World) = (graphicsDevice, world);
+
+            float offset = 7.5f;
             
             _xAxisBox = new ComplexBox
             {
-                CenterOffset = Vector3.Zero,
+                CenterOffset = new Vector3(offset, 0f, 0f),
                 RotationOffset = Quaternion.Identity,
                 DrawType = DrawType.Solid,
-                HalfExtent = new Vector3(5f, 0.5f, 0.5f),
+                HalfExtent = new Vector3(1f, 1f, 1f),
             };
 
             _yAxisBox = _xAxisBox;
-            _yAxisBox.HalfExtent = new Vector3(0.5f, 5f, 0.5f);
+            _yAxisBox.CenterOffset = new Vector3(0f, offset, 0f);
 
-            _zAxisBox = _xAxisBox;
-            _zAxisBox.HalfExtent = new Vector3(0.5f, 0.5f, 5f);
+            _zAxisBox = _xAxisBox; 
+            _zAxisBox.CenterOffset = new Vector3(0f, 0f, offset);
+
+            _axisLines = new[]
+            {
+                //x axis line
+                new VertexPositionColor(Vector3.Zero, Color.Red),
+                new VertexPositionColor(new Vector3(offset, 0f, 0f), Color.Red),
+                
+                //y axis line
+                new VertexPositionColor(Vector3.Zero, Color.Green),
+                new VertexPositionColor(new Vector3(0f, offset, 0f), Color.Green),
+                
+                //z axis line
+                new VertexPositionColor(Vector3.Zero, Color.Blue),
+                new VertexPositionColor(new Vector3(0f, 0f, offset), Color.Blue),
+            };
         }
-
+        
         public void Draw(Effect effect, VertexBuffer buffer, ref Transform transform, ref Camera worldCam)
         {
-            transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+            //draw the liens
+            buffer.SetData(_axisLines);
 
-            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, true, null, buffer);
-            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, true, null, buffer);
-            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, true, null, buffer);
+            transform.Matrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
+            
+            if (effect is IEffectMatrices matrices)
+            {
+                matrices.World = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
+                                 Matrix.CreateFromQuaternion(rotation) *
+                                 Matrix.CreateTranslation(position);
+
+                matrices.View = worldCam.ViewMatrix;
+                matrices.Projection = worldCam.ProjectionMatrix;
+            }
+            
+            GraphicsDevice.SetVertexBuffer(buffer);
+
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawPrimitives(PrimitiveType.LineList, 0, _axisLines.Length);
+            }
+            
+            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, false, null, buffer);
+            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, false, null, buffer);
+            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, false, null, buffer);
         }
 
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,
@@ -62,8 +102,7 @@ namespace AppleSceneEditor.Systems.Axis
                 Viewport viewport = GraphicsDevice.Viewport;
 
                 transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
-                
-                //the axis boxes do NOT have offsets.
+
                 int xHit = worldCam.FireRayHit(ref _xAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
                 int yHit = worldCam.FireRayHit(ref _yAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
                 int zHit = worldCam.FireRayHit(ref _zAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
@@ -78,17 +117,17 @@ namespace AppleSceneEditor.Systems.Axis
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
-                int movementValue = mouseState.Y - _previousMouseState.Y;
+                float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
 
-                Vector3 movementVector = _axisSelectedFlag switch
+                Vector3 scaleAxis = _axisSelectedFlag switch
                 {
-                    1 => new Vector3(movementValue, 0f, 0f),
-                    2 => new Vector3(0f, movementValue, 0f),
-                    3 => new Vector3(0f, 0f, movementValue),
+                    1 => Vector3.UnitY,
+                    2 => Vector3.UnitX,
+                    3 => Vector3.UnitZ,
                     _ => Vector3.Zero
                 };
 
-                transform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
+                transform.Matrix *= Matrix.CreateScale(scaleAxis * movementValue);
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {

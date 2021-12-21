@@ -51,9 +51,9 @@ namespace AppleSceneEditor.Systems.Axis
         {
             transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
 
-            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, null, buffer);
-            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, null, buffer);
-            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, null, buffer);
+            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, true, null, buffer);
+            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, true, null, buffer);
+            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, true, null, buffer);
         }
 
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,
@@ -83,7 +83,7 @@ namespace AppleSceneEditor.Systems.Axis
             {
                 float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
 
-                Vector3 movementAxis = _axisSelectedFlag switch
+                Vector3 rotateAxis = _axisSelectedFlag switch
                 {
                     1 => Vector3.Up, //yaw,
                     2 => Vector3.Right, //pitch
@@ -94,7 +94,7 @@ namespace AppleSceneEditor.Systems.Axis
                 //Make the box rotate on its center rather than the center of the world.
                 Vector3 translation = transform.Matrix.Translation;
                 transform.Matrix *= Matrix.CreateTranslation(-translation) *
-                                    Matrix.CreateFromAxisAngle(movementAxis, movementValue) *
+                                    Matrix.CreateFromAxisAngle(rotateAxis, movementValue) *
                                     Matrix.CreateTranslation(translation);
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
