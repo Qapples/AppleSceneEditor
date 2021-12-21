@@ -51,9 +51,15 @@ namespace AppleSceneEditor.Systems.Axis
         {
             transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
 
-            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, true, null, buffer);
-            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, true, null, buffer);
-            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, true, null, buffer);
+            //we can save a few matrix copies by getting the view matrix here.
+            //none of the boxes here have any valuable offset so we only need one world matrix
+            Matrix world = _xAxisBox.GetWorldMatrix(position, rotation, Vector3.One, true);
+            ref Matrix projection = ref worldCam.ProjectionMatrix;
+            Matrix view = worldCam.ViewMatrix;
+
+            _xAxisBox.Draw(GraphicsDevice, effect, Color.Red, ref world, ref view, ref projection, null, buffer);
+            _yAxisBox.Draw(GraphicsDevice, effect, Color.Green, ref world, ref view, ref projection, null, buffer);
+            _zAxisBox.Draw(GraphicsDevice, effect, Color.Blue, ref world, ref view, ref projection, null, buffer);
         }
 
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,

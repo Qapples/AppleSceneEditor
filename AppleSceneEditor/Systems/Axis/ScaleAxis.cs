@@ -12,11 +12,11 @@ namespace AppleSceneEditor.Systems.Axis
     public class ScaleAxis : IAxis
     {
         public World World { get; private set; }
-        
+
         public GraphicsDevice GraphicsDevice { get; private set; }
 
         private VertexPositionColor[] _axisLines;
-        
+
         private ComplexBox _xAxisBox;
         private ComplexBox _yAxisBox;
         private ComplexBox _zAxisBox;
@@ -25,13 +25,13 @@ namespace AppleSceneEditor.Systems.Axis
 
         private Transform _previousTransform;
         private MouseState _previousMouseState;
-        
+
         public ScaleAxis(World world, GraphicsDevice graphicsDevice)
         {
             (GraphicsDevice, World) = (graphicsDevice, world);
 
             float offset = 7.5f;
-            
+
             _xAxisBox = new ComplexBox
             {
                 CenterOffset = new Vector3(offset, 0f, 0f),
@@ -43,7 +43,7 @@ namespace AppleSceneEditor.Systems.Axis
             _yAxisBox = _xAxisBox;
             _yAxisBox.CenterOffset = new Vector3(0f, offset, 0f);
 
-            _zAxisBox = _xAxisBox; 
+            _zAxisBox = _xAxisBox;
             _zAxisBox.CenterOffset = new Vector3(0f, 0f, offset);
 
             _axisLines = new[]
@@ -51,34 +51,35 @@ namespace AppleSceneEditor.Systems.Axis
                 //x axis line
                 new VertexPositionColor(Vector3.Zero, Color.Red),
                 new VertexPositionColor(new Vector3(offset, 0f, 0f), Color.Red),
-                
+
                 //y axis line
                 new VertexPositionColor(Vector3.Zero, Color.Green),
                 new VertexPositionColor(new Vector3(0f, offset, 0f), Color.Green),
-                
+
                 //z axis line
                 new VertexPositionColor(Vector3.Zero, Color.Blue),
                 new VertexPositionColor(new Vector3(0f, 0f, offset), Color.Blue),
             };
         }
-        
+
         public void Draw(Effect effect, VertexBuffer buffer, ref Transform transform, ref Camera worldCam)
         {
-            //draw the liens
+            //draw the lines to the boxes
             buffer.SetData(_axisLines);
 
             transform.Matrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
-            
+            Matrix posMatrix = Matrix.CreateTranslation(position);
+
             if (effect is IEffectMatrices matrices)
             {
                 matrices.World = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
                                  Matrix.CreateFromQuaternion(rotation) *
-                                 Matrix.CreateTranslation(position);
+                                 posMatrix;
 
                 matrices.View = worldCam.ViewMatrix;
                 matrices.Projection = worldCam.ProjectionMatrix;
             }
-            
+
             GraphicsDevice.SetVertexBuffer(buffer);
 
             foreach (EffectPass pass in effect.CurrentTechnique.Passes)
@@ -86,10 +87,19 @@ namespace AppleSceneEditor.Systems.Axis
                 pass.Apply();
                 GraphicsDevice.DrawPrimitives(PrimitiveType.LineList, 0, _axisLines.Length);
             }
-            
-            _xAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Red, ref worldCam, false, null, buffer);
-            _yAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Green, ref worldCam, false, null, buffer);
-            _zAxisBox.Draw(GraphicsDevice, effect, position, rotation, Color.Blue, ref worldCam, false, null, buffer);
+
+            //each box has different offsets so we need to make three world matrices
+            Matrix xWorld = _xAxisBox.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false);
+            Matrix yWorld = _yAxisBox.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false);
+            Matrix zWorld = _zAxisBox.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false);
+            (xWorld, yWorld, zWorld) = (xWorld * posMatrix, yWorld * posMatrix, zWorld * posMatrix);
+
+            ref Matrix projection = ref worldCam.ProjectionMatrix;
+            Matrix view = worldCam.ViewMatrix;
+
+            _xAxisBox.Draw(GraphicsDevice, effect, Color.Red, ref xWorld, ref view, ref projection, null, buffer);
+            _yAxisBox.Draw(GraphicsDevice, effect, Color.Green, ref yWorld, ref view, ref projection, null, buffer);
+            _zAxisBox.Draw(GraphicsDevice, effect, Color.Blue, ref zWorld, ref view, ref projection, null, buffer);
         }
 
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,

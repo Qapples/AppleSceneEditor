@@ -113,8 +113,9 @@ namespace AppleSceneEditor.Systems
                 ref var box = ref entity.Get<ComplexBox>();
 
                 transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+                Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, Vector3.One, true);
 
-                box.Draw(_graphicsDevice, _boxEffect, position, rotation, Color.Red, ref worldCam, true, null,
+                box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref drawWorldMatrix, ref worldCam, null,
                     _boxVertexBuffer);
 
                 bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay);
