@@ -93,11 +93,10 @@ namespace AppleSceneEditor.Systems.Axis
             }
 
             //each box has different offsets so we need to make three world matrices
-            Matrix xWorld = _xAxisBox.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false);
-            Matrix yWorld = _yAxisBox.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false);
-            Matrix zWorld = _zAxisBox.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false);
-            (xWorld, yWorld, zWorld) = (xWorld * posMatrix, yWorld * posMatrix, zWorld * posMatrix);
-
+            Matrix xWorld = GetBoxWorldMatrix(ref _xAxisBox, ref posMatrix, ref rotation);
+            Matrix yWorld = GetBoxWorldMatrix(ref _yAxisBox, ref posMatrix, ref rotation);
+            Matrix zWorld = GetBoxWorldMatrix(ref _zAxisBox, ref posMatrix, ref rotation);
+            
             ref Matrix projection = ref worldCam.ProjectionMatrix;
             Matrix view = worldCam.ViewMatrix;
 
@@ -111,16 +110,21 @@ namespace AppleSceneEditor.Systems.Axis
         {
             ref var transform = ref selectedEntity.Get<Transform>();
 
-            if (isRayFired && _axisSelectedFlag == 0)
+            if (true && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
 
                 transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+                
+                Matrix posMatrix = Matrix.CreateTranslation(position);
+   
+                Vector3 zPos = GetBoxWorldMatrix(ref _zAxisBox, ref posMatrix, ref rotation).Translation;
+                Vector3 xPos = GetBoxWorldMatrix(ref _xAxisBox, ref posMatrix, ref rotation).Translation;
+                Vector3 yPos = GetBoxWorldMatrix(ref _yAxisBox, ref posMatrix, ref rotation).Translation;
 
-                //use non ref version as offsets are applied within the method
-                int xHit = worldCam.FireRayHit(_xAxisBox, position, rotation, viewport) ? 1 : 0;
-                int yHit = worldCam.FireRayHit(_yAxisBox, position, rotation, viewport) ? 1 : 0;
-                int zHit = worldCam.FireRayHit(_zAxisBox, position, rotation, viewport) ? 1 : 0;
+                int xHit = worldCam.FireRayHit(ref _xAxisBox, ref xPos, ref rotation, ref viewport) ? 1 : 0;
+                int yHit = worldCam.FireRayHit(ref _yAxisBox, ref yPos, ref rotation, ref viewport) ? 1 : 0;
+                int zHit = worldCam.FireRayHit(ref _zAxisBox, ref zPos, ref rotation, ref viewport) ? 1 : 0;
 
                 //there must be only one axis hit in order for it to be selected (avoid situations where 
                 //more than one axis is hit)
@@ -170,5 +174,8 @@ namespace AppleSceneEditor.Systems.Axis
 
             return null;
         }
+
+        private static Matrix GetBoxWorldMatrix(ref ComplexBox box, ref Matrix posMatrix, ref Quaternion rotation) =>
+            box.GetWorldMatrix(Vector3.Zero, rotation, Vector3.One, false) * posMatrix;
     }
 }
