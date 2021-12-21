@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Numerics;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
@@ -6,6 +8,8 @@ using GrappleFightNET5.Components.Collision;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Quaternion = Microsoft.Xna.Framework.Quaternion;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace AppleSceneEditor.Systems.Axis
 {
@@ -113,31 +117,39 @@ namespace AppleSceneEditor.Systems.Axis
 
                 transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
 
-                int xHit = worldCam.FireRayHit(ref _xAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
-                int yHit = worldCam.FireRayHit(ref _yAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
-                int zHit = worldCam.FireRayHit(ref _zAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
+                //use non ref version as offsets are applied within the method
+                int xHit = worldCam.FireRayHit(_xAxisBox, position, rotation, viewport) ? 1 : 0;
+                int yHit = worldCam.FireRayHit(_yAxisBox, position, rotation, viewport) ? 1 : 0;
+                int zHit = worldCam.FireRayHit(_zAxisBox, position, rotation, viewport) ? 1 : 0;
 
                 //there must be only one axis hit in order for it to be selected (avoid situations where 
                 //more than one axis is hit)
-                if (xHit + yHit + zHit < 2)
+                if (xHit + yHit + zHit == 1)
                 {
                     _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
                     _previousTransform = transform;
+                    Debug.WriteLine($"scale axis hit: {_axisSelectedFlag}");
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
                 float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
-
+                
+                transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+                
                 Vector3 scaleAxis = _axisSelectedFlag switch
                 {
-                    1 => Vector3.UnitY,
-                    2 => Vector3.UnitX,
-                    3 => Vector3.UnitZ,
+                    1 => new Vector3(0, movementValue, 0), //y axis
+                    2 => new Vector3(movementValue, 0, 0), //x axis
+                    3 => new Vector3(0, 0, movementValue), //z axis
                     _ => Vector3.Zero
                 };
 
-                transform.Matrix *= Matrix.CreateScale(scaleAxis * movementValue);
+                //reconstruct the matrix
+                transform.Matrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
+                                   Matrix.CreateScale(scale + scaleAxis) *
+                                   Matrix.CreateFromQuaternion(rotation) *
+                                   Matrix.CreateTranslation(position);
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {

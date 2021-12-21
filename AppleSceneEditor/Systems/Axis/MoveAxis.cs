@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
@@ -77,7 +78,7 @@ namespace AppleSceneEditor.Systems.Axis
 
                 //there must be only one axis hit in order for it to be selected (avoid situations where 
                 //more than one axis is hit)
-                if (xHit + yHit + zHit < 2)
+                if (xHit + yHit + zHit == 1)
                 {
                     _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
                     _previousTransform = transform;
@@ -85,6 +86,8 @@ namespace AppleSceneEditor.Systems.Axis
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
+                transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+                
                 int movementValue = mouseState.Y - _previousMouseState.Y;
 
                 Vector3 movementVector = _axisSelectedFlag switch
@@ -96,6 +99,8 @@ namespace AppleSceneEditor.Systems.Axis
                 };
 
                 transform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
+
+                Debug.WriteLine($"position: {position}\nrotation: {rotation}\nscale: {scale}\n");
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {

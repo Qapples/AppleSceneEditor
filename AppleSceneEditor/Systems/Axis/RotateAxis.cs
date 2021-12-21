@@ -79,7 +79,7 @@ namespace AppleSceneEditor.Systems.Axis
 
                 //there must be only one axis hit in order for it to be selected (avoid situations where 
                 //more than one axis is hit)
-                if (xHit + yHit + zHit < 2)
+                if (xHit + yHit + zHit == 1)
                 {
                     _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
                     _previousTransform = transform;
@@ -88,6 +88,8 @@ namespace AppleSceneEditor.Systems.Axis
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
                 float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
+                
+                transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
 
                 Vector3 rotateAxis = _axisSelectedFlag switch
                 {
@@ -97,11 +99,13 @@ namespace AppleSceneEditor.Systems.Axis
                     _ => Vector3.Zero
                 };
 
-                //Make the box rotate on its center rather than the center of the world.
-                Vector3 translation = transform.Matrix.Translation;
-                transform.Matrix *= Matrix.CreateTranslation(-translation) *
-                                    Matrix.CreateFromAxisAngle(rotateAxis, movementValue) *
-                                    Matrix.CreateTranslation(translation);
+                //reconstruct the matrix, rotation should be in place rather than around the world
+                transform.Matrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
+                                   Matrix.CreateScale(scale) *
+                                   Matrix.CreateFromQuaternion(rotation) * 
+                                   Matrix.CreateFromAxisAngle(rotateAxis, movementValue) *
+                                   Matrix.CreateTranslation(position);
+
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {

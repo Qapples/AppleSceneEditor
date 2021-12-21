@@ -112,9 +112,9 @@ namespace AppleSceneEditor.Systems
             {
                 ref var box = ref entity.Get<ComplexBox>();
 
-                transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
-                Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, Vector3.One, true);
-
+                transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+                Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, scale, true);
+                    
                 box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref drawWorldMatrix, ref worldCam, null,
                     _boxVertexBuffer);
 
