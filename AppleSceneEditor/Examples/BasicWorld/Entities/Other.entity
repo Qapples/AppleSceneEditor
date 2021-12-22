@@ -4,6 +4,13 @@
       "$type": "ValueInfo",
       "valueType": "System.Int32",
       "value": "4"
+    },
+    {
+      "$type": "TransformInfo",
+      "position": "0 0 0",
+      "scale": "1 1 1",
+      "rotation": "0 0 0",
+      "velocity": "0 0 0"
     }
   ],
   "id": "Other"

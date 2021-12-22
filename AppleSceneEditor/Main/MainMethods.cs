@@ -13,6 +13,7 @@ using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Systems;
 using AppleSerialization.Json;
 using DefaultEcs;
+using DefaultEcs.System;
 using GrappleFightNET5.Components;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
@@ -60,8 +61,11 @@ namespace AppleSceneEditor
             
             scene.World.Set(AxisType.Move);
 
-            _drawSystem?.Dispose();
-            _drawSystem = new DrawSystem(scene.World, GraphicsDevice, _commands);
+            _drawSystems?.Dispose();
+            _drawSystems = new SequentialSystem<GameTime>(
+                new DrawSystem(scene.World, GraphicsDevice),
+                new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
+            
 
             //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
             //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.

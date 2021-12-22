@@ -10,7 +10,6 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
-using AppleSceneEditor.Systems;
 using AppleSerialization;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
@@ -61,7 +60,7 @@ namespace AppleSceneEditor
         private List<JsonObject> _jsonObjects;
         private JsonObject? _currentJsonObject;
 
-        private ISystem<GameTime>? _drawSystem;
+        private ISystem<GameTime>? _drawSystems;
 
         private CommandStream _commands;
         private InputHandler _notHeldInputHandler;
@@ -366,7 +365,7 @@ namespace AppleSceneEditor
             _jsonObjects = null!;
             _currentJsonObject = null;
             
-            _drawSystem?.Dispose();
+            _drawSystems?.Dispose();
 
             _commands.Dispose();
             _notHeldInputHandler.Dispose();
@@ -494,7 +493,7 @@ namespace AppleSceneEditor
                 _sceneViewport = new Viewport(x, y, width, height);
             }
 
-            if (_drawSystem is not null)
+            if (_drawSystems is not null)
             {
                 //The depth buffer is changed everytime we use the spritebatch to draw 2d objects. So, we must "reset" the
                 //by setting the depth stencil state to it's default value before drawing any 3d objects. If we don't do
@@ -504,7 +503,10 @@ namespace AppleSceneEditor
                 //set the viewport so that the scene is drawn within the scene viewer
                 GraphicsDevice.Viewport = _sceneViewport;
 
-                _drawSystem.Update(gameTime);
+                _drawSystems.Update(gameTime);
+                
+                GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, false);
+
             }
 
             GraphicsDevice.Viewport = _overallViewport;
