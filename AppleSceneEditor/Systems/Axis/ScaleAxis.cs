@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.Numerics;
 using AppleSceneEditor.Commands;
-using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
 using GrappleFightNET5.Components;
 using GrappleFightNET5.Components.Collision;
