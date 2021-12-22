@@ -40,6 +40,13 @@ namespace AppleSceneEditor
             _addComponentWindow.ShowModal(_desktop);
         }
 
+        private void AddEntityButtonClick(object? sender, EventArgs? eventArgs)
+        {
+            if (_currentScene is null) return;
+            
+            _addEntityWindow.ShowModal(_desktop);
+        }
+
         private void FinishButtonClick(string typeName)
         {
             const string methodName = nameof(MainGame) + "." + nameof(FinishButtonClick) + " (EditorEvents)";

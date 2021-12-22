@@ -44,6 +44,7 @@ namespace AppleSceneEditor
 
         private Window _addComponentWindow;
         private Window _alreadyExistsWindow;
+        private Window _addEntityWindow;
         private Window _settingsWindow;
         
         //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
@@ -199,8 +200,9 @@ namespace AppleSceneEditor
                 Root = _project.Root
             };
             
-            //create dialogs
+            //create windows and dialogs
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
+            _addEntityWindow = new Window(); //this window will be created later on in InitScene
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
             _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(_desktop, settingsMenuPath, _configPath);
 
@@ -234,11 +236,13 @@ namespace AppleSceneEditor
                     case "MainPanel":
                     {
                         if (widget is not Panel panel) return false;
-                        if (panel.FindWidgetById("AddComponentButton") is not TextButton addButton) return false;
+                        if (panel.FindWidgetById("AddComponentButton") is not TextButton addComponent ||
+                            panel.FindWidgetById("AddEntityButton") is not TextButton addEntity) return false;
 
-                        addButton.Click += AddComponentButtonClick;
+                        addComponent.Click += AddComponentButtonClick;
+                        addEntity.Click += AddEntityButtonClick;
+                        
                         panel.AcceptsKeyboardFocus = true;
-
                         missingWidgets.Remove("MainPanel");
                         
                         break;

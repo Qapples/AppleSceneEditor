@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using AppleSceneEditor.Input;
+using System.Linq;
 using Myra.Graphics2D.UI;
 using SettingsPanelInitializer = AppleSceneEditor.Factories.SettingsPanelInitializers.SettingsPanelInitializer;
 
@@ -11,6 +10,10 @@ namespace AppleSceneEditor.Factories
     public static class DialogFactory
     {
         public delegate void NewComponentOkClick(string typeName);
+        
+        //---------------------------------
+        // Public dialog creation methods
+        //---------------------------------
         
         public static Window CreateNewComponentDialog(IEnumerable<string> types, NewComponentOkClick onOkClick)
         {
@@ -38,6 +41,35 @@ namespace AppleSceneEditor.Factories
             
             panel.Widgets.Add(stackPanel);
 
+            return outWindow;
+        }
+
+        public static Window CreateNewEntityDialog(string sceneDirectory)
+        {
+            VerticalStackPanel stackPanel = new();
+            Window outWindow = new() {Content = stackPanel};
+
+            TextBox idTextBox = new()
+            {
+                Text = "", MinWidth = 250, HorizontalAlignment = HorizontalAlignment.Center
+            };
+            
+            TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
+            TextButton cancelButton = new() {Text = "Cancel", HorizontalAlignment = HorizontalAlignment.Right};
+
+            okButton.Click += (_, _) =>
+            {
+                CreateNewEntity(sceneDirectory, idTextBox.Text);
+                outWindow.Close();
+            };
+            cancelButton.Click += (_, _) => outWindow.Close();
+
+            stackPanel.AddChild(new Label
+                {Text = "Enter the ID of the new entity", HorizontalAlignment = HorizontalAlignment.Center});
+            stackPanel.AddChild(idTextBox);
+            stackPanel.AddChild(new HorizontalStackPanel
+                {Widgets = {okButton, cancelButton}, HorizontalAlignment = HorizontalAlignment.Right});
+            
             return outWindow;
         }
 
@@ -163,6 +195,10 @@ namespace AppleSceneEditor.Factories
 
             return outWindow;
         }
+        
+        //-----------------
+        // Private methods
+        //-----------------
 
         //There's probably a better name to be had with this method, but I can't come up with one. So, docs are going
         //to have to do for now.
@@ -192,5 +228,40 @@ namespace AppleSceneEditor.Factories
             "KeybindPanel" => SettingsPanelInitializers.KeybindsPanelInitializer,
             _ => null
         };
+        
+        private static string GenerateBlankEntityFile(string entityId) => $@"{{
+    ""components"": [
+        {{
+        }}
+    ],
+    ""id"" : ""{entityId}""
+}}";
+        
+        private static void CreateNewEntity(string sceneDirectory, string entityId)
+        {
+#if DEBUG
+            const string methodName = nameof(DialogFactory) + "." + nameof(CreateNewEntity);
+#endif
+            string entitiesDirectory = Path.Combine(sceneDirectory, "Entities");
+
+            //TODO: Add a dialog for when an entities directory cannot be found and when there's already an existing entity with the same ID.
+            if (!Directory.Exists(entitiesDirectory))
+            {
+                Debug.WriteLine(
+                    $"{methodName}: cannot find the \"Entities\" directory within directory {sceneDirectory}!");
+                return;
+            }
+            
+            //Directory.GetFiles returns the full path, not just the name of the files.
+            if (Directory.GetFiles(entitiesDirectory).Any(s => Path.GetFileNameWithoutExtension(s) == entityId))
+            {
+                Debug.WriteLine(
+                    $"{methodName}: entity of id {entityId} already exists!");
+                return;   
+            }
+
+            using StreamWriter writer = File.CreateText(Path.Combine(entitiesDirectory, $"{entityId}.entity"));
+            writer.Write(GenerateBlankEntityFile(entityId));
+        }
     }
 }
