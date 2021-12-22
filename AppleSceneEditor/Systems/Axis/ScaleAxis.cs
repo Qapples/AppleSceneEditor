@@ -30,6 +30,8 @@ namespace AppleSceneEditor.Systems.Axis
         private Transform _previousTransform;
         private MouseState _previousMouseState;
 
+        private Vector3 _entityBoxExtent;
+
         public ScaleAxis(World world, GraphicsDevice graphicsDevice)
         {
             (GraphicsDevice, World) = (graphicsDevice, world);
@@ -110,6 +112,8 @@ namespace AppleSceneEditor.Systems.Axis
         {
             ref var transform = ref selectedEntity.Get<Transform>();
 
+            bool hasBox = selectedEntity.Has<ComplexBox>();
+
             if (isRayFired && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
@@ -148,24 +152,42 @@ namespace AppleSceneEditor.Systems.Axis
                     _ => Vector3.Zero
                 };
 
+                Vector3 newScale = scale + scaleAxis;
+
                 //reconstruct the matrix
                 transform.Matrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
-                                   Matrix.CreateScale(scale + scaleAxis) *
+                                   Matrix.CreateScale(newScale) *
                                    Matrix.CreateFromQuaternion(rotation) *
                                    Matrix.CreateTranslation(position);
 
-                if (selectedEntity.Has<ComplexBox>())
+                //we are changing the box extent here so that the user can see the changes in real time.
+                //ChangeTransformCommand is responsible for actually changing it, as it can be undo/redone.
+                if (hasBox)
                 {
                     ref var box = ref selectedEntity.Get<ComplexBox>();
 
-                    box.HalfExtent += scaleAxis;
+                    if (_entityBoxExtent == Vector3.Zero)
+                    {
+                        _entityBoxExtent = box.HalfExtent;
+                    }
+
+                    box.HalfExtent = _entityBoxExtent * newScale;
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             { 
                 _axisSelectedFlag = 0;
+                
+                if (hasBox)
+                {
+                    //reset the HalfExtent of the box to what it was before - the ChangeTransformCommand will handle it.
+                    ref var box = ref selectedEntity.Get<ComplexBox>();
+                    box.HalfExtent = _entityBoxExtent;
+                }
+                
+                _entityBoxExtent = Vector3.Zero;
 
-                return new ChangeTransformCommand(selectedEntity, _previousTransform, transform);
+                return new ChangeTransformCommand(selectedEntity, _previousTransform, transform, true);
             }
 
             _previousMouseState = mouseState;
