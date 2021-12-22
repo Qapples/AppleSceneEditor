@@ -19,11 +19,11 @@ using Microsoft.Xna.Framework.Input;
 namespace AppleSceneEditor.Systems
 {
     /// <summary>
-    /// System responsible for drawing 3d objects.
+    /// System responsible for drawing drawable components that entities may have.
     /// </summary>
     [With(typeof(Transform))]
     [WithEither(typeof(ComplexBox), typeof(MeshData))]
-    public sealed class DrawSystem : AEntitySetSystem<GameTime>
+    public sealed class EntityDrawSystem : AEntitySetSystem<GameTime>
     {
         private GraphicsDevice _graphicsDevice;
         private BasicEffect _boxEffect;
@@ -34,12 +34,12 @@ namespace AppleSceneEditor.Systems
 
         //there should be 36 vertices in every ComplexBox when drawing them.
 
-        public DrawSystem(World world, GraphicsDevice graphicsDevice) : this(world,
+        public EntityDrawSystem(World world, GraphicsDevice graphicsDevice) : this(world,
             new DefaultParallelRunner(1), graphicsDevice)
         {
         }
 
-        public DrawSystem(World world, IParallelRunner runner, GraphicsDevice graphicsDevice) : base(world, runner)
+        public EntityDrawSystem(World world, IParallelRunner runner, GraphicsDevice graphicsDevice) : base(world, runner)
         {
             _graphicsDevice = graphicsDevice;
 
@@ -102,7 +102,7 @@ namespace AppleSceneEditor.Systems
                 box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref drawWorldMatrix, ref worldCam, null,
                     _boxVertexBuffer);
 
-                bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay);
+                bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireSceneEditorRay);
 
                 if (fireRayFlag)
                 {

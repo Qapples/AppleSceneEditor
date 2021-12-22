@@ -10,6 +10,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace AppleSceneEditor.Systems
 {
+    /// <summary>
+    /// System responsible for drawing the in-editor transformation axis.
+    /// </summary>
     public class AxisDrawSystem : ISystem<GameTime>
     {
         public bool IsEnabled { get; set; }
@@ -49,7 +52,7 @@ namespace AppleSceneEditor.Systems
             Entity selectedEntity = _world.Get<SelectedEntityFlag>().SelectedEntity;
             MouseState mouseState = Mouse.GetState();
             
-            bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireEntitySelectionRay);
+            bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireSceneEditorRay);
 
             if (selectedEntity.Has<Transform>())
             {

@@ -13,10 +13,10 @@ namespace AppleSceneEditor
         UserControllingSceneViewer = 0b10,
         
         /// <summary>
-        /// Indicates that the user wants to select an entity through the scene viewer and that a ray should be fired
-        /// within the world
+        /// Indicates that the user wants to fire a ray within the scene editor to either select an entity or to
+        /// manipulate the transformation of an entity via the transformation axis.
         /// </summary>
-        FireEntitySelectionRay = 0b100,
+        FireSceneEditorRay = 0b100,
         
         /// <summary>
         /// Indicates that a NEW entity has just been selected and things need to be updated.

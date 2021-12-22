@@ -63,7 +63,7 @@ namespace AppleSceneEditor
 
             _drawSystems?.Dispose();
             _drawSystems = new SequentialSystem<GameTime>(
-                new DrawSystem(scene.World, GraphicsDevice),
+                new EntityDrawSystem(scene.World, GraphicsDevice),
                 new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
             
 

@@ -441,7 +441,7 @@ namespace AppleSceneEditor
                     mouseState.LeftButton == ButtonState.Pressed &&
                     _previousMouseState.LeftButton == ButtonState.Released)
                 {
-                    GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, true);
+                    GlobalFlag.SetFlag(GlobalFlags.FireSceneEditorRay, true);
                 }
 
                 //account for flags
@@ -505,7 +505,7 @@ namespace AppleSceneEditor
 
                 _drawSystems.Update(gameTime);
                 
-                GlobalFlag.SetFlag(GlobalFlags.FireEntitySelectionRay, false);
+                GlobalFlag.SetFlag(GlobalFlags.FireSceneEditorRay, false);
 
             }
 
