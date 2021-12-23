@@ -43,6 +43,14 @@ namespace AppleSceneEditor.Commands
 #if DEBUG
             const string methodName = nameof(AddEntityCommand) + "." + nameof(Execute);
 #endif
+            /* To fully add an entity, we must:
+             * 1. Create the file of the entity within the entities directory. (.entity)
+             * 2. Create a JsonObject instance from that new entity file.
+             * 3. Create a new entity instance from the world.
+             * 4. Add a button in EntityStackPanel so the user can select the entity within the entity viewer
+             * 5. Add that JsonObject to a list of JsonObjects representative of each entity in the loaded scene.
+             */
+
             string id = Path.GetFileNameWithoutExtension(_entityPath);
 
             File.WriteAllText(_entityPath, _entityContents);
