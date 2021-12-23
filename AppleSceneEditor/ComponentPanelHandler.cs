@@ -77,7 +77,7 @@ namespace AppleSceneEditor
                 return false;
             }
 
-            _rootObject.GenerateEntity(scene, scene.ScenePath is null
+            _rootObject.GenerateEntity(scene.World, scene.ScenePath is null
                 ? null
                 : Path.Combine(scene.ScenePath, "Entities", $"{_rootObject.Name}.entity"));
             

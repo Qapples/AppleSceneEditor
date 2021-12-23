@@ -38,8 +38,7 @@ namespace AppleSceneEditor.Extensions
         /// </summary>
         /// <param name="rootObject">The <see cref="JsonObject"/> to create the <see cref="Entity"/> instance from.
         /// </param>
-        /// <param name="scene">The <see cref="Scene"/> that provides the <see cref="World"/> instance that is used
-        /// to create the entity.</param>
+        /// <param name="world">The <see cref="World"/> instance that tne entity will be created from.</param>
         /// <param name="entityPath">If this value is set to, then the contents of <see cref="rootObject"/> are written
         /// to this file path.</param>
         /// <param name="readerOptions">Optional <see cref="JsonReaderOptions"/> instance that determines how the
@@ -49,17 +48,16 @@ namespace AppleSceneEditor.Extensions
         /// then a default value will be used.</param>
         /// <returns><see cref="Nullable{Entity}"/> is returned. If generation is successful, then it contains the
         /// <see cref="Entity"/>. Otherwise, it contains null.</returns>
-        public static Entity? GenerateEntity(this JsonObject rootObject, Scene scene, string? entityPath = null,
+        public static Entity? GenerateEntity(this JsonObject rootObject, World world, string? entityPath = null,
             JsonReaderOptions? readerOptions = null, JsonSerializerOptions? serializerOptions = null)
         {
-            World world = scene.World;
             
             //if we have a selected entity flag, make sure that we transfer that flag over to the new entity
             bool isSelectedEntity = false;
 
             //remove any entities with the same id beforehand as we are going to replace it.
             //cant use a reference because we are disposing the object if we find it and that causes unusual behavior.
-            foreach (Entity entity in scene.Entities.GetEntities())
+            foreach (Entity entity in world.GetEntities().With<string>().AsEnumerable())
             {
                 if (entity.Get<string>() == rootObject.Name)
                 {
