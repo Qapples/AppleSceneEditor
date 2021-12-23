@@ -12,6 +12,7 @@ using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Factories;
 using AppleSceneEditor.Systems;
+using AppleSceneEditor.UI;
 using AppleSerialization.Json;
 using DefaultEcs;
 using DefaultEcs.System;

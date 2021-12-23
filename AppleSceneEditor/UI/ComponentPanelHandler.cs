@@ -11,13 +11,13 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
 using AppleSerialization;
 using AppleSerialization.Json;
-using Myra.Graphics2D.UI;
 using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework;
+using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Styles;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
-namespace AppleSceneEditor
+namespace AppleSceneEditor.UI
 {
     /// <summary>
     /// Responsible for manipulating <see cref="StackPanel"/> instances so that they can be used to mainpulate the
