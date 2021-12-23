@@ -10,6 +10,8 @@ namespace AppleSceneEditor.Factories
     public static class DialogFactory
     {
         public delegate void NewComponentOkClick(string typeName);
+
+        public delegate void NewEntityOkClick(string entityPath);
         
         //---------------------------------
         // Public dialog creation methods
@@ -44,7 +46,7 @@ namespace AppleSceneEditor.Factories
             return outWindow;
         }
 
-        public static Window CreateNewEntityDialog(string sceneDirectory)
+        public static Window CreateNewEntityDialog(string sceneDirectory, NewEntityOkClick onOkClick)
         {
             VerticalStackPanel stackPanel = new();
             Window outWindow = new() {Content = stackPanel};
@@ -59,7 +61,7 @@ namespace AppleSceneEditor.Factories
 
             okButton.Click += (_, _) =>
             {
-                CreateNewEntity(sceneDirectory, idTextBox.Text);
+                onOkClick(Path.Combine(sceneDirectory, "Entities", $"{idTextBox.Text}.entity"));
                 outWindow.Close();
             };
             cancelButton.Click += (_, _) => outWindow.Close();
@@ -228,40 +230,5 @@ namespace AppleSceneEditor.Factories
             "KeybindPanel" => SettingsPanelInitializers.KeybindsPanelInitializer,
             _ => null
         };
-        
-        private static string GenerateBlankEntityFile(string entityId) => $@"{{
-    ""components"": [
-        {{
-        }}
-    ],
-    ""id"" : ""{entityId}""
-}}";
-        
-        private static void CreateNewEntity(string sceneDirectory, string entityId)
-        {
-#if DEBUG
-            const string methodName = nameof(DialogFactory) + "." + nameof(CreateNewEntity);
-#endif
-            string entitiesDirectory = Path.Combine(sceneDirectory, "Entities");
-
-            //TODO: Add a dialog for when an entities directory cannot be found and when there's already an existing entity with the same ID.
-            if (!Directory.Exists(entitiesDirectory))
-            {
-                Debug.WriteLine(
-                    $"{methodName}: cannot find the \"Entities\" directory within directory {sceneDirectory}!");
-                return;
-            }
-            
-            //Directory.GetFiles returns the full path, not just the name of the files.
-            if (Directory.GetFiles(entitiesDirectory).Any(s => Path.GetFileNameWithoutExtension(s) == entityId))
-            {
-                Debug.WriteLine(
-                    $"{methodName}: entity of id {entityId} already exists!");
-                return;   
-            }
-
-            using StreamWriter writer = File.CreateText(Path.Combine(entitiesDirectory, $"{entityId}.entity"));
-            writer.Write(GenerateBlankEntityFile(entityId));
-        }
     }
 }

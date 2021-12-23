@@ -67,7 +67,7 @@ namespace AppleSceneEditor
                 new EntityDrawSystem(scene.World, GraphicsDevice),
                 new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
 
-            _addEntityWindow = DialogFactory.CreateNewEntityDialog(sceneDirectory);
+            _addEntityWindow = DialogFactory.CreateNewEntityDialog(sceneDirectory, NewEntityOkClick);
 
             //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
             //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.

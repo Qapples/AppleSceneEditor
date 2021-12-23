@@ -72,6 +72,7 @@ namespace AppleSceneEditor
 
         private Grid _mainGrid;
         private HorizontalMenu _mainMenu;
+        private StackPanel _entityViewerStackPanel;
        
         public MainGame(string[] args)
         {
@@ -250,6 +251,8 @@ namespace AppleSceneEditor
                     case "MainGrid":
                     {
                         if (widget is not Grid grid) return false;
+
+                        _entityViewerStackPanel = (StackPanel) grid.FindWidgetById("EntityStackPanel");
 
                         _mainGrid = grid;
                         _mainGrid.AcceptsKeyboardFocus = true;

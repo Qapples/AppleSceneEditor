@@ -74,5 +74,44 @@ namespace AppleSceneEditor
             
             _commands.AddCommandAndExecute(new AddComponentCommand(prototype, _mainPanelHandler));
         }
+
+        private void NewEntityOkClick(string entityPath)
+        {
+#if DEBUG
+            const string methodName = nameof(NewEntityOkClick) + "(event)";      
+#endif
+            string? entityDirectory = Path.GetDirectoryName(entityPath);
+            if (entityDirectory is null || !Directory.Exists(entityDirectory))
+            {
+                Debug.WriteLine($"{methodName}: failed to get directory of entity.");
+                return;
+            }
+            
+            //Directory.GetFiles returns the full path, not just the name of the files.
+            if (Directory.GetFiles(entityDirectory).Any(s => Path.GetFullPath(s) == Path.GetFullPath(entityPath)))
+            {
+                Debug.WriteLine(
+                    $"{methodName}: the entity file {entityPath} already exists!");
+                return;   
+            }
+            
+
+            string id = Path.GetFileNameWithoutExtension(entityPath);
+            _commands.AddCommandAndExecute(new AddEntityCommand(entityPath, GenerateBlankEntityFile(id),
+                _currentScene.World, _entityViewerStackPanel, _jsonObjects));
+        }
+        
+        private static string GenerateBlankEntityFile(string entityId) => $@"{{
+    ""components"": [
+        {{
+            ""$type"": ""TransformInfo"",
+            ""position"": ""0 0 0"",
+            ""scale"": ""1 1 1"",
+            ""rotation"": ""0 0 0"",
+            ""velocity"": ""0 0 0""
+        }}
+    ],
+    ""id"" : ""{entityId}""
+}}";
     }
 }
