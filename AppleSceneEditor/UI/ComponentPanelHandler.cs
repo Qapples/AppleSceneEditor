@@ -103,7 +103,6 @@ namespace AppleSceneEditor.UI
         {
             (_rootObject, Desktop, Components, PropertyStackPanel) = (null!, null!, null!, null!);
             
-            _commands.Dispose();
             _commands = null!;
         }
         

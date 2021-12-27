@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AppleSceneEditor.Extensions;
+using AppleSceneEditor.UI;
 using AppleSerialization.Json;
 using DefaultEcs;
 using Myra.Graphics2D.UI;
@@ -17,18 +18,16 @@ namespace AppleSceneEditor.Commands
         private readonly string _entityPath;
         
         private World _world;
-        private StackPanel _entityStackPanel;
-        private IList<JsonObject> _entitiesJsonObjects; //represents all the json objects currently loaded in the scene
-
+        private EntityViewer _viewer;
+        
         private string _entityContents = "";
         private JsonObject? _entityJsonObject;
-        private TextButton? _entityButton;
+        private Grid? _entityButtonGrid;
 
-        public RemoveEntityCommand(string entityPath, World world, StackPanel entityStackPanel,
-            IList<JsonObject> entitiesJsonObjects)
+        public RemoveEntityCommand(string entityPath, EntityViewer viewer)
         {
-            (_entityPath, _world, _entityStackPanel, _entitiesJsonObjects, Disposed) =
-                (entityPath, world, entityStackPanel, entitiesJsonObjects, false);
+            (_entityPath, _world, _viewer, Disposed) =
+                (entityPath, viewer.World, viewer, false);
         }
 
         public void Execute()
@@ -44,7 +43,8 @@ namespace AppleSceneEditor.Commands
             */
 
             string id = Path.GetFileNameWithoutExtension(_entityPath);
-            
+            List<JsonObject> jsonObjects = _viewer.EntityJsonObjects;
+
             if (File.Exists(_entityPath))
             {
                 _entityContents = File.ReadAllText(_entityPath);
@@ -52,11 +52,11 @@ namespace AppleSceneEditor.Commands
             }
 
             _entityJsonObject =
-                _entitiesJsonObjects.FirstOrDefault(o => o.FindProperty("id")?.Value is string value && value == id);
+                jsonObjects.FirstOrDefault(o => o.FindProperty("id")?.Value is string value && value == id);
 
             if (_entityJsonObject is not null)
             {
-                _entitiesJsonObjects.Remove(_entityJsonObject);
+                jsonObjects.Remove(_entityJsonObject);
             }
             else
             {
@@ -71,16 +71,7 @@ namespace AppleSceneEditor.Commands
                 }
             }
 
-            _entityButton = _entityStackPanel.TryFindWidgetById<TextButton>($"EntityButton_{id}");
-
-            if (_entityButton is not null)
-            {
-                _entityStackPanel.RemoveChild(_entityButton);
-            }
-            else
-            {
-                Debug.WriteLine($"{methodName}: cannot find entity button of id \"{id}\"");
-            }
+            _entityButtonGrid = _viewer.RemoveEntityButtonGrid(id);
         }
 
         public void Undo()
@@ -92,7 +83,7 @@ namespace AppleSceneEditor.Commands
 
             if (_entityJsonObject is not null)
             {
-                _entitiesJsonObjects.Add(_entityJsonObject);
+                _viewer.EntityJsonObjects.Add(_entityJsonObject);
             }
 
             Entity? revivedEntity = _entityJsonObject?.GenerateEntity(_world);
@@ -101,9 +92,9 @@ namespace AppleSceneEditor.Commands
                 Debug.WriteLine($"{methodName}: cannot create entity from world!");
             }
 
-            if (_entityButton is not null)
+            if (_entityButtonGrid is not null)
             {
-                _entityStackPanel.AddChild(_entityButton);
+                _viewer.EntityButtonStackPanel.AddChild(_entityButtonGrid);
             }
         }
 
@@ -111,8 +102,8 @@ namespace AppleSceneEditor.Commands
 
         public void Dispose()
         {
-            (_world, _entityStackPanel, _entitiesJsonObjects, _entityJsonObject, _entityButton, Disposed) =
-                (null!, null!, null!, null!, null!, true);
+            (_world, _viewer, _entityJsonObject, _entityButtonGrid, Disposed) =
+                (null!, null!, null!, null!, true);
         }
     }
 }

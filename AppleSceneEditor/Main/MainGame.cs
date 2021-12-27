@@ -10,6 +10,7 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
+using AppleSceneEditor.UI;
 using AppleSerialization;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
@@ -44,7 +45,6 @@ namespace AppleSceneEditor
 
         private Window _addComponentWindow;
         private Window _alreadyExistsWindow;
-        private Window _addEntityWindow;
         private Window _settingsWindow;
         
         //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
@@ -73,6 +73,8 @@ namespace AppleSceneEditor
         private Grid _mainGrid;
         private HorizontalMenu _mainMenu;
         private StackPanel _entityViewerStackPanel;
+
+        private EntityViewer _entityViewer;
        
         public MainGame(string[] args)
         {
@@ -203,7 +205,6 @@ namespace AppleSceneEditor
             
             //create windows and dialogs
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
-            _addEntityWindow = new Window(); //this window will be created later on in InitScene
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
             _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(_desktop, settingsMenuPath, _configPath);
 
@@ -241,7 +242,7 @@ namespace AppleSceneEditor
                             panel.FindWidgetById("AddEntityButton") is not TextButton addEntity) return false;
 
                         addComponent.Click += AddComponentButtonClick;
-                        addEntity.Click += AddEntityButtonClick;
+                        //addEntity.Click += AddEntityButtonClick;
                         
                         panel.AcceptsKeyboardFocus = true;
                         missingWidgets.Remove("MainPanel");
@@ -378,7 +379,9 @@ namespace AppleSceneEditor
             _notHeldInputHandler.Dispose();
             _heldInputHandler.Dispose();
 
+            _mainPanelHandler?.Dispose();
             _mainPanelHandler = null;
+            _entityViewer = null!;
 
             Dispose();
             

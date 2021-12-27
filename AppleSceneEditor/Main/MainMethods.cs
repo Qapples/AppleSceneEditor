@@ -5,12 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Exceptions;
-using AppleSceneEditor.Factories;
 using AppleSceneEditor.Systems;
 using AppleSceneEditor.UI;
 using AppleSerialization.Json;
@@ -68,71 +66,10 @@ namespace AppleSceneEditor
                 new EntityDrawSystem(scene.World, GraphicsDevice),
                 new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
 
-            _addEntityWindow = DialogFactory.CreateNewEntityDialog(sceneDirectory, NewEntityOkClick);
-
-            //there should be a stack panel with an id of "EntityStackPanel" that should contain the entities. if it
-            //exists and is a valid VerticalStackPanel, add the entities to the stack panel as buttons with their ID.
-            bool result = _desktop.Root.ProcessWidgets(widget =>
-            {
-                if (widget.Id == "MainGrid")
-                {
-                    if (widget is not Grid grid) return false;
-
-                    ScrollViewer? scrollViewer = grid.TryFindWidgetById<ScrollViewer>("EntityScrollViewer");
-                    if (scrollViewer is null)
-                    {
-                        Debug.WriteLine("Can't find scrollviewer of ID \"EntityScrollViewer\"");
-                        return false;
-                    }
-
-                    VerticalStackPanel? stackPanel =
-                        scrollViewer.TryFindWidgetById<VerticalStackPanel>("EntityStackPanel");
-                    if (stackPanel is null)
-                    {
-                        Debug.WriteLine("Can't find VerticalStackPanel with ID of \"EntityStackPanel\".");
-                        return false;
-                    }
-
-                    stackPanel.AcceptsKeyboardFocus = true;
-
-                    foreach (Entity entity in scene.Entities.GetEntities())
-                    {
-                        if (!entity.Has<string>()) continue;
-
-                        //can't use ref due to closure
-                        var id = entity.Get<string>();
-                        
-                        //when a user presses an "EntityButton", then that entity will be selected. We can signify
-                        //through the world of the currentScene that we want to select an entity by giving the world
-                        //a SelectedEntityFlag component containing the Entity we want to select.
-                        TextButton button = new() {Text = id, Id = "EntityButton_" + id};
-                        button.TouchDown += (_, _) =>
-                        {
-                            GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
-                            scene?.World.Set(new SelectedEntityFlag(entity));
-                        };
-                        
-                        //the base entity should be selected by default
-                        if (string.Equals(id, "base", StringComparison.OrdinalIgnoreCase))
-                        {
-                            scene?.World.Set(new SelectedEntityFlag(entity));
-                        }
-
-                        stackPanel.AddChild(button);
-                    }
-                    
-                    //init scene with base entity
-                    SelectEntity(scene, "Base");
-                }
-
-                return true;
-            });
-
-            if (!result)
-            {
-                Debug.WriteLine($"Error was encountered in {nameof(InitScene)}. Use debugger.");
-                return null;
-            }
+            _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,
+                (StackPanel) _desktop.Root.FindWidgetById("EntityStackPanel"), _jsonObjects, _commands, _desktop);
+            
+            SelectEntity(scene, "Base");
 
             return scene;
         }
