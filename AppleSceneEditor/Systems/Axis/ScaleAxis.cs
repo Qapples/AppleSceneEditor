@@ -143,8 +143,8 @@ namespace AppleSceneEditor.Systems.Axis
                 
                 Vector3 scaleAxis = _axisSelectedFlag switch
                 {
-                    1 => new Vector3(0, movementValue, 0), //y axis
-                    2 => new Vector3(movementValue, 0, 0), //x axis
+                    1 => new Vector3(movementValue, 0, 0), //x axis
+                    2 => new Vector3(0, movementValue, 0), //y axis
                     3 => new Vector3(0, 0, movementValue), //z axis
                     _ => Vector3.Zero
                 };
