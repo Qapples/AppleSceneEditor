@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
@@ -68,6 +69,19 @@ namespace AppleSceneEditor
 
             _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,
                 (StackPanel) _desktop.Root.FindWidgetById("EntityStackPanel"), _jsonObjects, _commands, _desktop);
+            
+            foreach (Entity entity in scene.Entities.GetEntities())
+            {
+                if (!entity.Has<string>()) continue;
+                
+                ref var id = ref entity.Get<string>();
+
+                //the base entity should be selected by default
+                if (string.Equals(id, "base", StringComparison.OrdinalIgnoreCase))
+                {
+                    scene.World.Set(new SelectedEntityFlag(entity));
+                }
+            }
             
             SelectEntity(scene, "Base");
 
