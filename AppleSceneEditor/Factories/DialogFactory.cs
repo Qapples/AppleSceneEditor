@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Myra.Graphics2D.UI;
 using SettingsPanelInitializer = AppleSceneEditor.Factories.SettingsPanelInitializers.SettingsPanelInitializer;
 
@@ -11,8 +10,6 @@ namespace AppleSceneEditor.Factories
     {
         public delegate void NewComponentOkClick(string typeName);
 
-        public delegate void NewEntityOkClick(string entityPath);
-        
         //---------------------------------
         // Public dialog creation methods
         //---------------------------------
@@ -43,35 +40,6 @@ namespace AppleSceneEditor.Factories
             
             panel.Widgets.Add(stackPanel);
 
-            return outWindow;
-        }
-
-        public static Window CreateNewEntityDialog(string sceneDirectory, NewEntityOkClick onOkClick)
-        {
-            VerticalStackPanel stackPanel = new();
-            Window outWindow = new() {Content = stackPanel};
-
-            TextBox idTextBox = new()
-            {
-                Text = "", MinWidth = 250, HorizontalAlignment = HorizontalAlignment.Center
-            };
-            
-            TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
-            TextButton cancelButton = new() {Text = "Cancel", HorizontalAlignment = HorizontalAlignment.Right};
-
-            okButton.Click += (_, _) =>
-            {
-                onOkClick(Path.Combine(sceneDirectory, "Entities", $"{idTextBox.Text}.entity"));
-                outWindow.Close();
-            };
-            cancelButton.Click += (_, _) => outWindow.Close();
-
-            stackPanel.AddChild(new Label
-                {Text = "Enter the ID of the new entity", HorizontalAlignment = HorizontalAlignment.Center});
-            stackPanel.AddChild(idTextBox);
-            stackPanel.AddChild(new HorizontalStackPanel
-                {Widgets = {okButton, cancelButton}, HorizontalAlignment = HorizontalAlignment.Right});
-            
             return outWindow;
         }
 
