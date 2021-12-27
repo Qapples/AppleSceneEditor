@@ -1,0 +1,29 @@
+{
+  "components": [
+    {
+      "$type": "TextureInfo",
+      "texturePath": {
+        "path": "Textures/TestModelTexture.png",
+        "isContentPath": true
+      }
+    },
+    {
+      "$type": "MeshInfo",
+      "meshPath": {
+        "path": "Models/TestModel.gltf",
+        "isContentPath": true
+      },
+      "effectName": "basic_skin_effect",
+      "meshIndex": 0,
+      "skinIndex": 0
+    },
+    {
+      "$type": "TransformInfo",
+      "position": "0 0 0",
+      "scale": "1 1 1",
+      "rotation": "0 0 0",
+      "velocity": "0 0 0"
+    }
+  ],
+  "id": "TestMesh"
+}
