@@ -28,7 +28,7 @@
       </HorizontalStackPanel>
       
       <Label Text="Properties Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5" GridColumn="2" StyleName="small"/>
-      <Label Text="File Viewer" HforizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" GridColumn="1" GridRow="1" Opacity="0.5"/>
+      <Label Text="File Viewer" HorizontalAlignment="Right" VerticalAlignment="Bottom" StyleName="small" GridColumn="1" GridRow="1" Opacity="0.5"/>
 
       <!--List of entities. The "holder" label is there to ensure that the entities go past the toolbar and are visible.
       -->
