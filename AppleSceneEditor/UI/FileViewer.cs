@@ -134,7 +134,11 @@ namespace AppleSceneEditor.UI
         {
             InternalChild.Widgets.Clear();
 
-            int i = 0;
+            Widget backFolderWidget = CreateFolderItemWidget("..");
+            backFolderWidget.GridColumn = 0;
+            InternalChild.AddChild(backFolderWidget);
+
+            int i = 1;
             foreach (string subDirectory in Directory.GetDirectories(CurrentDirectory))
             {
                 Widget widget = CreateFolderItemWidget(new DirectoryInfo(subDirectory).Name);
