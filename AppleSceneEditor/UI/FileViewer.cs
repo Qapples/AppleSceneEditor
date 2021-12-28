@@ -138,11 +138,20 @@ namespace AppleSceneEditor.UI
             backFolderWidget.GridColumn = 0;
             InternalChild.AddChild(backFolderWidget);
 
-            int i = 1;
+            int c = 1;
+            int r = 0;
+            
             foreach (string subDirectory in Directory.GetDirectories(CurrentDirectory))
             {
                 Widget widget = CreateFolderItemWidget(new DirectoryInfo(subDirectory).Name);
-                widget.GridColumn = i++;
+                widget.GridColumn = c++;
+                widget.GridRow = r;
+
+                if (c >= ItemsPerRow)
+                {
+                    c = 0;
+                    r++;
+                }
                 
                 InternalChild.AddChild(widget);
             }
@@ -150,7 +159,14 @@ namespace AppleSceneEditor.UI
             foreach (string filePath in Directory.GetFiles(CurrentDirectory))
             {
                 Widget widget = CreateFileItemWidget(Path.GetFileName(filePath));
-                widget.GridColumn = i++;
+                widget.GridColumn = c++;
+                widget.GridRow = r;
+
+                if (c >= ItemsPerRow)
+                {
+                    c = 0;
+                    r++;
+                }
                 
                 InternalChild.AddChild(widget);
             }
