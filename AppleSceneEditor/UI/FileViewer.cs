@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using AppleSceneEditor.Extensions;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
@@ -27,6 +28,8 @@ namespace AppleSceneEditor.UI
         public int ItemsPerRow { get; set; }
 
         private readonly Dictionary<string, IImage> _fileIcons;
+
+        private bool _isRightClick;
 
         public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons)
         {
@@ -73,9 +76,17 @@ namespace AppleSceneEditor.UI
                 Background = new SolidBrush(Color.Black)
             };
 
+            icon.TouchDown += (_, _) => _isRightClick = Mouse.GetState().RightButton == ButtonState.Pressed;
+
             if (isFolder)
             {
-                icon.Click += (_, _) => { CurrentDirectory = Path.Combine(CurrentDirectory, itemName); };
+                icon.Click += (_, _) =>
+                {
+                    if (!_isRightClick)
+                    {
+                        CurrentDirectory = Path.Combine(CurrentDirectory, itemName);
+                    }
+                };
             }
 
             string iconName =
