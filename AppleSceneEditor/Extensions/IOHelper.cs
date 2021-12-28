@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using AppleSerialization.Json;
-using GrappleFightNET5.Scenes;
 using Microsoft.Xna.Framework.Graphics;
+using Myra.Graphics2D.TextureAtlases;
+using Myra.Graphics2D.UI;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor.Extensions
@@ -127,5 +128,32 @@ namespace AppleSceneEditor.Extensions
 
             return true;
         }
+
+        public static Dictionary<string, Image> GetFileIconsFromDirectory(string directory,
+            GraphicsDevice graphicsDevice)
+        {
+#if DEBUG
+            const string methodName = nameof(IOHelper) + "." + nameof(GetFileIconsFromDirectory);
+#endif
+            Dictionary<string, Image> outDict = new();
+
+            foreach (string filePath in Directory.GetFiles(directory))
+            {
+                if (!IsImageExtension(Path.GetExtension(filePath)))
+                {
+                    Debug.WriteLine($"{methodName}: {filePath} does not have valid image extension. Ignoring.");
+                    continue;
+                }
+
+                outDict[Path.GetFileName(filePath)] = new Image
+                    {Renderable = new TextureRegion(Texture2D.FromFile(graphicsDevice, filePath))};
+            }
+
+            return outDict;
+        }
+
+        //supported formats: bmp, gif, jpg, png, tif and dds (only for simple textures).
+        private static bool IsImageExtension(string extension) =>
+            extension is ".bmp" or ".gif" or ".jpg" or ".png" or ".tif" or ".dds";
     }
 }

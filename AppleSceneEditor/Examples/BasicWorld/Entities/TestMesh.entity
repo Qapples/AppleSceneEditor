@@ -9,13 +9,13 @@
     },
     {
       "$type": "MeshInfo",
+      "effectName": "basic_skin_effect",
+      "meshIndex": 0,
+      "skinIndex": 0,
       "meshPath": {
         "path": "Models/TestModel.gltf",
         "isContentPath": true
-      },
-      "effectName": "basic_skin_effect",
-      "meshIndex": 0,
-      "skinIndex": 0
+      }
     },
     {
       "$type": "TransformInfo",
