@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using AppleSceneEditor.Extensions;
-using FastDeepCloner;
-using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Myra.Graphics2D;
-using Myra.Graphics2D.TextureAtlases;
+using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Styles;
 
@@ -73,7 +71,11 @@ namespace AppleSceneEditor.UI
 #if DEBUG
             const string methodName = nameof(FileViewer) + "." + nameof(CreateFileItemWidget);
 #endif
-            ImageButton icon = new() {HorizontalAlignment = HorizontalAlignment.Center};
+            ImageButton icon = new()
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Background = new SolidBrush(Color.Black)
+            };
             
             if (_fileIcons.TryGetValue(IOHelper.ConvertExtensionToIconName(Path.GetExtension(fileName)),
                 out IImage? iconImage))
@@ -103,7 +105,11 @@ namespace AppleSceneEditor.UI
 #if DEBUG
             const string methodName = nameof(FileViewer) + "." + nameof(CreateFolderItemWidget);
 #endif
-            ImageButton icon = new() {HorizontalAlignment = HorizontalAlignment.Center};
+            ImageButton icon = new()
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Background = new SolidBrush(Color.Black)
+            };
             
             if (_fileIcons.TryGetValue(FolderIconName, out IImage? image))
             {
