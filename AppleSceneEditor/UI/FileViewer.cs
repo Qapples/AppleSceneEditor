@@ -60,44 +60,14 @@ namespace AppleSceneEditor.UI
         {
         }
 
-        private VerticalStackPanel CreateFileItemWidget(string fileName)
-        {
-#if DEBUG
-            const string methodName = nameof(FileViewer) + "." + nameof(CreateFileItemWidget);
-#endif
-            ImageButton icon = new()
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Background = new SolidBrush(Color.Black)
-            };
-            
-            if (_fileIcons.TryGetValue(IOHelper.ConvertExtensionToIconName(Path.GetExtension(fileName)),
-                out IImage? iconImage))
-            {
-                icon.Image = iconImage;
-            }
-            else
-            {
-                Debug.WriteLine($"{methodName}: can't find icon for file viewer in {fileName}");
-            }
-
-            return new VerticalStackPanel
-            {
-                Widgets =
-                {
-                    icon,
-                    new Label {Text = fileName, HorizontalAlignment = HorizontalAlignment.Center}
-                },
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-        }
+     
 
         private const string FolderIconName = "folder_icon";
-        
-        private VerticalStackPanel CreateFolderItemWidget(string folderName)
+
+        private VerticalStackPanel CreateItemWidget(string itemName, bool isFolder)
         {
 #if DEBUG
-            const string methodName = nameof(FileViewer) + "." + nameof(CreateFolderItemWidget);
+            const string methodName = nameof(FileViewer) + "." + nameof(CreateItemWidget);
 #endif
             ImageButton icon = new()
             {
@@ -105,18 +75,20 @@ namespace AppleSceneEditor.UI
                 Background = new SolidBrush(Color.Black)
             };
 
-            icon.Click += (_, _) =>
+            if (isFolder)
             {
-                CurrentDirectory = Path.Combine(CurrentDirectory, folderName);
-            };
-            
-            if (_fileIcons.TryGetValue(FolderIconName, out IImage? image))
+                icon.Click += (_, _) => { CurrentDirectory = Path.Combine(CurrentDirectory, itemName); };
+            }
+
+            string iconName =
+                isFolder ? FolderIconName : IOHelper.ConvertExtensionToIconName(Path.GetExtension(itemName));
+            if (_fileIcons.TryGetValue(iconName, out IImage? image))
             {
                 icon.Image = image;
             }
             else
             {
-                Debug.WriteLine($"{methodName}: cannot find folder icon whose name is supposed to be {FolderIconName}");
+                Debug.WriteLine($"{methodName}: cannot find icon of name {iconName}. Is Folder: {isFolder}");
             }
             
             return new VerticalStackPanel
@@ -124,17 +96,23 @@ namespace AppleSceneEditor.UI
                 Widgets =
                 {
                     icon,
-                    new Label {Text = folderName, HorizontalAlignment = HorizontalAlignment.Center}
+                    new Label
+                    {
+                        Text = itemName,
+                        HorizontalAlignment = HorizontalAlignment.Center, 
+                        MaxWidth = icon.Width
+                    }
                 },
                 HorizontalAlignment = HorizontalAlignment.Center
             };
+
         }
 
         private void BuildUI()
         {
             InternalChild.Widgets.Clear();
 
-            Widget backFolderWidget = CreateFolderItemWidget("..");
+            Widget backFolderWidget = CreateItemWidget("..", true);
             backFolderWidget.GridColumn = 0;
             InternalChild.AddChild(backFolderWidget);
 
@@ -143,7 +121,7 @@ namespace AppleSceneEditor.UI
             
             foreach (string subDirectory in Directory.GetDirectories(CurrentDirectory))
             {
-                Widget widget = CreateFolderItemWidget(new DirectoryInfo(subDirectory).Name);
+                Widget widget = CreateItemWidget(new DirectoryInfo(subDirectory).Name, true);
                 widget.GridColumn = c++;
                 widget.GridRow = r;
 
@@ -158,7 +136,7 @@ namespace AppleSceneEditor.UI
             
             foreach (string filePath in Directory.GetFiles(CurrentDirectory))
             {
-                Widget widget = CreateFileItemWidget(Path.GetFileName(filePath));
+                Widget widget = CreateItemWidget(Path.GetFileName(filePath), false);
                 widget.GridColumn = c++;
                 widget.GridRow = r;
 
