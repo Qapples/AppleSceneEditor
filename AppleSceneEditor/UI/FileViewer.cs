@@ -5,6 +5,7 @@ using System.IO;
 using AppleSceneEditor.Extensions;
 using FastDeepCloner;
 using Microsoft.Xna.Framework.Graphics;
+using Myra.Graphics2D;
 using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Styles;
@@ -17,9 +18,9 @@ namespace AppleSceneEditor.UI
         
         public int ItemsPerRow { get; set; }
 
-        private readonly Dictionary<string, Image> _fileIcons;
+        private readonly Dictionary<string, IImage> _fileIcons;
 
-        public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, Image> fileIcons)
+        public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons)
         {
             (CurrentDirectory, ItemsPerRow, _fileIcons) = (directory, itemsPerRow, fileIcons);
 
@@ -62,7 +63,7 @@ namespace AppleSceneEditor.UI
             VerticalAlignment = VerticalAlignment.Stretch;
         }
 
-        public FileViewer(string directory, int itemsPerRow, Dictionary<string, Image> fileIcons) : this(
+        public FileViewer(string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons) : this(
             Stylesheet.Current.TreeStyle, directory, itemsPerRow, fileIcons)
         {
         }
@@ -72,15 +73,17 @@ namespace AppleSceneEditor.UI
 #if DEBUG
             const string methodName = nameof(FileViewer) + "." + nameof(CreateFileItemWidget);
 #endif
-            if (!_fileIcons.TryGetValue(IOHelper.ConvertExtensionToIconName(Path.GetExtension(fileName)),
-                out Image? icon))
+            ImageButton icon = new() {HorizontalAlignment = HorizontalAlignment.Center};
+            
+            if (_fileIcons.TryGetValue(IOHelper.ConvertExtensionToIconName(Path.GetExtension(fileName)),
+                out IImage? iconImage))
             {
-                icon = new Image();
+                icon.Image = iconImage;
+            }
+            else
+            {
                 Debug.WriteLine($"{methodName}: can't find icon for file viewer in {fileName}");
             }
-
-            //do a shallow copy of the icon.
-            icon = new Image {Renderable = icon.Renderable, HorizontalAlignment = HorizontalAlignment.Center};
 
             return new VerticalStackPanel
             {
@@ -100,15 +103,17 @@ namespace AppleSceneEditor.UI
 #if DEBUG
             const string methodName = nameof(FileViewer) + "." + nameof(CreateFolderItemWidget);
 #endif
-            if (!_fileIcons.TryGetValue(FolderIconName, out Image? icon))
+            ImageButton icon = new() {HorizontalAlignment = HorizontalAlignment.Center};
+            
+            if (_fileIcons.TryGetValue(FolderIconName, out IImage? image))
             {
-                icon = new Image();
+                icon.Image = image;
+            }
+            else
+            {
                 Debug.WriteLine($"{methodName}: cannot find folder icon whose name is supposed to be {FolderIconName}");
             }
             
-            //do a shallow copy of the icon.
-            icon = new Image {Renderable = icon.Renderable, HorizontalAlignment = HorizontalAlignment.Center};
-
             return new VerticalStackPanel
             {
                 Widgets =

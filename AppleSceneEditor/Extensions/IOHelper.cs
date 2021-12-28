@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.Json;
 using AppleSerialization.Json;
 using Microsoft.Xna.Framework.Graphics;
+using Myra.Graphics2D;
 using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
@@ -129,13 +130,13 @@ namespace AppleSceneEditor.Extensions
             return true;
         }
 
-        public static Dictionary<string, Image> GetFileIconsFromDirectory(string directory,
+        public static Dictionary<string, IImage> GetFileIconsFromDirectory(string directory,
             GraphicsDevice graphicsDevice)
         {
 #if DEBUG
             const string methodName = nameof(IOHelper) + "." + nameof(GetFileIconsFromDirectory);
 #endif
-            Dictionary<string, Image> outDict = new();
+            Dictionary<string, IImage> outDict = new();
 
             foreach (string filePath in Directory.GetFiles(directory))
             {
@@ -145,8 +146,8 @@ namespace AppleSceneEditor.Extensions
                     continue;
                 }
 
-                outDict[Path.GetFileNameWithoutExtension(filePath)] = new Image
-                    {Renderable = new TextureRegion(Texture2D.FromFile(graphicsDevice, filePath))};
+                outDict[Path.GetFileNameWithoutExtension(filePath)] =
+                    new TextureRegion(Texture2D.FromFile(graphicsDevice, filePath));
             }
 
             return outDict;
