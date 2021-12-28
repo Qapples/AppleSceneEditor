@@ -12,7 +12,17 @@ namespace AppleSceneEditor.UI
 {
     public sealed class FileViewer : SingleItemContainer<Grid>
     {
-        public string CurrentDirectory { get; set; }
+        private string _currentDirectory;
+
+        public string CurrentDirectory
+        {
+            get => _currentDirectory;
+            set
+            {
+                _currentDirectory = value;
+                BuildUI();
+            }
+        }
         
         public int ItemsPerRow { get; set; }
 
@@ -20,37 +30,13 @@ namespace AppleSceneEditor.UI
 
         public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons)
         {
-            (CurrentDirectory, ItemsPerRow, _fileIcons) = (directory, itemsPerRow, fileIcons);
+            (_currentDirectory, ItemsPerRow, _fileIcons) = (directory, itemsPerRow, fileIcons);
 
             InternalChild = new Grid
             {
                 ColumnSpacing = 4,
                 RowSpacing = 4,
             };
-
-            int i;
-            for (i = 0; i < itemsPerRow; i++)
-            {
-                //myra is wack. Proportions are over 3 instead of over 1.
-                InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 3f / itemsPerRow));
-            }
-
-            i = 0;
-            foreach (string subDirectory in Directory.GetDirectories(directory))
-            {
-                Widget widget = CreateFolderItemWidget(new DirectoryInfo(subDirectory).Name);
-                widget.GridColumn = i++;
-                
-                InternalChild.AddChild(widget);
-            }
-            
-            foreach (string filePath in Directory.GetFiles(directory))
-            {
-                Widget widget = CreateFileItemWidget(Path.GetFileName(filePath));
-                widget.GridColumn = i++;
-                
-                InternalChild.AddChild(widget);
-            }
 
             if (style is not null)
             {
@@ -59,6 +45,14 @@ namespace AppleSceneEditor.UI
 
             HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Stretch;
+            
+            for (int i = 0; i < ItemsPerRow; i++)
+            {
+                //myra is wack. Proportions are over 3 instead of over 1.
+                InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 3f / ItemsPerRow));
+            }
+            
+            BuildUI();
         }
 
         public FileViewer(string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons) : this(
@@ -110,6 +104,11 @@ namespace AppleSceneEditor.UI
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Background = new SolidBrush(Color.Black)
             };
+
+            icon.Click += (_, _) =>
+            {
+                CurrentDirectory = Path.Combine(CurrentDirectory, folderName);
+            };
             
             if (_fileIcons.TryGetValue(FolderIconName, out IImage? image))
             {
@@ -129,6 +128,28 @@ namespace AppleSceneEditor.UI
                 },
                 HorizontalAlignment = HorizontalAlignment.Center
             };
+        }
+
+        private void BuildUI()
+        {
+            InternalChild.Widgets.Clear();
+
+            int i = 0;
+            foreach (string subDirectory in Directory.GetDirectories(CurrentDirectory))
+            {
+                Widget widget = CreateFolderItemWidget(new DirectoryInfo(subDirectory).Name);
+                widget.GridColumn = i++;
+                
+                InternalChild.AddChild(widget);
+            }
+            
+            foreach (string filePath in Directory.GetFiles(CurrentDirectory))
+            {
+                Widget widget = CreateFileItemWidget(Path.GetFileName(filePath));
+                widget.GridColumn = i++;
+                
+                InternalChild.AddChild(widget);
+            }
         }
     }
 }
