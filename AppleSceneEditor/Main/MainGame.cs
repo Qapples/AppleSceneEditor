@@ -72,9 +72,9 @@ namespace AppleSceneEditor
 
         private Grid _mainGrid;
         private HorizontalMenu _mainMenu;
-        private StackPanel _entityViewerStackPanel;
 
         private EntityViewer _entityViewer;
+        private FileViewer _fileViewer;
        
         public MainGame(string[] args)
         {
@@ -243,7 +243,7 @@ namespace AppleSceneEditor
 
                         addComponent.Click += AddComponentButtonClick;
                         //addEntity.Click += AddEntityButtonClick;
-                        
+
                         panel.AcceptsKeyboardFocus = true;
                         missingWidgets.Remove("MainPanel");
                         
@@ -252,9 +252,7 @@ namespace AppleSceneEditor
                     case "MainGrid":
                     {
                         if (widget is not Grid grid) return false;
-
-                        _entityViewerStackPanel = (StackPanel) grid.FindWidgetById("EntityStackPanel");
-
+                        
                         _mainGrid = grid;
                         _mainGrid.AcceptsKeyboardFocus = true;
                         
@@ -382,6 +380,9 @@ namespace AppleSceneEditor
             _mainPanelHandler?.Dispose();
             _mainPanelHandler = null;
             _entityViewer = null!;
+            _fileViewer = null!;
+
+            Stylesheet.Current = null;
 
             Dispose();
             

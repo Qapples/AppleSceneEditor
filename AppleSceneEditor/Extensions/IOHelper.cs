@@ -145,12 +145,17 @@ namespace AppleSceneEditor.Extensions
                     continue;
                 }
 
-                outDict[Path.GetFileName(filePath)] = new Image
+                outDict[Path.GetFileNameWithoutExtension(filePath)] = new Image
                     {Renderable = new TextureRegion(Texture2D.FromFile(graphicsDevice, filePath))};
             }
 
             return outDict;
         }
+
+        public static string ConvertExtensionToIconName(string extension) => extension switch
+        {
+            _ => "file_icon"
+        };
 
         //supported formats: bmp, gif, jpg, png, tif and dds (only for simple textures).
         private static bool IsImageExtension(string extension) =>

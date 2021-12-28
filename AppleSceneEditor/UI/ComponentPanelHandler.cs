@@ -101,9 +101,7 @@ namespace AppleSceneEditor.UI
 
         public void Dispose()
         {
-            (_rootObject, Desktop, Components, PropertyStackPanel) = (null!, null!, null!, null!);
-            
-            _commands = null!;
+            (_rootObject, _commands, Desktop, Components, PropertyStackPanel) = (null!, null!, null!, null!, null!);
         }
         
         //--------------------------

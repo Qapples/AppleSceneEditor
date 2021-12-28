@@ -36,7 +36,7 @@ namespace AppleSceneEditor
         // Init methods
         //----------------
 
-        private Scene? InitScene(string sceneDirectory)
+        private Scene InitScene(string sceneDirectory)
         {
             Scene scene = new(sceneDirectory, GraphicsDevice, null, _spriteBatch, true);
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
@@ -69,6 +69,11 @@ namespace AppleSceneEditor
 
             _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,
                 (StackPanel) _desktop.Root.FindWidgetById("EntityStackPanel"), _jsonObjects, _commands, _desktop);
+
+            string fileIconsPath = Path.Combine(Content.RootDirectory, "Textures", "FileIcons");
+            _fileViewer = new FileViewer(sceneDirectory, 8,
+                IOHelper.GetFileIconsFromDirectory(fileIconsPath, GraphicsDevice)) {GridColumn = 1, GridRow = 1};
+            _mainGrid.AddChild(_fileViewer);
             
             foreach (Entity entity in scene.Entities.GetEntities())
             {
