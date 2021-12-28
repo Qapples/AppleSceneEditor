@@ -60,8 +60,6 @@ namespace AppleSceneEditor.UI
         {
         }
 
-     
-
         private const string FolderIconName = "folder_icon";
 
         private VerticalStackPanel CreateItemWidget(string itemName, bool isFolder)
@@ -90,22 +88,24 @@ namespace AppleSceneEditor.UI
             {
                 Debug.WriteLine($"{methodName}: cannot find icon of name {iconName}. Is Folder: {isFolder}");
             }
-            
+
             return new VerticalStackPanel
             {
                 Widgets =
                 {
                     icon,
-                    new Label
+                    new TextBox
                     {
                         Text = itemName,
-                        HorizontalAlignment = HorizontalAlignment.Center, 
-                        MaxWidth = icon.Width
-                    }
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        TextVerticalAlignment = VerticalAlignment.Center,
+                        Enabled = false,
+                        DisabledTextColor = Color.White,
+                        DisabledBackground = new SolidBrush(Color.Black),
+                    },
                 },
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-
         }
 
         private void BuildUI()
