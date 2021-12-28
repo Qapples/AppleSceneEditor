@@ -72,8 +72,8 @@ namespace AppleSceneEditor
 
             string fileIconsPath = Path.Combine(Content.RootDirectory, "Textures", "FileIcons");
             _fileViewer = new FileViewer(sceneDirectory, 8,
-                IOHelper.GetFileIconsFromDirectory(fileIconsPath, GraphicsDevice)) {GridColumn = 1, GridRow = 1};
-            _mainGrid.AddChild(_fileViewer);
+                IOHelper.GetFileIconsFromDirectory(fileIconsPath, GraphicsDevice));
+            _mainGrid.AddChild(new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _fileViewer});
             
             foreach (Entity entity in scene.Entities.GetEntities())
             {
