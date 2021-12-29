@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.UI;
 using AppleSerialization.Json;
@@ -19,19 +20,16 @@ namespace AppleSceneEditor.Commands
         private readonly string _entityContents;
 
         private World _world;
-        private EntityViewer _viewer;
      
         private Entity _newEntity;
-        private TextButton _newEntityButton;
         private JsonObject _newEntityJsonObject;
 
-        public AddEntityCommand(string entityPath, string entityContents, EntityViewer viewer)
+        public AddEntityCommand(string entityPath, string entityContents, World world)
         {
-            (_entityPath, _entityContents, _world, _viewer, Disposed) =
-                (entityPath, entityContents, viewer.World, viewer, false);
+            (_entityPath, _entityContents, _world, Disposed) =
+                (entityPath, entityContents, world, false);
 
             _newEntity = default;
-            _newEntityButton = new TextButton();
             _newEntityJsonObject = new JsonObject();
         }
 
@@ -52,7 +50,7 @@ namespace AppleSceneEditor.Commands
 
             File.WriteAllText(_entityPath, _entityContents);
 
-            Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(_entityContents));
+            Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(_entityContents));
             
             JsonObject? nullableJsonObj = JsonObject.CreateFromJsonReader(ref reader);
             if (nullableJsonObj is null)
@@ -63,7 +61,6 @@ namespace AppleSceneEditor.Commands
 
             _newEntityJsonObject = nullableJsonObj;
             nullableJsonObj = null;
-            _viewer.EntityJsonObjects.Add(_newEntityJsonObject);
 
             Entity? newEntityNullable = _newEntityJsonObject.GenerateEntity(_world);
             if (newEntityNullable is null)
@@ -71,8 +68,8 @@ namespace AppleSceneEditor.Commands
                 Debug.WriteLine($"{methodName}: failed to create entity from JsonObject from file: {_entityPath}");
                 return;
             }
-
-            _viewer.CreateEntityButtonGrid(id, newEntityNullable.Value, out _);
+            
+            _world.Set(new AddedEntityFlag(newEntityNullable.Value, _newEntityJsonObject));
         }
 
         public void Undo()
@@ -80,7 +77,10 @@ namespace AppleSceneEditor.Commands
 #if DEBUG
             const string methodName = nameof(AddEntityCommand) + "." + nameof(Undo);
 #endif
-            if (_newEntity != default) _newEntity.Dispose();
+            if (_newEntity != default)
+            {
+                _newEntity.Dispose();
+            }
 
             string id = Path.GetFileNameWithoutExtension(_entityPath);
 
@@ -93,17 +93,15 @@ namespace AppleSceneEditor.Commands
                 Debug.WriteLine($"{methodName}: failed to remove entity file {_entityPath} with exception: {e}");
                 return;
             }
-
-            _viewer.EntityJsonObjects.Remove(_newEntityJsonObject);
-            _viewer.RemoveEntityButtonGrid(id);
+            
+            _world.Set(new RemovedEntityFlag(id));
         }
 
         public void Redo() => Execute();
 
         public void Dispose()
         {
-            (_world, _viewer, _newEntityButton, _newEntityJsonObject, Disposed) =
-                (null!, null!, null!, null!, true);
+            (_world, _newEntityJsonObject, Disposed) = (null!, null!, true);
         }
     }
 }

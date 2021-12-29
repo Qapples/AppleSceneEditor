@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
+using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.UI;
 using AppleSerialization.Json;
@@ -18,16 +21,14 @@ namespace AppleSceneEditor.Commands
         private readonly string _entityPath;
         
         private World _world;
-        private EntityViewer _viewer;
-        
+
         private string _entityContents = "";
         private JsonObject? _entityJsonObject;
         private Grid? _entityButtonGrid;
 
-        public RemoveEntityCommand(string entityPath, EntityViewer viewer)
+        public RemoveEntityCommand(string entityPath, World world)
         {
-            (_entityPath, _world, _viewer, Disposed) =
-                (entityPath, viewer.World, viewer, false);
+            (_entityPath, _world, Disposed) = (entityPath, world, false);
         }
 
         public void Execute()
@@ -43,24 +44,11 @@ namespace AppleSceneEditor.Commands
             */
 
             string id = Path.GetFileNameWithoutExtension(_entityPath);
-            List<JsonObject> jsonObjects = _viewer.EntityJsonObjects;
 
             if (File.Exists(_entityPath))
             {
                 _entityContents = File.ReadAllText(_entityPath);
                 File.Delete(_entityPath);
-            }
-
-            _entityJsonObject =
-                jsonObjects.FirstOrDefault(o => o.FindProperty("id")?.Value is string value && value == id);
-
-            if (_entityJsonObject is not null)
-            {
-                jsonObjects.Remove(_entityJsonObject);
-            }
-            else
-            {
-                Debug.WriteLine($"{methodName}: cannot find entity of id \"{id}\" in lost of JsonObjects!");
             }
 
             foreach (Entity entity in _world.GetEntities().With<string>().AsEnumerable())
@@ -70,40 +58,42 @@ namespace AppleSceneEditor.Commands
                     entity.Dispose();
                 }
             }
-
-            _entityButtonGrid = _viewer.RemoveEntityButtonGrid(id);
+            
+            _world.Set(new RemovedEntityFlag(id));
         }
 
         public void Undo()
         {
 #if DEBUG
-            const string methodName = nameof(RemoveEntityCommand) + "." + nameof(Execute);
+            const string methodName = nameof(RemoveEntityCommand) + "." + nameof(Undo);
 #endif
             File.WriteAllText(_entityPath, _entityContents);
-
-            if (_entityJsonObject is not null)
+            
+            Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(_entityContents));
+            
+            JsonObject? nullableJsonObj = JsonObject.CreateFromJsonReader(ref reader);
+            if (nullableJsonObj is null)
             {
-                _viewer.EntityJsonObjects.Add(_entityJsonObject);
+                Debug.WriteLine($"{methodName}: unable to create a JsonObject from entity file: {_entityPath}");
+                return;
             }
 
-            Entity? revivedEntity = _entityJsonObject?.GenerateEntity(_world);
+            Entity? revivedEntity = nullableJsonObj.GenerateEntity(_world);
             if (revivedEntity is null)
             {
                 Debug.WriteLine($"{methodName}: cannot create entity from world!");
+                return;
             }
-
-            if (_entityButtonGrid is not null)
-            {
-                _viewer.EntityButtonStackPanel.AddChild(_entityButtonGrid);
-            }
+            
+            _world.Set(new AddedEntityFlag(revivedEntity.Value, nullableJsonObj));
         }
 
         public void Redo() => Execute();
 
         public void Dispose()
         {
-            (_world, _viewer, _entityJsonObject, _entityButtonGrid, Disposed) =
-                (null!, null!, null!, null!, true);
+            (_world, _entityJsonObject, _entityButtonGrid, Disposed) =
+                (null!, null!, null!, true);
         }
     }
 }

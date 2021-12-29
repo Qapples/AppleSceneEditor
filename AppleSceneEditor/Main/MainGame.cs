@@ -470,12 +470,38 @@ namespace AppleSceneEditor
 
                 if (world.Has<EntityTransformChangedFlag>() && _currentJsonObject is not null)
                 {
-                    var flag = world.Get<EntityTransformChangedFlag>();
+                    ref var flag = ref world.Get<EntityTransformChangedFlag>();
 
                     _currentJsonObject.UpdateTransform(flag.CurrentTransform);
                     _mainPanelHandler?.RebuildUI();
 
                     world.Remove<EntityTransformChangedFlag>();
+                }
+
+                if (world.Has<AddedEntityFlag>())
+                {
+                    ref var flag = ref world.Get<AddedEntityFlag>();
+
+                    _jsonObjects.Add(flag.AddedJsonObject);
+                    _entityViewer.CreateEntityButtonGrid(flag.AddedEntity.Get<string>(), flag.AddedEntity, out _);
+                    
+                    world.Remove<AddedEntityFlag>();
+                }
+
+                if (world.Has<RemovedEntityFlag>())
+                {
+                    ref var flag = ref world.Get<RemovedEntityFlag>();
+                    string id = flag.RemovedEntityId;
+
+                    JsonObject? foundJsonObject = _jsonObjects.FindJsonObjectById(id);
+                    if (foundJsonObject is not null)
+                    {
+                        _jsonObjects.Remove(foundJsonObject);
+                    }
+                    
+                    _entityViewer.RemoveEntityButtonGrid(id);
+                    
+                    world.Remove<RemovedEntityFlag>();
                 }
             }
 

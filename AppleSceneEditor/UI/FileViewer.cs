@@ -201,6 +201,7 @@ namespace AppleSceneEditor.UI
             outMenu.Items.Add(deleteItem);
             outMenu.Items.Add(renameItem);
             outMenu.Items.Add(editItem);
+
             outMenu.Items.Add(copyItem);
 
             outMenu.VisibleChanged += (_, _) =>

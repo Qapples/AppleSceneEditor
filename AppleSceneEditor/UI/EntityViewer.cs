@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
+using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Scenes.Info;
@@ -47,13 +48,29 @@ namespace AppleSceneEditor.UI
         public void AddEntity(string id, string entityContents)
         {
             string entityPath = Path.Combine(EntitiesDirectory, $"{id}.entity");
-            _commands.AddCommandAndExecute(new AddEntityCommand(entityPath, entityContents, this));
+            _commands.AddCommandAndExecute(new AddEntityCommand(entityPath, entityContents, World));
+
+            ref var flag = ref World.Get<AddedEntityFlag>();
+            CreateEntityButtonGrid(id, flag.AddedEntity, out _);
+            EntityJsonObjects.Add(flag.AddedJsonObject);
+            
+            World.Remove<AddedEntityFlag>();
         }
 
         public void RemoveEntity(string id)
         {
             string entityPath = Path.Combine(EntitiesDirectory, $"{id}.entity");
-            _commands.AddCommandAndExecute(new RemoveEntityCommand(entityPath, this));
+            _commands.AddCommandAndExecute(new RemoveEntityCommand(entityPath, World));
+
+            RemoveEntityButtonGrid(id);
+            
+            JsonObject? foundJsonObject = EntityJsonObjects.FindJsonObjectById(id);
+            if (foundJsonObject is not null)
+            {
+                EntityJsonObjects.Remove(foundJsonObject);
+            }
+            
+            World.Remove<RemovedEntityFlag>();
         }
         
         public Grid? CreateEntityButtonGrid(string id, Entity entity, out bool alreadyExists)
