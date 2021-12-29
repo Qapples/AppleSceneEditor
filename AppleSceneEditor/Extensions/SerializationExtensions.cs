@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AppleSerialization.Json;
@@ -16,6 +17,7 @@ namespace AppleSceneEditor.Extensions
             const string methodName = nameof(SerializationExtensions) + "." + nameof(UpdateTransform);
 #endif
             JsonArray? components = obj.FindArray("components");
+            
 
             if (components is null)
             {
@@ -59,6 +61,9 @@ namespace AppleSceneEditor.Extensions
             velocityProp.Value = ToSpacedStr(transform.Velocity);
         }
 
+        public static JsonObject? FindJsonObjectById(this IEnumerable<JsonObject> enumerable, string id) =>
+            enumerable.FirstOrDefault(o => o.FindProperty("id")?.Value is string value && value == id);
+        
         private static Vector3 GetEulerAnglesFromQuaternion(Quaternion q)
         {
             float poleValue = q.X * q.Y + q.Z * q.W;
