@@ -31,6 +31,11 @@ namespace AppleSceneEditor.UI
 
         private bool _isRightClick;
 
+        private VerticalMenu _fileContextMenu;
+        private VerticalMenu _folderContextMenu;
+
+        private string _selectedItemName;
+
         public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons)
         {
             (_currentDirectory, ItemsPerRow, _fileIcons) = (directory, itemsPerRow, fileIcons);
@@ -54,6 +59,9 @@ namespace AppleSceneEditor.UI
                 //myra is wack. Proportions are over 3 instead of over 1.
                 InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 3f / ItemsPerRow));
             }
+
+            _fileContextMenu = CreateFileContextMenu();
+            _folderContextMenu = CreateFolderContextMenu();
             
             BuildUI();
         }
@@ -88,6 +96,17 @@ namespace AppleSceneEditor.UI
                     }
                 };
             }
+            
+            //context menu
+            icon.Click += (_, _) =>
+            {
+                if (_isRightClick && Desktop.ContextMenu is null && itemName != "..")
+                {
+                    _selectedItemName = itemName;
+                    
+                    Desktop.ShowContextMenu(isFolder ? _folderContextMenu : _fileContextMenu, Desktop.TouchPosition);
+                }
+            };
 
             string iconName =
                 isFolder ? FolderIconName : IOHelper.ConvertExtensionToIconName(Path.GetExtension(itemName));
@@ -159,6 +178,24 @@ namespace AppleSceneEditor.UI
                 
                 InternalChild.AddChild(widget);
             }
+        }
+
+        
+        private VerticalMenu CreateFileContextMenu()
+        {
+            MenuItem deleteItem = new() {Text = "Delete"};
+            MenuItem renameItem = new() {Text = "Rename"};
+            MenuItem editItem = new() {Text = "Edit"};
+
+            return new VerticalMenu {Items = {deleteItem, renameItem, editItem}}; 
+        }
+        
+        private VerticalMenu CreateFolderContextMenu()
+        {
+            MenuItem deleteItem = new() {Text = "Delete"};
+            MenuItem renameItem = new() {Text = "Rename"};
+
+            return new VerticalMenu {Items = {deleteItem, renameItem}};
         }
     }
 }
