@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.Extensions;
+using DefaultEcs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D;
@@ -28,6 +29,8 @@ namespace AppleSceneEditor.UI
         }
         
         public int ItemsPerRow { get; set; }
+        
+        public World? World { get; set; }
 
         private readonly Dictionary<string, IImage> _fileIcons;
         
@@ -40,11 +43,11 @@ namespace AppleSceneEditor.UI
 
         private string _selectedItemName;
 
-        public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons,
-            CommandStream globalCommands)
+        public FileViewer(TreeStyle? style, string directory, int itemsPerRow, World? world,
+            Dictionary<string, IImage> fileIcons, CommandStream globalCommands)
         {
-            (_currentDirectory, ItemsPerRow, _fileIcons, _globalCommands) =
-                (directory, itemsPerRow, fileIcons, globalCommands);
+            (_currentDirectory, ItemsPerRow, World, _fileIcons, _globalCommands) =
+                (directory, itemsPerRow, world, fileIcons, globalCommands);
 
             InternalChild = new Grid
             {
@@ -68,14 +71,20 @@ namespace AppleSceneEditor.UI
 
             _fileContextMenu = CreateFileContextMenu();
             _folderContextMenu = CreateFolderContextMenu();
-            
+
             _selectedItemName = "";
 
             BuildUI();
         }
 
+        public FileViewer(string directory, int itemsPerRow, World? world, Dictionary<string, IImage> fileIcons,
+            CommandStream globalCommands) : this(Stylesheet.Current.TreeStyle, directory, itemsPerRow, world, fileIcons,
+            globalCommands)
+        {
+        }
+        
         public FileViewer(string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons,
-            CommandStream globalCommands) : this(Stylesheet.Current.TreeStyle, directory, itemsPerRow, fileIcons,
+            CommandStream globalCommands) : this(Stylesheet.Current.TreeStyle, directory, itemsPerRow, null, fileIcons,
             globalCommands)
         {
         }
@@ -206,12 +215,18 @@ namespace AppleSceneEditor.UI
 
             outMenu.VisibleChanged += (_, _) =>
             {
-                copyItem.Enabled = IsSceneFile(_selectedItemName);
+                copyItem.Enabled = IsSceneFile(_selectedItemName) && World is not null;
             };
 
             copyItem.Selected += (_, _) =>
             {
-                //_globalCommands.AddCommandAndExecute(new AddEntityCommand());
+                string itemPath = Path.Combine(CurrentDirectory, _selectedItemName);
+
+                if (World is not null)
+                {
+                    _globalCommands.AddCommandAndExecute(new AddEntityCommand(itemPath, File.ReadAllText(itemPath),
+                        World));
+                }
             };
             
             return outMenu;

@@ -70,10 +70,8 @@ namespace AppleSceneEditor
             _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,
                 (StackPanel) _desktop.Root.FindWidgetById("EntityStackPanel"), _jsonObjects, _commands, _desktop);
 
-            string fileIconsPath = Path.Combine(Content.RootDirectory, "Textures", "FileIcons");
-            _fileViewer = new FileViewer(sceneDirectory, 8,
-                IOHelper.GetFileIconsFromDirectory(fileIconsPath, GraphicsDevice), _commands);
-            _mainGrid.AddChild(new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _fileViewer});
+            _fileViewer.CurrentDirectory = sceneDirectory;
+            _fileViewer.World = scene.World;
             
             foreach (Entity entity in scene.Entities.GetEntities())
             {

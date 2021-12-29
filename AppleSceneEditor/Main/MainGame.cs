@@ -326,6 +326,14 @@ namespace AppleSceneEditor
                 throw new WidgetNotFoundException(missingWidgets.ToArray());
             }
 
+
+            string fileIconsPath = Path.Combine(Content.RootDirectory, "Textures", "FileIcons");
+            string examplesPath = Path.Combine(Content.RootDirectory, "..", "Examples");
+
+            _fileViewer = new FileViewer(examplesPath, 8,
+                IOHelper.GetFileIconsFromDirectory(fileIconsPath, GraphicsDevice), _commands);
+            _mainGrid.AddChild(new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _fileViewer});
+
             //load the default world (if provided)
             if (_defaultWorldPath is not null)
             {
