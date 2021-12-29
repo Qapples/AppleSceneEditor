@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using AppleSceneEditor.Commands;
 using AppleSceneEditor.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -28,6 +30,7 @@ namespace AppleSceneEditor.UI
         public int ItemsPerRow { get; set; }
 
         private readonly Dictionary<string, IImage> _fileIcons;
+        private readonly CommandStream _globalCommands;
 
         private bool _isRightClick;
 
@@ -36,9 +39,11 @@ namespace AppleSceneEditor.UI
 
         private string _selectedItemName;
 
-        public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons)
+        public FileViewer(TreeStyle? style, string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons,
+            CommandStream globalCommands)
         {
-            (_currentDirectory, ItemsPerRow, _fileIcons) = (directory, itemsPerRow, fileIcons);
+            (_currentDirectory, ItemsPerRow, _fileIcons, _globalCommands) =
+                (directory, itemsPerRow, fileIcons, globalCommands);
 
             InternalChild = new Grid
             {
@@ -63,11 +68,14 @@ namespace AppleSceneEditor.UI
             _fileContextMenu = CreateFileContextMenu();
             _folderContextMenu = CreateFolderContextMenu();
             
+            _selectedItemName = "";
+
             BuildUI();
         }
 
-        public FileViewer(string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons) : this(
-            Stylesheet.Current.TreeStyle, directory, itemsPerRow, fileIcons)
+        public FileViewer(string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons,
+            CommandStream globalCommands) : this(Stylesheet.Current.TreeStyle, directory, itemsPerRow, fileIcons,
+            globalCommands)
         {
         }
 
@@ -103,7 +111,7 @@ namespace AppleSceneEditor.UI
                 if (_isRightClick && Desktop.ContextMenu is null && itemName != "..")
                 {
                     _selectedItemName = itemName;
-                    
+
                     Desktop.ShowContextMenu(isFolder ? _folderContextMenu : _fileContextMenu, Desktop.TouchPosition);
                 }
             };
@@ -180,14 +188,26 @@ namespace AppleSceneEditor.UI
             }
         }
 
-        
         private VerticalMenu CreateFileContextMenu()
         {
+            VerticalMenu outMenu = new();
+            
             MenuItem deleteItem = new() {Text = "Delete"};
             MenuItem renameItem = new() {Text = "Rename"};
             MenuItem editItem = new() {Text = "Edit"};
+            MenuItem copyItem = new() {Text = "Copy into scene", Enabled = true};
+            
+            outMenu.Items.Add(deleteItem);
+            outMenu.Items.Add(renameItem);
+            outMenu.Items.Add(editItem);
+            outMenu.Items.Add(copyItem);
 
-            return new VerticalMenu {Items = {deleteItem, renameItem, editItem}}; 
+            outMenu.VisibleChanged += (_, _) =>
+            {
+                copyItem.Enabled = IsSceneFile(_selectedItemName);
+            };
+            
+            return outMenu;
         }
         
         private VerticalMenu CreateFolderContextMenu()
@@ -197,5 +217,7 @@ namespace AppleSceneEditor.UI
 
             return new VerticalMenu {Items = {deleteItem, renameItem}};
         }
+
+        private static bool IsSceneFile(string fileName) => Path.GetExtension(fileName) is ".prefab" or ".entity";
     }
 }
