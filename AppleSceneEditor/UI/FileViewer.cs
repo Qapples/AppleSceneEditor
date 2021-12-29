@@ -30,6 +30,7 @@ namespace AppleSceneEditor.UI
         public int ItemsPerRow { get; set; }
 
         private readonly Dictionary<string, IImage> _fileIcons;
+        
         private readonly CommandStream _globalCommands;
 
         private bool _isRightClick;
@@ -205,6 +206,11 @@ namespace AppleSceneEditor.UI
             outMenu.VisibleChanged += (_, _) =>
             {
                 copyItem.Enabled = IsSceneFile(_selectedItemName);
+            };
+
+            copyItem.Selected += (_, _) =>
+            {
+                //_globalCommands.AddCommandAndExecute(new AddEntityCommand());
             };
             
             return outMenu;
