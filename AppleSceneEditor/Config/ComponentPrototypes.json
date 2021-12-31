@@ -23,9 +23,9 @@
     },
     {
       "$type": "CollisionBoxInfo",
-      "position": "0 0 0",
-      "halfExtent": "0 0 0",
-      "rotation": "0 0 0"
+      "centerOffset": "0 0 0",
+      "rotationOffset": "0 0 0",
+      "halfExtent": "0 0 0"
     },
     {
       "$type": "ScriptInfo",
