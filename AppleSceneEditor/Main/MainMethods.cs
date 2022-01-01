@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Input;
@@ -62,7 +63,9 @@ namespace AppleSceneEditor
             
             scene.World.Set(AxisType.Move);
 
-            _drawSystems?.Dispose();
+            _commands.Dispose();
+            _commands = new CommandStream();
+            
             _drawSystems = new SequentialSystem<GameTime>(
                 new EntityDrawSystem(scene.World, GraphicsDevice),
                 new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
@@ -117,7 +120,14 @@ namespace AppleSceneEditor
                     return;
                 }
 
+                _currentScene?.Dispose();
                 _currentScene = InitScene(folder);
+                
+                _notHeldInputHandler.Dispose();
+                _heldInputHandler.Dispose();
+                
+                (_notHeldInputHandler, _heldInputHandler) =
+                    CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
             };
 
             return fileDialog;
