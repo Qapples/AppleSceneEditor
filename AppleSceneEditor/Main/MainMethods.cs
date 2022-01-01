@@ -41,7 +41,7 @@ namespace AppleSceneEditor
         {
             Scene scene = new(sceneDirectory, GraphicsDevice, null, _spriteBatch, true);
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
-            
+
             scene.Compile();
             
             //initialize world-wide components
@@ -72,6 +72,9 @@ namespace AppleSceneEditor
 
             _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,
                 (StackPanel) _desktop.Root.FindWidgetById("EntityStackPanel"), _jsonObjects, _commands, _desktop);
+            
+            _mainPanelHandler?.Dispose();
+            _mainPanelHandler = null;
 
             _fileViewer.CurrentDirectory = sceneDirectory;
             _fileViewer.World = scene.World;

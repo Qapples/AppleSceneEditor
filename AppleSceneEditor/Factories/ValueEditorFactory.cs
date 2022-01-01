@@ -223,8 +223,6 @@ namespace AppleSceneEditor.Factories
                     args.Cancel = true;
                     return;
                 }
-                
-                UpdateJsonVectorProperty(tempProperty, otherBoxes);
             }
             
             Label[] labels = valueNames.Select(s => new Label {Text = $"{s}: "}).ToArray();
@@ -236,6 +234,7 @@ namespace AppleSceneEditor.Factories
             {
                 boxes[i] = new TextBox {Text = values[i].ToString()};
                 boxes[i].ValueChanging += (o, args) => ValueChangingMethod(o, args, property, boxes);
+                boxes[i].TextChanged += (_, _) => UpdateJsonVectorProperty(property, boxes);
 
                 //ensure that there is a space between each value
                 if (i > 0)
