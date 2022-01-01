@@ -229,7 +229,7 @@ namespace AppleSceneEditor
                         if (settingsMenuOpen is not null) settingsMenuOpen.Selected += SettingsMenuOpen;
 
                         _mainMenu = menu;
-                        _mainMenu.AcceptsKeyboardFocus = true;
+                        _mainMenu.AcceptsKeyboardFocus = false;
 
                         missingWidgets.Remove("MainMenu");
 

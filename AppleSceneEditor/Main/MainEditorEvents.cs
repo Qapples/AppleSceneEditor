@@ -17,23 +17,26 @@ namespace AppleSceneEditor
 
         public void MenuFileOpen(object? sender, EventArgs? eventArgs)
         {
+            GlobalFlag.SetFlag(GlobalFlags.UserControllingSceneViewer, false);
             _openFileDialog.ShowModal(_desktop);
         }
 
         public void MenuFileNew(object? sender, EventArgs? eventArgs)
         {
+            GlobalFlag.SetFlag(GlobalFlags.UserControllingSceneViewer, false);
             _newFileDialog.ShowModal(_desktop);
         }
 
         public void SettingsMenuOpen(object? sender, EventArgs? eventArgs)
         {
+            GlobalFlag.SetFlag(GlobalFlags.UserControllingSceneViewer, false);
             _settingsWindow.ShowModal(_desktop);
         }
 
         private void AddComponentButtonClick(object? sender, EventArgs? eventArgs)
         {
             if (_currentJsonObject is null) return;
-            
+
             _addComponentWindow.ShowModal(_desktop);
         }
 
