@@ -114,18 +114,23 @@ namespace AppleSceneEditor
 
         private FileDialog CreateNewFileDialog()
         {
-            FileDialog fileDialog = new(FileDialogMode.OpenFile) {Filter = "*.world", Enabled = true, Visible = true};
+            FileDialog fileDialog = new(FileDialogMode.SaveFile) {Filter = "*.world", Enabled = true, Visible = true};
             
             fileDialog.Closed += (o, e) =>
             {
                 if (!fileDialog.Result) return;
 
-                string folderPath = fileDialog.Folder;
-                if (string.IsNullOrEmpty(folderPath)) return;
-                
-                if (IOHelper.CreateNewScene(folderPath, _spriteBatch))
+                //the returning name of the file regardless of the extension will be the scene name.
+                if (string.IsNullOrEmpty(fileDialog.Folder) || string.IsNullOrEmpty(fileDialog.FilePath))
                 {
-                    InitScene(folderPath);
+                    return;
+                }
+
+                string scenePath = Path.Combine(Path.Combine(fileDialog.Folder,
+                    Path.GetFileNameWithoutExtension(fileDialog.FilePath)));
+                if (IOHelper.CreateNewScene(scenePath))
+                {
+                    InitScene(scenePath);
                 }
             };
 

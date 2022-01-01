@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using AppleSerialization.Json;
+using GrappleFightNET5.Scenes.Info;
 using Microsoft.Xna.Framework.Graphics;
 using Myra.Graphics2D;
 using Myra.Graphics2D.TextureAtlases;
@@ -81,18 +82,22 @@ namespace AppleSceneEditor.Extensions
             return outList;
         }
 
-        private const string BaseEntityContents = @"{
+        private static readonly string BaseEntityContents = $@"{{
     ""components"": [
-        {
-        }
+        {{
+            ""$type"": ""{nameof(TransformInfo)}"",
+            ""position"": ""0 0 0"",
+            ""scale"": ""1 1 1"",
+            ""rotation"": ""0 0 0"",
+            ""velocity"": ""0 0 0""
+        }}
     ],
     ""id"" : ""Base""
-}";
+}}";
 
         //we're accepting a spritebatch instead of a graphics device since spriteBatch includes a reference to it's 
         //graphics device and we need both either way to create a new scene.
-        public static bool CreateNewScene(string folderPath, SpriteBatch spriteBatch,
-            int maxEntityCapacity = 128)
+        public static bool CreateNewScene(string folderPath, int maxEntityCapacity = 128)
         {
 #if DEBUG
             const string methodName = nameof(IOHelper) + "." + nameof(CreateNewScene);
@@ -101,25 +106,15 @@ namespace AppleSceneEditor.Extensions
 
             //create paths
             string entitiesPath = Path.Combine(folderPath, "Entities");
-            Directory.CreateDirectory(Path.Combine(folderPath, "Systems"));
-            Directory.CreateDirectory(Path.Combine(folderPath, "Entities"));
             Directory.CreateDirectory(Path.Combine(folderPath, "Content"));
+            Directory.CreateDirectory(entitiesPath);
+            Directory.CreateDirectory(Path.Combine(folderPath, "Systems"));
 
             //create world file
             try
             {
-                using (StreamWriter writer = File.CreateText(worldPath))
-                {
-                    writer.WriteLine($"WorldMaxCapacity: {maxEntityCapacity}");
-                    writer.Flush();
-                }
-
-                //add base entity
-                using (StreamWriter writer = File.CreateText(Path.Combine(entitiesPath, "BaseEntity")))
-                {
-                    writer.WriteLine(BaseEntityContents);
-                    writer.Flush();
-                }
+                File.WriteAllText(worldPath, $"WorldMaxCapacity: {maxEntityCapacity}");
+                File.WriteAllText(Path.Combine(entitiesPath, "Base.entity"), BaseEntityContents);
             }
             catch (Exception e)
             {

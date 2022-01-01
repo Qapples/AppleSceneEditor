@@ -551,7 +551,6 @@ namespace AppleSceneEditor
                 _drawSystems.Update(gameTime);
                 
                 GlobalFlag.SetFlag(GlobalFlags.FireSceneEditorRay, false);
-
             }
 
             GraphicsDevice.Viewport = _overallViewport;

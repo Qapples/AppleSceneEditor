@@ -45,4 +45,8 @@
       <EmbeddedResource Include="Content\Stylesheets\editor_ui_skin.xmms" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Examples\OctantWorld" />
+    </ItemGroup>
+
 </Project>
