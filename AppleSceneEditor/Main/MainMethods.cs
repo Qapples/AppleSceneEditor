@@ -101,12 +101,23 @@ namespace AppleSceneEditor
             
             fileDialog.Closed += (o, e) =>
             {
+#if DEBUG
+                const string methodName = nameof(CreateOpenFileDialog) + "." + nameof(fileDialog.Closed);
+#endif
                 if (!fileDialog.Result) return;
 
-                string filePath = fileDialog.FilePath;
-                if (string.IsNullOrEmpty(filePath)) return;
+                string folder = fileDialog.Folder;
+                if (string.IsNullOrEmpty(folder)) return;
 
-                _currentScene = InitScene(Directory.GetParent(filePath)!.FullName);
+                SceneValidationError error = Scene.ValidateSceneDirectory(folder);
+                if (error != SceneValidationError.Valid)
+                {
+                    Debug.WriteLine($"{methodName}: scene directory ({folder}) is invalid with message: " +
+                                    $"{error.ToErrorMessage()}");
+                    return;
+                }
+
+                _currentScene = InitScene(folder);
             };
 
             return fileDialog;
