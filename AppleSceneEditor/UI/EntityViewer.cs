@@ -7,7 +7,7 @@ using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using DefaultEcs;
-using GrappleFightNET5.Scenes.Info;
+using GrappleFightNET5.Resource.Info;
 using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.UI

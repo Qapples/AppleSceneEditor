@@ -4,11 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using AppleSerialization.Json;
-using GrappleFightNET5.Scenes.Info;
+using GrappleFightNET5.Resource.Info;
 using Microsoft.Xna.Framework.Graphics;
 using Myra.Graphics2D;
 using Myra.Graphics2D.TextureAtlases;
-using Myra.Graphics2D.UI;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 
 namespace AppleSceneEditor.Extensions

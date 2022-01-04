@@ -19,7 +19,7 @@ using DefaultEcs;
 using DefaultEcs.System;
 using FontStashSharp;
 using GrappleFightNET5.Components;
-using GrappleFightNET5.Scenes.Info;
+using GrappleFightNET5.Resource.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -30,7 +30,7 @@ using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
 using Myra.Utility;
 using Environment = AppleSerialization.Environment;
-using Scene = GrappleFightNET5.Scenes.Scene;
+using Scene = GrappleFightNET5.Runtime.Scene;
 
 namespace AppleSceneEditor
 {
@@ -123,7 +123,7 @@ namespace AppleSceneEditor
         
         protected override void Initialize()
         {
-            const string sceneNamespace = nameof(GrappleFightNET5) + "." + nameof(GrappleFightNET5.Scenes);
+            const string resourceNamespace = nameof(GrappleFightNET5) + "." + nameof(GrappleFightNET5.Resource);
             const string appleInfoNamespace = nameof(AppleSerialization) + "." + nameof(AppleSerialization.Info);
                             
             MyraEnvironment.Game = this;
@@ -133,10 +133,10 @@ namespace AppleSceneEditor
             Environment.GraphicsDevice = GraphicsDevice;
             Environment.ContentManager = contentManager; 
             
-            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.MeshInfo, {sceneNamespace}", typeof(MeshInfo));
-            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.TextureInfo, {sceneNamespace}", typeof(TextureInfo));
-            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.ScriptInfo, {sceneNamespace}", typeof(ScriptInfo));
-            Environment.ExternalTypes.Add($"{sceneNamespace}.Info.TransformInfo, {sceneNamespace}", typeof(TransformInfo));
+            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.MeshInfo, {resourceNamespace}", typeof(MeshInfo));
+            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.TextureInfo, {resourceNamespace}", typeof(TextureInfo));
+            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.ScriptInfo, {resourceNamespace}", typeof(ScriptInfo));
+            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.TransformInfo, {resourceNamespace}", typeof(TransformInfo));
             Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));

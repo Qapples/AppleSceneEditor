@@ -17,7 +17,7 @@ using AppleSerialization.Json;
 using DefaultEcs;
 using DefaultEcs.System;
 using GrappleFightNET5.Components;
-using GrappleFightNET5.Scenes;
+using GrappleFightNET5.Runtime;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.Brushes;

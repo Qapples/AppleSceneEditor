@@ -25,10 +25,13 @@
 
     <ItemGroup>
       <Reference Include="GrappleFightNET5.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5\bin\Debug\net5.0\GrappleFightNET5.Components.dll</HintPath>
+        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Game\bin\Debug\net5.0\GrappleFightNET5.Components.dll</HintPath>
       </Reference>
-      <Reference Include="GrappleFightNET5.Scenes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5\bin\Debug\net5.0\GrappleFightNET5.Scenes.dll</HintPath>
+      <Reference Include="GrappleFightNET5.Runtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Game\bin\Debug\net5.0\GrappleFightNET5.Runtime.dll</HintPath>
+      </Reference>
+       <Reference Include="GrappleFightNET5.Resource Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Game\bin\Debug\net5.0\GrappleFightNET5.Resource.dll</HintPath>
       </Reference>
       <Reference Include="GrappleFightScripts, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\GrappleFightBuilder\GrappleFightBuilder\bin\Debug\net5.0\GrappleFightScripts.dll</HintPath>
