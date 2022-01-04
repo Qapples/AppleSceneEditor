@@ -70,6 +70,7 @@ namespace AppleSceneEditor
                 new EntityDrawSystem(scene.World, GraphicsDevice),
                 new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
 
+            _entityViewer?.Dispose();
             _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,
                 (StackPanel) _desktop.Root.FindWidgetById("EntityStackPanel"), _jsonObjects, _commands, _desktop);
             

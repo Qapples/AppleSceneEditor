@@ -29,7 +29,11 @@ namespace AppleSceneEditor.Factories
             TextButton okButton = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
             TextButton cancelButton = new() {Text = "Cancel", HorizontalAlignment = HorizontalAlignment.Right};
 
-            okButton.Click += (_, _) => onOkClick(typeSelectionBox.SelectedItem.Text);
+            okButton.Click += (_, _) =>
+            {
+                onOkClick(typeSelectionBox.SelectedItem.Text);
+                outWindow.Close();
+            };
             cancelButton.Click += (_, _) => outWindow.Close();
 
             stackPanel.AddChild(new Label

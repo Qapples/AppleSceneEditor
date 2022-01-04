@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,7 @@ using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.UI
 {
-    public class EntityViewer
+    public class EntityViewer : IDisposable
     {
         public const string EntityButtonIdPrefix = "EntityButton_";
         public const string EntityGridIdPrefix = "EntityGrid_";
@@ -28,6 +29,7 @@ namespace AppleSceneEditor.UI
         private CommandStream _commands;
         private Window _addEntityWindow;
         private EntityMap<string> _entityIdMap;
+        private bool _disposed;
 
         public EntityViewer(string entitiesDirectory, World world, StackPanel buttonStackPanel,
             List<JsonObject> entityJsonObjects, CommandStream commands, Desktop desktop)
@@ -138,7 +140,13 @@ namespace AppleSceneEditor.UI
 
             return widget as Grid;
         }
-        
+
+        public void Dispose()
+        {
+            (World, EntityButtonStackPanel, EntityJsonObjects, _commands, _addEntityWindow, _entityIdMap, _disposed) =
+                (null!, null!, null!, null!, null!, null!, true);
+        }
+
         private void PopulatePanel(string entitiesDirectory)
         {
             EntityButtonStackPanel.Widgets.Clear();
@@ -160,9 +168,10 @@ namespace AppleSceneEditor.UI
         {
             TextButton addEntityButton =
                 (TextButton) EntityButtonStackPanel.Desktop.Root.FindWidgetById("AddEntityButton");
-            addEntityButton.Click += (_, _) => _addEntityWindow.ShowModal(desktop);
-        }
 
+            addEntityButton.Click += (_, _) => _addEntityWindow?.ShowModal(desktop);
+        }
+        
         private Window CreateAddNewEntityWindow(string entitiesDirectory)
         {
             VerticalStackPanel stackPanel = new();
@@ -179,6 +188,7 @@ namespace AppleSceneEditor.UI
             okButton.Click += (_, _) =>
             {
                 NewEntityOkClick(Path.Combine(entitiesDirectory, $"{idTextBox.Text}.entity"));
+                idTextBox.Text = "";
                 outWindow.Close();
             };
             cancelButton.Click += (_, _) => outWindow.Close();
