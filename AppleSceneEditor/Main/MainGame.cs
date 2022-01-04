@@ -525,6 +525,13 @@ namespace AppleSceneEditor
 
             _desktop.Render();
 
+            //greater than 1 widget usually means a window is opened (however, the top menu will also increase the
+            //(widget count)
+            if (_desktop.Widgets.Count > 1 && _desktop.ContextMenu?.Visible is not true)
+            {
+                return;
+            }
+
             //if scene port is uninitialized, then initialize it. (the desktop must first be rendered before the
             //grid lines are initialized)
             if (_sceneViewport.Width == 0 || _sceneViewport.Height == 0)
@@ -547,7 +554,7 @@ namespace AppleSceneEditor
                 
                 //set the viewport so that the scene is drawn within the scene viewer
                 GraphicsDevice.Viewport = _sceneViewport;
-
+                
                 _drawSystems.Update(gameTime);
                 
                 GlobalFlag.SetFlag(GlobalFlags.FireSceneEditorRay, false);

@@ -198,13 +198,14 @@ namespace AppleSceneEditor.UI
             stackPanel.AddChild(idTextBox);
             stackPanel.AddChild(new HorizontalStackPanel
                 {Widgets = {okButton, cancelButton}, HorizontalAlignment = HorizontalAlignment.Right});
-            
+
             return outWindow;
         }
+
         private void NewEntityOkClick(string entityPath)
         {
 #if DEBUG
-            const string methodName = nameof(EntityViewer) + "." + nameof(NewEntityOkClick);   
+            const string methodName = nameof(EntityViewer) + "." + nameof(NewEntityOkClick);
 #endif
             string? entityDirectory = Path.GetDirectoryName(entityPath);
             if (entityDirectory is null || !Directory.Exists(entityDirectory))
