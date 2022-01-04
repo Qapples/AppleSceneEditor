@@ -154,7 +154,14 @@ namespace AppleSceneEditor
                     Path.GetFileNameWithoutExtension(fileDialog.FilePath)));
                 if (IOHelper.CreateNewScene(scenePath))
                 {
-                    InitScene(scenePath);
+                    _currentScene?.Dispose();
+                    _currentScene = InitScene(scenePath);
+
+                    _notHeldInputHandler.Dispose();
+                    _heldInputHandler.Dispose();
+
+                    (_notHeldInputHandler, _heldInputHandler) =
+                        CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
                 }
             };
 
