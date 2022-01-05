@@ -4,3 +4,4 @@ ScriptInfo "GrappleFightNET5.Resource.Info.ScriptInfo, GrappleFightNET5.Resource
 ValueInfo "AppleSerialization.Info.ValueInfo, AppleSerialization"
 CollisionBoxInfo "GrappleFightNET5.Resource.Info.CollisionBoxInfo, GrappleFightNET5.Resource"
 TransformInfo "GrappleFightNET5.Resource.Info.TransformInfo, GrappleFightNET5.Resource"
+PlayerControllerInfo "GrappleFightNET5.Resource.Info.PlayerControllerInfo, GrappleFightNET5.Resource"

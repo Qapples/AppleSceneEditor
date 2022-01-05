@@ -137,6 +137,7 @@ namespace AppleSceneEditor
             Environment.ExternalTypes.Add($"{resourceNamespace}.Info.TextureInfo, {resourceNamespace}", typeof(TextureInfo));
             Environment.ExternalTypes.Add($"{resourceNamespace}.Info.ScriptInfo, {resourceNamespace}", typeof(ScriptInfo));
             Environment.ExternalTypes.Add($"{resourceNamespace}.Info.TransformInfo, {resourceNamespace}", typeof(TransformInfo));
+            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.PlayerControllerInfo, {resourceNamespace}", typeof(PlayerControllerInfo));
             Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
