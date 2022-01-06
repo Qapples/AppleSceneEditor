@@ -36,7 +36,11 @@ namespace AppleSceneEditor.Factories
             bool isChecked = (bool) (property.Value ?? false);
             CheckBox checkBox = new() {IsPressed = isChecked};
 
-            checkBox.Click += (s, ea) => property.Value = checkBox.IsPressed;
+            checkBox.Click += (s, ea) =>
+            {
+                property.Value = checkBox.IsPressed;
+                property.ValueKind = checkBox.IsPressed ? JsonValueKind.True : JsonValueKind.False;
+            };
 
             return checkBox;
         }

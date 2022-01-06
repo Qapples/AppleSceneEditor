@@ -40,11 +40,11 @@
     },
     {
       "$type": "PlayerControllerInfo",
-      "value": true,
-      "speed": 0,
-      "airResistance": 0,
-      "friction": 0,
-      "gravity": 0
+      "enabled": true,
+      "speed": 0.0,
+      "airResistance": 0.0,
+      "friction": 0.0,
+      "gravity": 0.0
     }
   ]
 }
