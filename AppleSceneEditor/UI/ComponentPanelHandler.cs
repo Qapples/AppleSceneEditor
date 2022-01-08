@@ -290,6 +290,11 @@ namespace AppleSceneEditor.UI
                     {
                         return ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector4, property);
                     }
+                    else if (type == typeof(Rectangle))
+                    {
+                        return ValueEditorFactory.CreateVectorEditor(ValueEditorFactory.VectorType.Vector4, property,
+                            new[] {"X", "Y", "Width", "Height"});
+                    }
 
                     return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateStringEditor(property));
             }
