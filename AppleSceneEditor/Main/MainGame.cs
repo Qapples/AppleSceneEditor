@@ -137,6 +137,7 @@ namespace AppleSceneEditor
             AddExternalType(typeof(TransformInfo));
             AddExternalType(typeof(PlayerControllerInfo));
             AddExternalType(typeof(ValueInfo));
+            AddExternalType(typeof(CameraInfo));
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
