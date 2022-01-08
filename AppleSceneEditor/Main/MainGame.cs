@@ -122,10 +122,7 @@ namespace AppleSceneEditor
         }
         
         protected override void Initialize()
-        {
-            const string resourceNamespace = nameof(GrappleFightNET5) + "." + nameof(GrappleFightNET5.Resource);
-            const string appleInfoNamespace = nameof(AppleSerialization) + "." + nameof(AppleSerialization.Info);
-                            
+        {            
             MyraEnvironment.Game = this;
 
             RawContentManager contentManager = new(GraphicsDevice, Content.RootDirectory);
@@ -133,12 +130,13 @@ namespace AppleSceneEditor
             Environment.GraphicsDevice = GraphicsDevice;
             Environment.ContentManager = contentManager; 
             
-            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.MeshInfo, {resourceNamespace}", typeof(MeshInfo));
-            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.TextureInfo, {resourceNamespace}", typeof(TextureInfo));
-            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.ScriptInfo, {resourceNamespace}", typeof(ScriptInfo));
-            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.TransformInfo, {resourceNamespace}", typeof(TransformInfo));
-            Environment.ExternalTypes.Add($"{resourceNamespace}.Info.PlayerControllerInfo, {resourceNamespace}", typeof(PlayerControllerInfo));
-            Environment.ExternalTypes.Add($"{appleInfoNamespace}.ValueInfo, {appleInfoNamespace}", typeof(ValueInfo));
+            //Serialization types
+            AddExternalType(typeof(MeshInfo));
+            AddExternalType(typeof(TextureInfo));
+            AddExternalType(typeof(ScriptInfo));
+            AddExternalType(typeof(TransformInfo));
+            AddExternalType(typeof(PlayerControllerInfo));
+            AddExternalType(typeof(ValueInfo));
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
@@ -564,6 +562,15 @@ namespace AppleSceneEditor
             GraphicsDevice.Viewport = _overallViewport;
             
             base.Draw(gameTime);
+        }
+        
+        private static void AddExternalType(Type type)
+        {
+            if (type.AssemblyQualifiedName is null) return;
+            
+            string[] typeName = type.AssemblyQualifiedName.Split(", ");
+
+            AppleSerialization.Environment.ExternalTypes.Add($"{typeName[0]}, {typeName[1]}", type);
         }
     }
 }
