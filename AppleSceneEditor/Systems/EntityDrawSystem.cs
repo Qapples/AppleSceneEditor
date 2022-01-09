@@ -43,7 +43,7 @@ namespace AppleSceneEditor.Systems
         {
             _graphicsDevice = graphicsDevice;
 
-            _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 236, BufferUsage.WriteOnly);
+            _boxVertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 48, BufferUsage.WriteOnly);
             _boxEffect = new BasicEffect(_graphicsDevice)
                 {Alpha = 1, VertexColorEnabled = true, LightingEnabled = false};
         }
