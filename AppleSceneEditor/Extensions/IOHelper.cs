@@ -124,13 +124,13 @@ namespace AppleSceneEditor.Extensions
             return true;
         }
 
-        public static Dictionary<string, IImage> GetFileIconsFromDirectory(string directory,
+        public static Dictionary<string, Texture2D> GetTexturesFromDirectory(string directory,
             GraphicsDevice graphicsDevice)
         {
 #if DEBUG
-            const string methodName = nameof(IOHelper) + "." + nameof(GetFileIconsFromDirectory);
+            const string methodName = nameof(IOHelper) + "." + nameof(GetTexturesFromDirectory);
 #endif
-            Dictionary<string, IImage> outDict = new();
+            Dictionary<string, Texture2D> outDict = new();
 
             foreach (string filePath in Directory.GetFiles(directory))
             {
@@ -140,8 +140,7 @@ namespace AppleSceneEditor.Extensions
                     continue;
                 }
 
-                outDict[Path.GetFileNameWithoutExtension(filePath)] =
-                    new TextureRegion(Texture2D.FromFile(graphicsDevice, filePath));
+                outDict[Path.GetFileNameWithoutExtension(filePath)] = Texture2D.FromFile(graphicsDevice, filePath);
             }
 
             return outDict;

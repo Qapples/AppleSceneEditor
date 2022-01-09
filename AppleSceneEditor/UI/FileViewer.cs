@@ -6,9 +6,11 @@ using AppleSceneEditor.Commands;
 using AppleSceneEditor.Extensions;
 using DefaultEcs;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
+using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Styles;
 
@@ -32,7 +34,7 @@ namespace AppleSceneEditor.UI
         
         public World? World { get; set; }
 
-        private readonly Dictionary<string, IImage> _fileIcons;
+        private readonly Dictionary<string, Texture2D> _fileIcons;
         
         private readonly CommandStream _globalCommands;
 
@@ -44,7 +46,7 @@ namespace AppleSceneEditor.UI
         private string _selectedItemName;
 
         public FileViewer(TreeStyle? style, string directory, int itemsPerRow, World? world,
-            Dictionary<string, IImage> fileIcons, CommandStream globalCommands)
+            Dictionary<string, Texture2D> fileIcons, CommandStream globalCommands)
         {
             (_currentDirectory, ItemsPerRow, World, _fileIcons, _globalCommands) =
                 (directory, itemsPerRow, world, fileIcons, globalCommands);
@@ -77,13 +79,13 @@ namespace AppleSceneEditor.UI
             BuildUI();
         }
 
-        public FileViewer(string directory, int itemsPerRow, World? world, Dictionary<string, IImage> fileIcons,
+        public FileViewer(string directory, int itemsPerRow, World? world, Dictionary<string, Texture2D> fileIcons,
             CommandStream globalCommands) : this(Stylesheet.Current.TreeStyle, directory, itemsPerRow, world, fileIcons,
             globalCommands)
         {
         }
         
-        public FileViewer(string directory, int itemsPerRow, Dictionary<string, IImage> fileIcons,
+        public FileViewer(string directory, int itemsPerRow, Dictionary<string, Texture2D> fileIcons,
             CommandStream globalCommands) : this(Stylesheet.Current.TreeStyle, directory, itemsPerRow, null, fileIcons,
             globalCommands)
         {
@@ -128,9 +130,9 @@ namespace AppleSceneEditor.UI
 
             string iconName =
                 isFolder ? FolderIconName : IOHelper.ConvertExtensionToIconName(Path.GetExtension(itemName));
-            if (_fileIcons.TryGetValue(iconName, out IImage? image))
+            if (_fileIcons.TryGetValue(iconName, out Texture2D? image))
             {
-                icon.Image = image;
+                icon.Image = new TextureRegion(image);
             }
             else
             {
