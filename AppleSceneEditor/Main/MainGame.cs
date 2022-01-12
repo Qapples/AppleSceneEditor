@@ -54,6 +54,8 @@ namespace AppleSceneEditor
         private readonly string _configPath;
 
         private Dictionary<string, JsonObject> _prototypes;
+
+        private Dictionary<string, Texture2D> _sceneIcons;
 #nullable enable
 
         private Scene? _currentScene;
@@ -328,11 +330,14 @@ namespace AppleSceneEditor
 
 
             string fileIconsPath = Path.Combine(Content.RootDirectory, "Textures", "FileIcons");
+            string sceneIconsPath = Path.Combine(Content.RootDirectory, "Textures", "SceneIcons");
             string examplesPath = Path.Combine(Content.RootDirectory, "..", "Examples");
 
             _fileViewer = new FileViewer(examplesPath, 8,
                 IOHelper.GetTexturesFromDirectory(fileIconsPath, GraphicsDevice), _commands);
             _mainGrid.AddChild(new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _fileViewer});
+
+            _sceneIcons = IOHelper.GetTexturesFromDirectory(sceneIconsPath, GraphicsDevice);
 
             //load the default world (if provided)
             if (_defaultWorldPath is not null)

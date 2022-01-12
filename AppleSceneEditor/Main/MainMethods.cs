@@ -65,10 +65,11 @@ namespace AppleSceneEditor
 
             _commands.Dispose();
             _commands = new CommandStream();
-            
+
             _drawSystems = new SequentialSystem<GameTime>(
                 new EntityDrawSystem(scene.World, GraphicsDevice),
-                new AxisDrawSystem(scene.World, GraphicsDevice, _commands));
+                new AxisDrawSystem(scene.World, GraphicsDevice, _commands),
+                new SceneIconDrawSystem(scene.World, GraphicsDevice, _sceneIcons));
 
             _entityViewer?.Dispose();
             _entityViewer = new EntityViewer(Path.Combine(sceneDirectory, "Entities"), scene.World,

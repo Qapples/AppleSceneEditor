@@ -36,5 +36,24 @@ namespace AppleSceneEditor.Extensions
             
             effect.Dispose();
         }
+
+        public static Matrix CreateBillboad(Vector3 position, Matrix view)
+        {
+            Matrix result = Matrix.CreateTranslation(position);
+            
+            result.M11 = view.M11;
+            result.M12 = view.M21;
+            result.M13 = view.M31;
+
+            result.M21 = view.M12;
+            result.M22 = view.M22;
+            result.M23 = view.M32;
+
+            result.M31 = view.M13;
+            result.M32 = view.M23;
+            result.M33 = view.M33;
+
+            return result;
+        }
     }
 }
