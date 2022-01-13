@@ -67,14 +67,9 @@ namespace AppleSceneEditor.Systems
                 FillVertices(_vertices);
                 _vertexBuffer.SetData(_vertices);
 
-                Matrix rotationMatrix =
-                    Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(worldCamProp.YawDegrees)) *
-                    Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(worldCamProp.PitchDegrees));
-
                 Matrix finalTransform =
                     MonogameExtensions.CreateBillboad(camera.Position + entityTransform.Matrix.Translation,
-                        worldCam.ViewMatrix) *
-                    Matrix.CreateTranslation(camera.Position + entityTransform.Matrix.Translation);
+                        worldCam.ViewMatrix);
 
                 DrawIcon(ref finalTransform, ref worldCam, _vertexBuffer, _effect);
             }
