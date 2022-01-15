@@ -363,7 +363,8 @@ namespace AppleSceneEditor
         protected override void UnloadContent()
         {
             long beforeMemoryCount = GC.GetTotalMemory(false);
-            Debug.WriteLine($"Unloading. Data amount:       {beforeMemoryCount}");
+            Debug.WriteLine($"Unloading. Data amount:       {beforeMemoryCount} bytes. " +
+                            $"({beforeMemoryCount/ 1000000f} megabytes)");
             
             _spriteBatch.Dispose();
             _graphics.Dispose();
@@ -400,7 +401,8 @@ namespace AppleSceneEditor
             Dispose();
             
             long afterMemoryCount = GC.GetTotalMemory(true);
-            Debug.WriteLine($"Unload complete. Data amount: {afterMemoryCount}");
+            Debug.WriteLine($"Unload complete. Data amount: {afterMemoryCount} bytes. " +
+                            $"({afterMemoryCount / 1000000f} megabytes)");
         }
 
         private KeyboardState _previousKbState;
