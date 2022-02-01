@@ -365,7 +365,7 @@ namespace AppleSceneEditor
             long beforeMemoryCount = GC.GetTotalMemory(false);
             Debug.WriteLine($"Unloading. Data amount:       {beforeMemoryCount} bytes. " +
                             $"({beforeMemoryCount/ 1000000f} megabytes)");
-            
+
             _spriteBatch.Dispose();
             _graphics.Dispose();
 

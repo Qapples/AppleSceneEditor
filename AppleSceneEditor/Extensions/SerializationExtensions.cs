@@ -57,14 +57,14 @@ namespace AppleSceneEditor.Extensions
             //originally (although they still represent the same exact angle as the original)
             positionProp.Value = ToSpacedStr(translation);
             scaleProp.Value = ToSpacedStr(scale);
-            rotationProp.Value = ToSpacedStr(GetEulerAnglesFromQuaternion(rotation));
+            rotationProp.Value = ToSpacedStr(GetEulerAnglesFromQuaternion(rotation, false));
             velocityProp.Value = ToSpacedStr(transform.Velocity);
         }
 
         public static JsonObject? FindJsonObjectById(this IEnumerable<JsonObject> enumerable, string id) =>
             enumerable.FirstOrDefault(o => o.FindProperty("id")?.Value is string value && value == id);
         
-        private static Vector3 GetEulerAnglesFromQuaternion(Quaternion q)
+        private static Vector3 GetEulerAnglesFromQuaternion(Quaternion q, bool isRadians)
         {
             float poleValue = q.X * q.Y + q.Z * q.W;
             bool isPole = Math.Abs(MathF.Abs(poleValue) - 0.5f) < 0.00001f;
@@ -79,7 +79,10 @@ namespace AppleSceneEditor.Extensions
                 ? 0
                 : (2f * q.X * q.W) - (2f * q.Y * q.Z), 1f - 2f * (q.X * q.X) - 2f * (q.Z * q.Z));
 
-            return new Vector3(heading, attitude, bank);
+            return new Vector3(
+                isRadians ? heading : MathHelper.ToDegrees(heading), 
+                isRadians ? attitude : MathHelper.ToDegrees(attitude), 
+                isRadians ? bank : MathHelper.ToDegrees(bank));
         }
 
         private static string ToSpacedStr(Vector3 value) => $"{value.X} {value.Y} {value.Z}";
