@@ -268,7 +268,7 @@ namespace AppleSceneEditor.UI
             switch (property.ValueKind)
             {
                 case JsonValueKind.Number:
-                    return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateNumericEditor(property));
+                    return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateNumericEditor(property, type));
                 case JsonValueKind.False or JsonValueKind.True:
                     return GenerateLabelAndEditor(property.Name, ValueEditorFactory.CreateBooleanEditor(property));
                 case JsonValueKind.String:

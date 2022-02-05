@@ -95,7 +95,7 @@ namespace AppleSceneEditor.Factories
             return textBox;
         }
 
-        public static SpinButton? CreateNumericEditor(JsonProperty property)
+        public static SpinButton? CreateNumericEditor(JsonProperty property, Type valueType)
         {
             if (property.ValueKind != JsonValueKind.Number)
             {
@@ -107,12 +107,11 @@ namespace AppleSceneEditor.Factories
             //property.Value should never be null under any circumstances but if it is set it to the default value of
             //an int which in this case is zero.
             property.Value ??= default(int);
-            Type propertyValueType = property.Value.GetType();
 
             SpinButton spinButton = new()
             {
-                Integer = propertyValueType.IsNumericInteger(),
-                Nullable = propertyValueType.IsNullablePrimitive(),
+                Integer = valueType.IsNumericInteger(),
+                Nullable = valueType.IsNullablePrimitive(),
                 Value = property.Value != null
                     ? (float) Convert.ChangeType(property.Value, typeof(float))
                     : default(float?),
@@ -121,7 +120,7 @@ namespace AppleSceneEditor.Factories
             spinButton.ValueChanged += (s, a) =>
             {
                 object? result = spinButton.Value != null
-                    ? Convert.ChangeType(spinButton.Value.Value, propertyValueType)
+                    ? Convert.ChangeType(spinButton.Value.Value, valueType)
                     : null;
 
                 property.Value = result;
