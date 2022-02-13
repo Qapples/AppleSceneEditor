@@ -43,7 +43,8 @@ namespace AppleSceneEditor.Extensions
 
                 //type should be string thanks to the check from above
                 string type = (string) typeProp.Value!;
-                
+
+                obj.Name = null;
                 outDictionary.Add(type, obj);
             }
 
