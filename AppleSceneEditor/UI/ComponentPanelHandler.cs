@@ -118,7 +118,12 @@ namespace AppleSceneEditor.UI
                 //GetHeader should not return null here since $type is verified in CreateComponentWidgets
                 //CreateComponentGrid is basically the drop down menu. widgets are the actual UI elements the user can
                 //edit
-                PropertyStackPanel.AddChild(CreateComponentGrid(jsonObj, widgets, _commands, GetHeader(jsonObj)!));
+                //a bit of a hack being done here in order to pass in the dropDown grid into the RemoveComponentCommand
+                //constructor despite it not being instantiated
+                Grid dropDown = null!;
+                dropDown = CreateDropDown(widgets, GetHeader(jsonObj)!,
+                    (_, _) => _commands.AddCommandAndExecute(new RemoveComponentCommand(jsonObj, dropDown)));
+                PropertyStackPanel.AddChild(dropDown);
             }
         }
         
@@ -129,7 +134,7 @@ namespace AppleSceneEditor.UI
             return name;
         }
 
-        private static Grid CreateComponentGrid(JsonObject obj, Panel widgetsPanel, CommandStream commands, string header)
+        private static Grid CreateDropDown(Panel widgetsPanel, string header, EventHandler onRemoveClick)
         {
             widgetsPanel.GridRow = 1;
             widgetsPanel.GridColumn = 1;
@@ -184,8 +189,7 @@ namespace AppleSceneEditor.UI
                 GridColumn = 1
             };
 
-            removeButton.Click += (_, _) => commands.AddCommandAndExecute(new RemoveComponentCommand(obj, outGrid));
-
+            removeButton.Click += onRemoveClick;
             outGrid.AddChild(removeButton);
 
             return outGrid;
