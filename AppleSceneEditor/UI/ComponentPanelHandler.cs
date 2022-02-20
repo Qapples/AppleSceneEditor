@@ -126,13 +126,6 @@ namespace AppleSceneEditor.UI
                 PropertyStackPanel.AddChild(dropDown);
             }
         }
-        
-        private static string? GetHeader(JsonObject obj)
-        {
-            string? name = obj.FindProperty("$type")?.Value as string;
-
-            return name;
-        }
 
         private static Grid CreateDropDown(Panel widgetsPanel, string header, EventHandler onRemoveClick)
         {
@@ -329,6 +322,10 @@ namespace AppleSceneEditor.UI
                 editor
             }
         };
+        
+        private static string? GetHeader(JsonObject obj) => string.IsNullOrWhiteSpace(obj.Name)
+            ? obj.FindProperty("$type")?.Value as string
+            : obj.Name;
 
         private static ParameterInfo[]? GetConstructorParamTypes(Type type) => (from ctor in type.GetConstructors()
             where ctor.GetCustomAttribute(typeof(JsonConstructorAttribute)) is not null
