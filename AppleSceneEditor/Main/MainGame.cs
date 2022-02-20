@@ -136,6 +136,7 @@ namespace AppleSceneEditor
             AddExternalType(typeof(MeshInfo));
             AddExternalType(typeof(TextureInfo));
             AddExternalType(typeof(ScriptInfo));
+            AddExternalType(typeof(SingleScriptInfo));
             AddExternalType(typeof(TransformInfo));
             AddExternalType(typeof(PlayerControllerInfo));
             AddExternalType(typeof(ValueInfo));
