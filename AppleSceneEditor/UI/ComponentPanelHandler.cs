@@ -112,7 +112,7 @@ namespace AppleSceneEditor.UI
         {
             foreach (JsonObject jsonObj in Components)
             {
-                Panel? widgets = CreateComponentWidgets(jsonObj, Desktop);
+                Panel? widgets = CreateComponentWidgets(jsonObj, Desktop, _commands);
                 if (widgets is null) continue;
 
                 //GetHeader should not return null here since $type is verified in CreateComponentWidgets
@@ -195,7 +195,7 @@ namespace AppleSceneEditor.UI
             return outGrid;
         }
 
-        private static Panel? CreateComponentWidgets(JsonObject obj, Desktop desktop, Type? objectType = null)
+        private static Panel? CreateComponentWidgets(JsonObject obj, Desktop desktop, CommandStream commands, Type? objectType = null)
         {
             const string methodName = nameof(ComponentPanelHandler) + "." + nameof(CreateComponentWidgets);
 
@@ -254,7 +254,7 @@ namespace AppleSceneEditor.UI
                 where child.Name == info.Name
                 select (child, info.ParameterType))
             {
-                stackPanel.AddChild(CreateComponentWidgets(child, desktop, type));
+                stackPanel.AddChild(CreateComponentWidgets(child, desktop, commands, type));
             }
 
             if (hasArray && (hasChild || hasProp)) stackPanel.AddChild(new Label());
@@ -264,7 +264,14 @@ namespace AppleSceneEditor.UI
              {
                  foreach (JsonObject arrObj in array)
                  {
-                     stackPanel.AddChild(CreateComponentWidgets(arrObj, desktop));
+                     Panel? widgets = CreateComponentWidgets(arrObj, desktop, commands);
+                     if (widgets is null) continue;
+                     
+                     Grid dropDown = null!;
+                     dropDown = CreateDropDown(widgets, GetHeader(arrObj)!,
+                         (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, arrObj, dropDown)));
+
+                     stackPanel.AddChild(dropDown);
                  }
              }
             
