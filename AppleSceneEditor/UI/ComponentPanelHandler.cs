@@ -255,9 +255,15 @@ namespace AppleSceneEditor.UI
 
             if (hasArray && (hasChild || hasProp)) stackPanel.AddChild(new Label());
 
-            //arrays to stack panel
-            //TODO: Add support for JsonArrays. Not many components use arrays, so not a huge issue for now.
-
+             //arrays to stack panel
+             foreach (JsonArray array in obj.Arrays)
+             {
+                 foreach (JsonObject arrObj in array)
+                 {
+                     stackPanel.AddChild(CreateComponentWidgets(arrObj, desktop));
+                 }
+             }
+            
             return new Panel {Widgets = {stackPanel}};
         }
 
