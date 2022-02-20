@@ -19,6 +19,7 @@ namespace AppleSceneEditor.Commands
         public RemoveArrayElementCommand(JsonArray array, JsonObject objToRemove, Grid uiGrid)
         {
             (_array, _objToRemove, _uiGrid, Disposed) = (array, objToRemove, uiGrid, false);
+            _objIndex = -1;
 
             if (_uiGrid.Parent is IMultipleItemsContainer parent)
             {
@@ -33,6 +34,16 @@ namespace AppleSceneEditor.Commands
         
         public void Execute()
         {
+#if DEBUG
+            const string methodName = nameof(RemoveArrayElementCommand) + "." + nameof(Execute);
+#endif
+            if (_array.Count < 2)
+            {
+                Debug.WriteLine($"{methodName}: array length is 1 or less! Cannot remove element. Remove the " +
+                                $"array object itself if you desire to remove the array.");
+                return;
+            }
+            
             for (int i = 0; i < _array.Count; i++)
             {
                 JsonObject obj = _array[i];
@@ -51,6 +62,8 @@ namespace AppleSceneEditor.Commands
 
         public void Undo()
         {
+            if (_objIndex < 0) return;
+            
             if (_objIndex < _array.Count)
             {
                 _array.Insert(_objIndex, _objToRemove);
