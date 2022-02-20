@@ -14,7 +14,7 @@ namespace AppleSceneEditor.Commands
         private JsonObject _obj;
         
         private Grid _uiGrid;
-        private IMultipleItemsContainer? _uiGirdParent;
+        private IMultipleItemsContainer? _uiGridParent;
 
         public RemoveComponentCommand(JsonObject obj, Grid uiGrid)
         {
@@ -22,7 +22,7 @@ namespace AppleSceneEditor.Commands
 
             if (_uiGrid.Parent is IMultipleItemsContainer parent)
             {
-                _uiGirdParent = parent;
+                _uiGridParent = parent;
             }
             else
             {
@@ -72,7 +72,7 @@ namespace AppleSceneEditor.Commands
             }
 
             //we add one to account for the holder widget
-            _uiGirdParent?.Widgets.Insert(_arrIndex + 1, _uiGrid);
+            _uiGridParent?.Widgets.Insert(_arrIndex + 1, _uiGrid);
         }
 
         public void Redo() => Execute();
