@@ -67,12 +67,12 @@ namespace AppleSceneEditor.Commands
             if (_objIndex < _array.Count)
             {
                 _array.Insert(_objIndex, _objToRemove);
-                _uiGridParent?.Widgets.Insert(_objIndex, _uiGrid);
+                _uiGridParent?.Widgets.Insert(_objIndex - 1, _uiGrid);
             }
             else
             {
                 _array.Add(_objToRemove);
-                _uiGridParent?.Widgets.Add(_uiGrid);
+                _uiGridParent?.Widgets.Insert(_array.Count - 1, _uiGrid);
             }
         }
 

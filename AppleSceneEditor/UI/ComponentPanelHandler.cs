@@ -365,9 +365,6 @@ namespace AppleSceneEditor.UI
                     (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, newObj, dropDown)));
 
                 commands.AddCommandAndExecute(new AddArrayElementCommand(array, arrayWidgets, newObj, dropDown));
-                
-                //ensure that the add button back at the end of the widgets array.
-                arrayWidgets.Widgets.Move(arrayWidgets.Widgets.Count - 2, arrayWidgets.Widgets.Count - 1);
             };
 
             return outButton;

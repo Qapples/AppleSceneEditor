@@ -23,7 +23,7 @@ namespace AppleSceneEditor.Commands
         public void Execute()
         {
             _array.Add(_objToAdd);
-            _arrayWidgets.AddChild(_objWidget);
+            _arrayWidgets.Widgets.Insert(_arrayWidgets.Widgets.Count - 1, _objWidget);
         }
 
         public void Undo()
