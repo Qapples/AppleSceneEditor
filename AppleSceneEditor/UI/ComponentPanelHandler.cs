@@ -127,10 +127,11 @@ namespace AppleSceneEditor.UI
             }
         }
 
-        private static Grid CreateDropDown(Panel widgetsPanel, string header, EventHandler onRemoveClick)
+        private static Grid CreateDropDown<T>(T widgetsContainer, string header, EventHandler? onRemoveClick = null)
+            where T : Widget, IMultipleItemsContainer
         {
-            widgetsPanel.GridRow = 1;
-            widgetsPanel.GridColumn = 1;
+            widgetsContainer.GridRow = 1;
+            widgetsContainer.GridColumn = 1;
 
             Grid outGrid = new()
             {
@@ -155,11 +156,11 @@ namespace AppleSceneEditor.UI
             {
                 if (mark.IsPressed)
                 {
-                    outGrid.AddChild(widgetsPanel);
+                    outGrid.AddChild(widgetsContainer);
                 }
                 else
                 {
-                    outGrid.RemoveChild(widgetsPanel);
+                    outGrid.RemoveChild(widgetsContainer);
                 }
             };
             
@@ -175,6 +176,12 @@ namespace AppleSceneEditor.UI
             label.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
             outGrid.AddChild(label);
 
+            if (onRemoveClick is null)
+            {
+                return outGrid;
+            }
+
+            //only add the remove button if a onRemoveClick is specified
             TextButton removeButton = new()
             {
                 Text = "-",
@@ -255,6 +262,9 @@ namespace AppleSceneEditor.UI
              //arrays to stack panel
              foreach (JsonArray array in obj.Arrays)
              {
+                 VerticalStackPanel arrStackPanel = new();
+                 Grid arrDropDown = CreateDropDown(arrStackPanel, array.Name!);
+
                  foreach (JsonObject arrObj in array)
                  {
                      Panel? widgets = CreateComponentWidgets(arrObj, commands);
@@ -264,10 +274,11 @@ namespace AppleSceneEditor.UI
                      dropDown = CreateDropDown(widgets, GetHeader(arrObj)!,
                          (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, arrObj, dropDown)));
 
-                     stackPanel.AddChild(dropDown);
+                     arrStackPanel.AddChild(dropDown);
                  }
 
-                 stackPanel.AddChild(CreateAddArrayElementButton(array, stackPanel, commands));
+                 arrStackPanel.AddChild(CreateAddArrayElementButton(array, arrStackPanel, commands));
+                 stackPanel.AddChild(arrDropDown);
              }
             
             return new Panel {Widgets = {stackPanel}};
