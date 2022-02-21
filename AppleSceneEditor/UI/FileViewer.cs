@@ -36,7 +36,7 @@ namespace AppleSceneEditor.UI
 
         private readonly Dictionary<string, Texture2D> _fileIcons;
         
-        private readonly CommandStream _globalCommands;
+        private CommandStream _globalCommands;
 
         private bool _isRightClick;
 
@@ -90,6 +90,8 @@ namespace AppleSceneEditor.UI
             globalCommands)
         {
         }
+
+        public void ChangeCommandStream(CommandStream newStream) => _globalCommands = newStream;
 
         private const string FolderIconName = "folder_icon";
 

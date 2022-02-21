@@ -81,6 +81,7 @@ namespace AppleSceneEditor
 
             _fileViewer.CurrentDirectory = sceneDirectory;
             _fileViewer.World = scene.World;
+            _fileViewer.ChangeCommandStream(_commands);
             
             foreach (Entity entity in scene.Entities.GetEntities())
             {
