@@ -112,7 +112,7 @@ namespace AppleSceneEditor.UI
         {
             foreach (JsonObject jsonObj in Components)
             {
-                Panel? widgets = CreateComponentWidgets(jsonObj, Desktop, _commands);
+                Panel? widgets = CreateComponentWidgets(jsonObj, _commands);
                 if (widgets is null) continue;
 
                 //GetHeader should not return null here since $type is verified in CreateComponentWidgets
@@ -188,7 +188,7 @@ namespace AppleSceneEditor.UI
             return outGrid;
         }
 
-        private static Panel? CreateComponentWidgets(JsonObject obj, Desktop desktop, CommandStream commands, Type? objectType = null)
+        private static Panel? CreateComponentWidgets(JsonObject obj, CommandStream commands, Type? objectType = null)
         {
             const string methodName = nameof(ComponentPanelHandler) + "." + nameof(CreateComponentWidgets);
 
@@ -247,7 +247,7 @@ namespace AppleSceneEditor.UI
                 where child.Name == info.Name
                 select (child, info.ParameterType))
             {
-                stackPanel.AddChild(CreateComponentWidgets(child, desktop, commands, type));
+                stackPanel.AddChild(CreateComponentWidgets(child, commands, type));
             }
 
             if (hasArray && (hasChild || hasProp)) stackPanel.AddChild(new Label());
@@ -257,7 +257,7 @@ namespace AppleSceneEditor.UI
              {
                  foreach (JsonObject arrObj in array)
                  {
-                     Panel? widgets = CreateComponentWidgets(arrObj, desktop, commands);
+                     Panel? widgets = CreateComponentWidgets(arrObj, commands);
                      if (widgets is null) continue;
                      
                      Grid dropDown = null!;
@@ -266,6 +266,8 @@ namespace AppleSceneEditor.UI
 
                      stackPanel.AddChild(dropDown);
                  }
+
+                 stackPanel.AddChild(CreateAddArrayElementButton(array, stackPanel, commands));
              }
             
             return new Panel {Widgets = {stackPanel}};
@@ -322,6 +324,43 @@ namespace AppleSceneEditor.UI
                 editor
             }
         };
+
+        private static TextButton CreateAddArrayElementButton(JsonArray array, IMultipleItemsContainer arrayWidgets,
+            CommandStream commands)
+        {
+#if DEBUG
+            const string methodName = nameof(ComponentPanelHandler) + "." + nameof(CreateAddArrayElementButton);
+#endif
+            TextButton outButton = new()
+            {
+                Text = "Add"
+            };
+
+            outButton.Click += (_, _) =>
+            {
+                if (array.Count == 0)
+                {
+                    Debug.WriteLine($"{methodName} (button click): array is of length 0! Cannot create new " +
+                                    "element. Try creating a new array altogether or changing the element(s) already there.");
+                    return;
+                }
+
+                JsonObject newObj = (JsonObject) array[0].Clone();
+                Panel? widgets = CreateComponentWidgets(newObj, commands);
+                if (widgets is null) return;
+
+                Grid dropDown = null!;
+                dropDown = CreateDropDown(widgets, GetHeader(newObj)!,
+                    (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, newObj, dropDown)));
+
+                commands.AddCommandAndExecute(new AddArrayElementCommand(array, arrayWidgets, newObj, dropDown));
+                
+                //ensure that the add button back at the end of the widgets array.
+                arrayWidgets.Widgets.Move(arrayWidgets.Widgets.Count - 2, arrayWidgets.Widgets.Count - 1);
+            };
+
+            return outButton;
+        }
         
         private static string? GetHeader(JsonObject obj) => string.IsNullOrWhiteSpace(obj.Name)
             ? obj.FindProperty("$type")?.Value as string
