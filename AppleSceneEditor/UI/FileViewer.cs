@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.Extensions;
 using DefaultEcs;
@@ -224,24 +225,52 @@ namespace AppleSceneEditor.UI
 
             copyItem.Selected += (_, _) =>
             {
-                string itemPath = Path.Combine(CurrentDirectory, _selectedItemName);
-
-                if (World is not null)
-                {
-                    _globalCommands.AddCommandAndExecute(new AddEntityCommand(itemPath, File.ReadAllText(itemPath),
-                        World));
-                }
+                CreateEntityNameEntryWindow(_selectedItemName).ShowModal(Desktop);
             };
-            
+
             return outMenu;
         }
-        
+
         private VerticalMenu CreateFolderContextMenu()
         {
             MenuItem deleteItem = new() {Text = "Delete"};
             MenuItem renameItem = new() {Text = "Rename"};
 
             return new VerticalMenu {Items = {deleteItem, renameItem}};
+        }
+
+        private Window CreateEntityNameEntryWindow(string entityName)
+        {
+            VerticalStackPanel stackPanel = new();
+            Window outWindow = new() {Content = stackPanel};
+
+            TextBox entryBox = new()
+                {Text = Path.GetFileNameWithoutExtension(entityName), HorizontalAlignment = HorizontalAlignment.Center};
+            TextButton okBox = new() {Text = "OK", HorizontalAlignment = HorizontalAlignment.Right};
+
+            okBox.Click += (_, _) =>
+            {
+                outWindow.Close();
+
+                if (World is null) return;
+
+                string newName = entryBox.Text;
+                string entityPath = Path.Combine(CurrentDirectory, entityName);
+                string newEntityPath = Path.Combine(CurrentDirectory, $"{newName}.entity");
+
+                string newContents = File.ReadAllText(entityPath);
+                newContents = Regex.Replace(newContents, "(\"id\":\\s*\")(.+)(\")", $"$1{newName}$3");
+                File.WriteAllText(newEntityPath, newContents);
+
+                _globalCommands.AddCommandAndExecute(new AddEntityCommand(newEntityPath, newContents, World));
+            };
+
+            stackPanel.AddChild(new Label
+                {Text = "Enter name of new entity:", HorizontalAlignment = HorizontalAlignment.Center});
+            stackPanel.AddChild(entryBox);
+            stackPanel.AddChild(okBox);
+
+            return outWindow;
         }
 
         private static bool IsSceneFile(string fileName) => Path.GetExtension(fileName) is ".prefab" or ".entity";
