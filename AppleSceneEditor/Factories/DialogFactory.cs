@@ -31,7 +31,10 @@ namespace AppleSceneEditor.Factories
 
             okButton.Click += (_, _) =>
             {
-                onOkClick(typeSelectionBox.SelectedItem.Text);
+                string? text = typeSelectionBox.SelectedItem?.Text;
+                if (string.IsNullOrWhiteSpace(text)) return;
+                
+                onOkClick(text);
                 outWindow.Close();
             };
             cancelButton.Click += (_, _) => outWindow.Close();
