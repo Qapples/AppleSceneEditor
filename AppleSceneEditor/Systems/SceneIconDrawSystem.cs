@@ -68,7 +68,7 @@ namespace AppleSceneEditor.Systems
                 _vertexBuffer.SetData(_vertices);
 
                 Matrix finalTransform =
-                    MonogameExtensions.CreateBillboad(camera.Position + entityTransform.Matrix.Translation,
+                    MonogameExtensions.CreateBillboad(camera.LocalPosition + entityTransform.Matrix.Translation,
                         worldCam.ViewMatrix);
 
                 DrawIcon(ref finalTransform, ref worldCam, _vertexBuffer, _effect);

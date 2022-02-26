@@ -78,7 +78,6 @@ namespace AppleSceneEditor.Systems.Axis
                 matrices.World = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
                                  Matrix.CreateFromQuaternion(rotation) *
                                  posMatrix;
-
                 matrices.View = worldCam.ViewMatrix;
                 matrices.Projection = worldCam.ProjectionMatrix;
             }
