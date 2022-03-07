@@ -22,7 +22,7 @@ namespace AppleSceneEditor.Systems
     /// System responsible for drawing drawable components that entities may have.
     /// </summary>
     [With(typeof(Transform))]
-    [WithEither(typeof(ComplexBox), typeof(MeshData))]
+    [WithEither(typeof(CollisionHullCollection), typeof(MeshData))]
     public sealed class EntityDrawSystem : AEntitySetSystem<GameTime>
     {
         private GraphicsDevice _graphicsDevice;
@@ -92,30 +92,36 @@ namespace AppleSceneEditor.Systems
                 }
             }
 
-            if (entity.Has<ComplexBox>())
+            if (entity.Has<CollisionHullCollection>())
             {
-                ref var box = ref entity.Get<ComplexBox>();
-
+                ref var hulls = ref entity.Get<CollisionHullCollection>();
+                
                 transform.Matrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
-                Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, Vector3.One, true);
 
-                box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref drawWorldMatrix, ref worldCam, null,
-                    _boxVertexBuffer);
-
-                bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireSceneEditorRay);
-
-                if (fireRayFlag)
+                foreach (ICollisionHull hull in hulls)
                 {
-                    //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer
-                    Viewport viewport = _graphicsDevice.Viewport;
-                    float? intercept = worldCam.FireRay(ref box, ref position, ref rotation, ref viewport);
-
-                    if (intercept is not null)
+                    if (hull is ComplexBox box)
                     {
-                        //raise a "selectedEntityFlag" by adding a component which let's everyone that has access to our
-                        //world know that we have selected an entity.
-                        World.Set(new SelectedEntityFlag(entity));
-                        GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
+                        Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, Vector3.One, true);
+
+                        box.Draw(_graphicsDevice, _boxEffect, Color.Red, ref drawWorldMatrix, ref worldCam, null,
+                            _boxVertexBuffer);
+                    }
+
+                    bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireSceneEditorRay);
+
+                    if (fireRayFlag)
+                    {
+                        //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer
+                        float? intercept = worldCam.FireRay(hull, position, rotation, _graphicsDevice.Viewport);
+
+                        if (intercept is not null)
+                        {
+                            //raise a "selectedEntityFlag" by adding a component which let's everyone that has access to our
+                            //world know that we have selected an entity.
+                            World.Set(new SelectedEntityFlag(entity));
+                            GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
+                        }
                     }
                 }
             }
