@@ -7,3 +7,5 @@ CollisionBoxInfo "GrappleFightNET5.Resource.Info.CollisionBoxInfo, GrappleFightN
 TransformInfo "GrappleFightNET5.Resource.Info.TransformInfo, GrappleFightNET5.Resource"
 PlayerControllerInfo "GrappleFightNET5.Resource.Info.PlayerControllerInfo, GrappleFightNET5.Resource"
 CameraInfo "GrappleFightNET5.Resource.Info.CameraInfo, GrappleFightNET5.Resource"
+CollisionHullCollectionInfo "GrappleFightNET5.Resource.Info.CollisionHullCollectionInfo, GrappleFightNET5.Resource"
+SingleHullInfo "GrappleFightNET5.Resource.Info.SingleHullInfo, GrappleFightNET5.Resource"
