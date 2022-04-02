@@ -11,6 +11,7 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.Factories;
 using AppleSerialization;
 using AppleSerialization.Json;
+using GrappleFightNET5.Resource.Info.Interfaces;
 using GrappleFightNET5.Runtime;
 using Microsoft.Xna.Framework;
 using Myra.Graphics2D.UI;
@@ -249,12 +250,14 @@ namespace AppleSceneEditor.UI
             if (hasChild && hasProp) stackPanel.AddChild(new Label());
 
             //children/objects to stack panel
-            foreach (var (child, type) in from child in obj.Children
+            foreach (var (child, t) in from child in obj.Children
                 from info in paramsInfo
                 where child.Name == info.Name
                 select (child, info.ParameterType))
             {
-                stackPanel.AddChild(CreateComponentWidgets(child, commands, type));
+                Type? childType = t.IsTypeJsonSerializable() ? t : ConverterHelper.GetTypeFromObject(child);
+
+                stackPanel.AddChild(CreateComponentWidgets(child, commands, childType));
             }
 
             if (hasArray && (hasChild || hasProp)) stackPanel.AddChild(new Label());
