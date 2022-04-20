@@ -31,6 +31,7 @@
       "$type": "ScriptInfo",
       "scriptInfos": [
         {
+          "$type": "SingleScriptInfo",
           "name": "",
           "enabled": true
         }
