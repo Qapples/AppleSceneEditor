@@ -60,6 +60,13 @@
       "nearPlaneDistance": 0.0,
       "farPlaneDistance": 0.0,
       "sensitivity": 0.0
+    },
+    {
+      "$type": "HitboxInfo",
+      "hitboxFilePath": {
+        "path": "",
+        "isContentPath": true
+      }
     }
   ]
 }

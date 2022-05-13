@@ -138,9 +138,9 @@ namespace AppleSceneEditor.Systems
         {
             0 => Color.DeepSkyBlue,
             1 => Color.LightSkyBlue,
-            2 => Color.LightGreen,
+            2 => Color.SeaGreen,
             3 => Color.Green,
-            4 => Color.LightYellow,
+            4 => Color.GreenYellow,
             5 => Color.Yellow,
             6 => Color.Orange,
             7 => Color.Red,
