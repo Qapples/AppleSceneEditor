@@ -11,7 +11,6 @@ using AppleSceneEditor.Factories;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.UI;
-using AppleSceneEditor.UI.HitboxEditor;
 using AppleSerialization;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
@@ -47,6 +46,7 @@ namespace AppleSceneEditor
         private Window _addComponentWindow;
         private Window _alreadyExistsWindow;
         private Window _settingsWindow;
+        private Window _hitboxEditorWindow;
         
         //TODO: The way we handle args right now is for sure a mess. Not super important but later down the line improve the way we do this.
         private readonly string _uiPath;
@@ -212,9 +212,12 @@ namespace AppleSceneEditor
             };
             
             //create windows and dialogs
+            _hitboxEditor = new HitboxEditor();
+            
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
             _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(_desktop, settingsMenuPath, _configPath);
+            _hitboxEditorWindow = new Window {Content = _hitboxEditor, MinHeight = 500, MinWidth = 500};
 
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
@@ -231,11 +234,13 @@ namespace AppleSceneEditor
                         MenuItem? fileItemOpen = menu.FindMenuItemById("MenuFileOpen");
                         MenuItem? fileItemNew = menu.FindMenuItemById("MenuFileNew");
                         MenuItem? settingsMenuOpen = menu.FindMenuItemById("SettingsMenuOpen");
+                        MenuItem? hitboxEditorOpen = menu.FindMenuItemById("HitboxEditorOpen");
 
                         if (fileItemOpen is not null) fileItemOpen.Selected += MenuFileOpen;
                         if (fileItemNew is not null) fileItemNew.Selected += MenuFileNew;
                         if (settingsMenuOpen is not null) settingsMenuOpen.Selected += SettingsMenuOpen;
-
+                        if (hitboxEditorOpen is not null) hitboxEditorOpen.Selected += HitboxEditorOpen;
+                        
                         _mainMenu = menu;
                         _mainMenu.AcceptsKeyboardFocus = false;
 
@@ -341,7 +346,6 @@ namespace AppleSceneEditor
 
             _fileViewer = new FileViewer(examplesPath, 8,
                 IOHelper.GetTexturesFromDirectory(fileIconsPath, GraphicsDevice), _commands);
-            _hitboxEditor = new HitboxEditor()
             _mainGrid.AddChild(new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _fileViewer});
 
             _sceneIcons = IOHelper.GetTexturesFromDirectory(sceneIconsPath, GraphicsDevice);
@@ -371,7 +375,7 @@ namespace AppleSceneEditor
         {
             long beforeMemoryCount = GC.GetTotalMemory(false);
             Debug.WriteLine($"Unloading. Data amount:       {beforeMemoryCount} bytes. " +
-                            $"({beforeMemoryCount/ 1000000f} megabytes)");
+                            $"({beforeMemoryCount / 1000000f} megabytes)");
 
             _spriteBatch.Dispose();
             _graphics.Dispose();
@@ -381,17 +385,21 @@ namespace AppleSceneEditor
 
             _addComponentWindow = null;
             _alreadyExistsWindow = null;
+            _settingsWindow = null;
+            _hitboxEditorWindow = null;
+
+            _hitboxEditor = null!;
 
             _openFileDialog = null!;
             _newFileDialog = null!;
 
             _project = null;
-            
+
             _currentScene?.Dispose();
 
             _jsonObjects = null!;
             _currentJsonObject = null;
-            
+
             _drawSystems?.Dispose();
 
             _commands.Dispose();
@@ -406,7 +414,7 @@ namespace AppleSceneEditor
             Stylesheet.Current = null;
 
             Dispose();
-            
+
             long afterMemoryCount = GC.GetTotalMemory(true);
             Debug.WriteLine($"Unload complete. Data amount: {afterMemoryCount} bytes. " +
                             $"({afterMemoryCount / 1000000f} megabytes)");

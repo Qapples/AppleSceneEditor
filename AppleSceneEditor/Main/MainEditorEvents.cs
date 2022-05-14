@@ -33,6 +33,12 @@ namespace AppleSceneEditor
             _settingsWindow.ShowModal(_desktop);
         }
 
+        public void HitboxEditorOpen(object? sender, EventArgs? eventArgs)
+        {
+            GlobalFlag.SetFlag(GlobalFlags.UserControllingSceneViewer, false);
+            _hitboxEditorWindow.Show(_desktop);
+        }
+
         private void AddComponentButtonClick(object? sender, EventArgs? eventArgs)
         {
             if (_currentJsonObject is null) return;

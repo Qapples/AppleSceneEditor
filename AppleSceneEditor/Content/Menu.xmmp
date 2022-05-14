@@ -52,6 +52,7 @@
         <MenuItem Text="&amp;New" ShortcutText="Ctrl+N" Id="MenuFileNew"/>
       </MenuItem>
       <MenuItem Text="&amp;Settings" ShortcutText="Ctrl+Alt+S" Id="SettingsMenuOpen"/>
+      <MenuItem Text="&amp;Hitbox Editor" ShortcutText="Ctrl+Alt+H" Id="HitboxEditorOpen"/>
     </HorizontalMenu>
     
     <HorizontalStackPanel Id="ToolMenu" Spacing="10" HorizontalAlignment="Right">
