@@ -11,6 +11,7 @@ using AppleSceneEditor.Factories;
 using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.UI;
+using AppleSceneEditor.UI.HitboxEditor;
 using AppleSerialization;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
@@ -77,6 +78,7 @@ namespace AppleSceneEditor
 
         private EntityViewer _entityViewer;
         private FileViewer _fileViewer;
+        private HitboxEditor _hitboxEditor;
        
         public MainGame(string[] args)
         {
@@ -339,6 +341,7 @@ namespace AppleSceneEditor
 
             _fileViewer = new FileViewer(examplesPath, 8,
                 IOHelper.GetTexturesFromDirectory(fileIconsPath, GraphicsDevice), _commands);
+            _hitboxEditor = new HitboxEditor()
             _mainGrid.AddChild(new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _fileViewer});
 
             _sceneIcons = IOHelper.GetTexturesFromDirectory(sceneIconsPath, GraphicsDevice);
