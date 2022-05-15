@@ -26,10 +26,13 @@ namespace AppleSceneEditor.UI
 
         private TextBox _opcodesTextBox;
         private TextBox _hullsTextBox;
-
+        
         private ScrollViewer _opcodesScrollViewer;
         private ScrollViewer _hullScrollViewer;
 
+        private const float OpcodesTextBoxProportion = 3f / 4f;
+        private const float HullTextBoxProportion = 1f - OpcodesTextBoxProportion;
+        
         public HitboxEditor(TreeStyle? style)
         {
             if (style is not null)
@@ -37,21 +40,65 @@ namespace AppleSceneEditor.UI
                 ApplyWidgetStyle(style);
             }
 
-            InternalChild = new Grid();
+            InternalChild = new Grid
+            {
+                ColumnSpacing = 4,
+                RowSpacing = 4,
+                ShowGridLines = true
+            };
 
             InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 2.5f));
-            InternalChild.RowsProportions.Add(new Proportion(ProportionType.Part, 0.5f));
-
+            //InternalChild.RowsProportions.Add(new Proportion(ProportionType.Part, 3f / 1f));
+            InternalChild.RowsProportions.Add(new Proportion(ProportionType.Auto));
+            
+            
             _opcodesTextBox = new TextBox
-                {Multiline = true, TextVerticalAlignment = VerticalAlignment.Stretch, MinHeight = 115};
+            {
+                Multiline = true, 
+                TextVerticalAlignment = VerticalAlignment.Stretch, 
+            };
+            
             _hullsTextBox = new TextBox
-                {Multiline = true, TextVerticalAlignment = VerticalAlignment.Stretch, MinHeight = 234};
+            {
+                Multiline = true, 
+                TextVerticalAlignment = VerticalAlignment.Stretch, 
+            };
 
-            _opcodesScrollViewer = new ScrollViewer {GridColumn = 1, GridRow = 1, Content = _opcodesTextBox};
-            _hullScrollViewer = new ScrollViewer {GridColumn = 1, GridRow = 0, Content = _hullsTextBox};
+            _opcodesScrollViewer = new ScrollViewer
+            {
+                GridColumn = 1, 
+                GridRow = 1, 
+                Content = _opcodesTextBox
+            };
+            
+            _hullScrollViewer = new ScrollViewer
+            {
+                GridColumn = 1, 
+                GridRow = 0, 
+                Content = _hullsTextBox
+            };
 
             InternalChild.AddChild(_opcodesScrollViewer);
             InternalChild.AddChild(_hullScrollViewer);
+
+            if (Parent?.Height is not null)
+            {
+                int height = Parent.Height.Value - InternalChild.ColumnSpacing;
+                
+                _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
+                _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion);
+            }
+
+            SizeChanged += (_, _) =>
+            {
+                if (Height is not null)
+                {
+                    int height = Height.Value - InternalChild.ColumnSpacing;
+                
+                    _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
+                    _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion);
+                }
+            };
         }
         
         public HitboxEditor() : this(Stylesheet.Current.TreeStyle)
