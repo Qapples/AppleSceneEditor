@@ -210,19 +210,32 @@ namespace AppleSceneEditor
             {
                 Root = _project.Root
             };
-            
+
             //create windows and dialogs
             _hitboxEditor = new HitboxEditor();
-            
+
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
             _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(_desktop, settingsMenuPath, _configPath);
-            _hitboxEditorWindow = new Window {Content = _hitboxEditor, MinHeight = 500, MinWidth = 500};
+
+            const int hitboxEditorWidth = 600;
+            const int hitboxEditorHeight = 500;
+            _hitboxEditorWindow = new Window
+            {
+                Content = _hitboxEditor,
+                Width = hitboxEditorWidth,
+                Height = hitboxEditorHeight,
+                MaxWidth = hitboxEditorWidth,
+                MaxHeight = hitboxEditorHeight
+            };
+
+            _hitboxEditor.Width = hitboxEditorWidth;
+            _hitboxEditor.Height = hitboxEditorHeight;
 
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
             List<string> missingWidgets = new() {"MainMenu", "MainPanel", "MainGrid", "ToolMenu"};
-            
+
             _project.Root.ProcessWidgets(widget =>
             {
                 switch (widget.Id)
