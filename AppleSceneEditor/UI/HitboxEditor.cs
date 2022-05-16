@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using AppleSceneEditor.Extensions;
 using GrappleFightNET5.Collision;
 using GrappleFightNET5.Collision.Components;
 using Microsoft.Xna.Framework;
@@ -9,6 +11,7 @@ using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.File;
 using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.UI
@@ -32,6 +35,11 @@ namespace AppleSceneEditor.UI
         
         private ScrollViewer _opcodesScrollViewer;
         private ScrollViewer _hullScrollViewer;
+
+        private FileDialog _openFileDialog;
+        private FileDialog _newFileDialog;
+        
+        private HorizontalMenu _menuBar;
 
         private const float OpcodesTextBoxProportion = 3f / 4f;
         private const float HullTextBoxProportion = 1f - OpcodesTextBoxProportion;
@@ -70,8 +78,7 @@ namespace AppleSceneEditor.UI
                 Border = new SolidBrush(Color.White),
                 BorderThickness = new Thickness(borderThickness, 0, 0, 0),
             };
-
-
+            
             _opcodesScrollViewer = new ScrollViewer
             {
                 GridColumn = 1, 
@@ -86,8 +93,38 @@ namespace AppleSceneEditor.UI
                 Content = _hullsTextBox
             };
 
+            _openFileDialog = new FileDialog(FileDialogMode.OpenFile)
+            {
+                Filter = "*.gfhb",
+                Enabled = true,
+                Visible = true
+            };
+            
+            _newFileDialog = new FileDialog(FileDialogMode.SaveFile)
+            {
+                Filter = "*.gfhb",
+                Enabled = true,
+                Visible = true
+            };
+
+            _menuBar = new HorizontalMenu
+            {
+                Items =
+                {
+                    new MenuItem("OpenMenuItem", "Open"),
+                    new MenuItem("NewMenuItem", "New")
+                }
+            };
+
+            _menuBar.FindMenuItemById("OpenMenuItem").Selected += (_, _) => _openFileDialog.ShowModal(Desktop);
+            _menuBar.FindMenuItemById("NewMenuItem").Selected += (_, _) => _newFileDialog.ShowModal(Desktop);
+
+            _openFileDialog.Closed += OpenFileDialogClosed;
+            _newFileDialog.Closed += NewFileDialogClosed;
+
             InternalChild.AddChild(_opcodesScrollViewer);
             InternalChild.AddChild(_hullScrollViewer);
+            InternalChild.AddChild(_menuBar);
 
             if (Parent?.Height is not null)
             {
@@ -203,6 +240,27 @@ namespace AppleSceneEditor.UI
 
             _hullsTextBox.Text = hullsTextBuilder.ToString();
             _opcodesTextBox.Text = _opcodesTextBox.ToString();
+        }
+
+        private void OpenFileDialogClosed(object? sender, EventArgs? args)
+        {
+            if (!_openFileDialog.Result || string.IsNullOrEmpty(_newFileDialog.FilePath))
+            {
+                return;
+            }
+
+            LoadHitboxFile(_newFileDialog.FilePath);
+        }
+
+        private void NewFileDialogClosed(object? sender, EventArgs? args)
+        {
+            if (!_newFileDialog.Result || string.IsNullOrEmpty(_newFileDialog.FilePath))
+            {
+                return;
+            }
+
+            File.Create(_newFileDialog.FilePath);
+            LoadHitboxFile(_newFileDialog.FilePath);
         }
     }
 }
