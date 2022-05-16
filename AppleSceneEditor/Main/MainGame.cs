@@ -224,9 +224,9 @@ namespace AppleSceneEditor
             {
                 Content = _hitboxEditor,
                 Width = hitboxEditorWidth,
-                Height = hitboxEditorHeight,
+                Height = hitboxEditorHeight + 25,
                 MaxWidth = hitboxEditorWidth,
-                MaxHeight = hitboxEditorHeight
+                MaxHeight = hitboxEditorHeight + 25
             };
 
             _hitboxEditor.Width = hitboxEditorWidth;

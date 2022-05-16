@@ -5,6 +5,9 @@ using System.Text;
 using GrappleFightNET5.Collision;
 using GrappleFightNET5.Collision.Components;
 using Microsoft.Xna.Framework;
+using Myra.Graphics2D;
+using Myra.Graphics2D.Brushes;
+using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Styles;
 
@@ -43,38 +46,43 @@ namespace AppleSceneEditor.UI
             InternalChild = new Grid
             {
                 ColumnSpacing = 4,
-                RowSpacing = 4,
-                ShowGridLines = true
+                RowSpacing = 1,
             };
 
             InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 2.5f));
             //InternalChild.RowsProportions.Add(new Proportion(ProportionType.Part, 3f / 1f));
             InternalChild.RowsProportions.Add(new Proportion(ProportionType.Auto));
             
+            const int borderThickness = 1;
             
             _opcodesTextBox = new TextBox
             {
                 Multiline = true, 
                 TextVerticalAlignment = VerticalAlignment.Stretch, 
+                Border = new SolidBrush(Color.White),
+                BorderThickness = new Thickness(borderThickness, borderThickness, 0, borderThickness),
             };
             
             _hullsTextBox = new TextBox
             {
-                Multiline = true, 
+                Multiline = true,
                 TextVerticalAlignment = VerticalAlignment.Stretch, 
+                Border = new SolidBrush(Color.White),
+                BorderThickness = new Thickness(borderThickness, 0, 0, 0),
             };
+
 
             _opcodesScrollViewer = new ScrollViewer
             {
                 GridColumn = 1, 
-                GridRow = 1, 
+                GridRow = 1,
                 Content = _opcodesTextBox
             };
             
             _hullScrollViewer = new ScrollViewer
             {
                 GridColumn = 1, 
-                GridRow = 0, 
+                GridRow = 0,
                 Content = _hullsTextBox
             };
 
@@ -84,7 +92,7 @@ namespace AppleSceneEditor.UI
             if (Parent?.Height is not null)
             {
                 int height = Parent.Height.Value - InternalChild.ColumnSpacing;
-                
+
                 _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
                 _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion);
             }
@@ -96,7 +104,7 @@ namespace AppleSceneEditor.UI
                     int height = Height.Value - InternalChild.ColumnSpacing;
                 
                     _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
-                    _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion);
+                    _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion) - 5;
                 }
             };
         }
