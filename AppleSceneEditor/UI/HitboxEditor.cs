@@ -37,7 +37,7 @@ namespace AppleSceneEditor.UI
         private ScrollViewer _hullScrollViewer;
 
         private FileDialog _openFileDialog;
-        private FileDialog _newFileDialog;
+        private FileDialog _saveFileDialog;
         
         private HorizontalMenu _menuBar;
 
@@ -100,7 +100,7 @@ namespace AppleSceneEditor.UI
                 Visible = true
             };
             
-            _newFileDialog = new FileDialog(FileDialogMode.SaveFile)
+            _saveFileDialog = new FileDialog(FileDialogMode.SaveFile)
             {
                 Filter = "*.gfhb",
                 Enabled = true,
@@ -112,15 +112,15 @@ namespace AppleSceneEditor.UI
                 Items =
                 {
                     new MenuItem("OpenMenuItem", "Open"),
-                    new MenuItem("NewMenuItem", "New")
+                    new MenuItem("SaveMenuItem", "Save")
                 }
             };
 
             _menuBar.FindMenuItemById("OpenMenuItem").Selected += (_, _) => _openFileDialog.ShowModal(Desktop);
-            _menuBar.FindMenuItemById("NewMenuItem").Selected += (_, _) => _newFileDialog.ShowModal(Desktop);
+            _menuBar.FindMenuItemById("SaveMenuItem").Selected += (_, _) => _saveFileDialog.ShowModal(Desktop);
 
             _openFileDialog.Closed += OpenFileDialogClosed;
-            _newFileDialog.Closed += NewFileDialogClosed;
+            _saveFileDialog.Closed += SaveFileDialogClosed;
 
             InternalChild.AddChild(_opcodesScrollViewer);
             InternalChild.AddChild(_hullScrollViewer);
@@ -244,23 +244,23 @@ namespace AppleSceneEditor.UI
 
         private void OpenFileDialogClosed(object? sender, EventArgs? args)
         {
-            if (!_openFileDialog.Result || string.IsNullOrEmpty(_newFileDialog.FilePath))
+            if (!_openFileDialog.Result || string.IsNullOrEmpty(_saveFileDialog.FilePath))
             {
                 return;
             }
 
-            LoadHitboxFile(_newFileDialog.FilePath);
+            LoadHitboxFile(_saveFileDialog.FilePath);
         }
 
-        private void NewFileDialogClosed(object? sender, EventArgs? args)
+        private void SaveFileDialogClosed(object? sender, EventArgs? args)
         {
-            if (!_newFileDialog.Result || string.IsNullOrEmpty(_newFileDialog.FilePath))
+            if (!_saveFileDialog.Result || string.IsNullOrEmpty(_saveFileDialog.FilePath))
             {
                 return;
             }
 
-            File.Create(_newFileDialog.FilePath);
-            LoadHitboxFile(_newFileDialog.FilePath);
+            File.Create(_saveFileDialog.FilePath);
+            LoadHitboxFile(_saveFileDialog.FilePath);
         }
     }
 }
