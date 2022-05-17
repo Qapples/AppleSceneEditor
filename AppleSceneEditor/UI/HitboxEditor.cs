@@ -276,18 +276,9 @@ namespace AppleSceneEditor.UI
 
                         writer.Write((byte) CollisionHullTypes.ComplexBox);
                         
-                        writer.Write(centerOffset.X);
-                        writer.Write(centerOffset.Y);
-                        writer.Write(centerOffset.Z);
-
-                        writer.Write(rotationVector4.X);
-                        writer.Write(rotationVector4.Y);
-                        writer.Write(rotationVector4.Z);
-                        writer.Write(rotationVector4.W);
-
-                        writer.Write(halfExtent.X);
-                        writer.Write(halfExtent.Y);
-                        writer.Write(halfExtent.Z);
+                        WriteVector3(writer, centerOffset);
+                        WriteVector4(writer, rotationVector4);
+                        WriteVector3(writer, halfExtent);
 
                         //skip whitespace line that separate the hulls.
                         while (string.IsNullOrWhiteSpace(hullContentLines[lineIndex++])) ;
@@ -336,9 +327,7 @@ namespace AppleSceneEditor.UI
                         ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
                         
                         writer.Write(parameterLength);
-                        writer.Write(translation.X);
-                        writer.Write(translation.Y);
-                        writer.Write(translation.Z);
+                        WriteVector3(writer, translation);
 
                         break;
                     
@@ -348,14 +337,32 @@ namespace AppleSceneEditor.UI
                         ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
                         
                         writer.Write(parameterLength);
-                        writer.Write(rotationVector4.X);
-                        writer.Write(rotationVector4.Y);
-                        writer.Write(rotationVector4.Z);
-                        writer.Write(rotationVector4.W);
+                        WriteVector4(writer, rotationVector4);
 
                         break;
                 }
             }
+        }
+
+        private Vector3 ReadVector3(BinaryReader reader) =>
+            new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+
+        private Vector4 ReadVector4(BinaryReader reader) =>
+            new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+
+        private void WriteVector3(BinaryWriter writer, Vector3 value)
+        {
+            writer.Write(value.X);
+            writer.Write(value.Y);
+            writer.Write(value.Z);
+        }
+
+        private void WriteVector4(BinaryWriter writer, Vector4 value)
+        {
+            writer.Write(value.X);
+            writer.Write(value.Y);
+            writer.Write(value.Z);
+            writer.Write(value.W);
         }
 
         private void OpenFileDialogClosed(object? sender, EventArgs? args)
