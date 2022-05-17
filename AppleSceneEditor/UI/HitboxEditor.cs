@@ -246,26 +246,23 @@ namespace AppleSceneEditor.UI
             _opcodesTextBox.Text = _opcodesTextBox.ToString();
         }
 
-        public byte[] SaveHitboxFileContents(string hullContents, string opcodeContents)
+        public void SaveHitboxFilContents(string fileLocation, string hullContents, string opcodeContents)
         {
-            List<byte> outputBytes = new();
+            using FileStream fs = File.Open(fileLocation, FileMode.OpenOrCreate);
+            using BinaryWriter writer = new(fs, Encoding.UTF8, false);
             
             //------------- SAVE HULLS ------------- 
             
             MatchCollection typeRegexMatches = new Regex("type: (.+)").Matches(hullContents);
             
             byte hullCount = (byte) typeRegexMatches.Count;
-            outputBytes.Add(hullCount);
+            writer.Write(hullCount);
             
             string[] hullContentLines = hullContents.Split('\n');
             int lineIndex = 0;
             
-            Span<byte> byteBuffer = stackalloc byte[128];
-
             for (int hullId = 0; hullId < hullCount; hullId++)
             {
-                byteBuffer.Clear();
-                
                 string hullType = typeRegexMatches[hullId].Groups[1].Value;
                 int bufferIndex = 0;
                 lineIndex++; //skip the line that defines the type of the hull.
@@ -277,16 +274,20 @@ namespace AppleSceneEditor.UI
                         ParseHelper.TryParseVector4(hullContentLines[lineIndex++], out Vector4 rotationVector4);
                         ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 halfExtent);
 
-                        //Total parameter bytes 12 + 16 + 12 = 40 bytes
-                        MemoryMarshal.Write(byteBuffer[..(bufferIndex += 12)], ref centerOffset);
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 16)], ref rotationVector4);
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 12)], ref halfExtent);
+                        writer.Write((byte) CollisionHullTypes.ComplexBox);
+                        
+                        writer.Write(centerOffset.X);
+                        writer.Write(centerOffset.Y);
+                        writer.Write(centerOffset.Z);
 
-                        outputBytes.Add((byte) CollisionHullTypes.ComplexBox);
-                        for (int i = 0; i < 40; i++)
-                        {
-                            outputBytes.Add(byteBuffer[i]);
-                        }
+                        writer.Write(rotationVector4.X);
+                        writer.Write(rotationVector4.Y);
+                        writer.Write(rotationVector4.Z);
+                        writer.Write(rotationVector4.W);
+
+                        writer.Write(halfExtent.X);
+                        writer.Write(halfExtent.Y);
+                        writer.Write(halfExtent.Z);
 
                         //skip whitespace line that separate the hulls.
                         while (string.IsNullOrWhiteSpace(hullContentLines[lineIndex++])) ;
@@ -311,22 +312,21 @@ namespace AppleSceneEditor.UI
                 string[] opcodeAndTimeSplitArr = opcodeContentLines[lineI++].Split(' ');
                 
                 int bufferIndex = 0;
-                byteBuffer.Clear();
-
+                
                 float time = float.Parse(opcodeAndTimeSplitArr[0]);
                 HitboxOpcodes opcode = Enum.Parse<HitboxOpcodes>(opcodeAndTimeSplitArr[1]);
                 
-                MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 4)], ref time);
-                byteBuffer[bufferIndex++] = (byte) opcode; 
-                
+                writer.Write(time);
+                writer.Write((byte) opcode);
+
                 switch (opcode)
                 {
                     case HitboxOpcodes.Act:
                     case HitboxOpcodes.Deact:
                         ushort parameterLength = 1;
                         
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 2)], ref parameterLength);
-                        byteBuffer[bufferIndex++] = byte.Parse(opcodeContentLines[lineI++]);
+                        writer.Write(parameterLength);
+                        writer.Write(opcodeContentLines[lineI++]);
 
                         break;
 
@@ -335,9 +335,11 @@ namespace AppleSceneEditor.UI
                         parameterLength = 12;
                         ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
                         
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 2)], ref parameterLength);
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += parameterLength)], ref translation);
-                        
+                        writer.Write(parameterLength);
+                        writer.Write(translation.X);
+                        writer.Write(translation.Y);
+                        writer.Write(translation.Z);
+
                         break;
                     
                     case HitboxOpcodes.Alrac:
@@ -345,20 +347,15 @@ namespace AppleSceneEditor.UI
                         parameterLength = 16;
                         ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
                         
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 2)], ref parameterLength);
-                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += parameterLength)],
-                            ref rotationVector4);
-                        
+                        writer.Write(parameterLength);
+                        writer.Write(rotationVector4.X);
+                        writer.Write(rotationVector4.Y);
+                        writer.Write(rotationVector4.Z);
+                        writer.Write(rotationVector4.W);
+
                         break;
                 }
-
-                for (int byteI = 0; byteI < bufferIndex; byteI++)
-                {
-                    outputBytes.Add(byteBuffer[byteI]);
-                }
             }
-
-            return outputBytes.ToArray();
         }
 
         private void OpenFileDialogClosed(object? sender, EventArgs? args)
@@ -378,7 +375,8 @@ namespace AppleSceneEditor.UI
                 return;
             }
 
-            File.Create(_saveFileDialog.FilePath);
+            using FileStream fs = File.Create(_saveFileDialog.FilePath);
+            
             LoadHitboxFile(_saveFileDialog.FilePath);
         }
     }
