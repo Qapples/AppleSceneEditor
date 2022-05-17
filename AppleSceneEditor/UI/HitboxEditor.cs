@@ -166,38 +166,27 @@ namespace AppleSceneEditor.UI
 
         public void LoadHitboxFile(string hitboxFilePath)
         {
-            Span<byte> hitboxFileBytes = File.ReadAllBytes(hitboxFilePath).AsSpan();
-            int byteIndex = 0;
+            using FileStream fs = File.Open(hitboxFilePath, FileMode.OpenOrCreate);
+            using BinaryReader reader = new(fs, Encoding.UTF8, false);
 
             StringBuilder opcodesTextBuilder = new();
             StringBuilder hullsTextBuilder = new();
 
             //---------- LOAD HULLS ---------- 
-            byte hullCount = hitboxFileBytes[byteIndex++];
+            byte hullCount = reader.ReadByte();
 
             for (int hullId = 0; hullId < hullCount; hullId++)
             {
-                CollisionHullTypes hullType = (CollisionHullTypes) (hitboxFileBytes[byteIndex++]);
+                CollisionHullTypes hullType = (CollisionHullTypes) reader.ReadByte();
 
                 hullsTextBuilder.Append($"type: {hullType}");
 
                 switch (hullType)
                 {
-                    // 00 = ComplexBox
-                    //  12 bytes that represent the CenterOffset
-                    //  16 bytes that represent the RotationOffset
-                    //  12 bytes that represent the HalfExtent
                     case CollisionHullTypes.ComplexBox:
-                        Vector3 centerOffset =
-                            MemoryMarshal.Read<Vector3>(hitboxFileBytes[byteIndex..(byteIndex += 12)]);
-                        Quaternion rotationOffset =
-                            MemoryMarshal.Read<Quaternion>(hitboxFileBytes[byteIndex..(byteIndex += 16)]);
-                        Vector3 halfExtent =
-                            MemoryMarshal.Read<Vector3>(hitboxFileBytes[byteIndex..(byteIndex += 12)]);
-
-                        hullsTextBuilder.Append($"CenterOffset: {centerOffset}");
-                        hullsTextBuilder.Append($"RotationOffset: {rotationOffset}");
-                        hullsTextBuilder.Append($"HalfExtent: {halfExtent}");
+                        hullsTextBuilder.Append($"CenterOffset: {ReadVector3(reader)}");
+                        hullsTextBuilder.Append($"RotationOffset: {ReadVector4(reader)}");
+                        hullsTextBuilder.Append($"HalfExtent: {ReadVector3(reader)}");
 
                         break;
                 }
@@ -205,17 +194,17 @@ namespace AppleSceneEditor.UI
 
             //---------- LOAD OPCODES ----------
 
-            byte opcodeCount = hitboxFileBytes[byteIndex++];
+            byte opcodeCount = reader.ReadByte();
 
             for (int i = 0; i < opcodeCount; i++)
             {
-                float time = MemoryMarshal.Read<float>(hitboxFileBytes[byteIndex..(byteIndex += 4)]);
-                HitboxOpcodes opcode = (HitboxOpcodes) (hitboxFileBytes[byteIndex++]);
-                ushort parametersLength = MemoryMarshal.Read<ushort>(hitboxFileBytes[byteIndex..(byteIndex += 2)]);
+                float time = reader.ReadSingle();
+                HitboxOpcodes opcode = (HitboxOpcodes) reader.ReadByte();
+                ushort parametersLength = reader.ReadUInt16();
 
                 opcodesTextBuilder.Append($"{time} {opcode}\n");
 
-                byte hitboxId = hitboxFileBytes[byteIndex++];
+                byte hitboxId = reader.ReadByte();
                 opcodesTextBuilder.Append(hitboxId);
 
                 switch (opcode)
@@ -224,16 +213,14 @@ namespace AppleSceneEditor.UI
 
                     case HitboxOpcodes.Alt:
                     case HitboxOpcodes.Slt:
-                        Vector3 translation =
-                            MemoryMarshal.Read<Vector3>(hitboxFileBytes[byteIndex..(byteIndex += 12)]);
+                        Vector3 translation = ReadVector3(reader);
                         opcodesTextBuilder.Append($"{translation.X} {translation.Y} {translation.Z}");
 
                         break;
 
                     case HitboxOpcodes.Alrac:
                     case HitboxOpcodes.Slrac:
-                        Quaternion rotation =
-                            MemoryMarshal.Read<Quaternion>(hitboxFileBytes[byteIndex..(byteIndex += 16)]);
+                        Vector4 rotation = ReadVector4(reader);
                         opcodesTextBuilder.Append($"{rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
 
                         break;
