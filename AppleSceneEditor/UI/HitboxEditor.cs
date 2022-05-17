@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using AppleSceneEditor.Extensions;
+using AppleSerialization;
 using GrappleFightNET5.Collision;
 using GrappleFightNET5.Collision.Components;
 using Microsoft.Xna.Framework;
@@ -240,6 +244,121 @@ namespace AppleSceneEditor.UI
 
             _hullsTextBox.Text = hullsTextBuilder.ToString();
             _opcodesTextBox.Text = _opcodesTextBox.ToString();
+        }
+
+        public byte[] SaveHitboxFileContents(string hullContents, string opcodeContents)
+        {
+            List<byte> outputBytes = new();
+            
+            //------------- SAVE HULLS ------------- 
+            
+            MatchCollection typeRegexMatches = new Regex("type: (.+)").Matches(hullContents);
+            
+            byte hullCount = (byte) typeRegexMatches.Count;
+            outputBytes.Add(hullCount);
+            
+            string[] hullContentLines = hullContents.Split('\n');
+            int lineIndex = 0;
+            
+            Span<byte> byteBuffer = stackalloc byte[128];
+
+            for (int hullId = 0; hullId < hullCount; hullId++)
+            {
+                byteBuffer.Clear();
+                
+                string hullType = typeRegexMatches[hullId].Groups[1].Value;
+                int bufferIndex = 0;
+                lineIndex++; //skip the line that defines the type of the hull.
+                
+                switch (Enum.Parse<CollisionHullTypes>(hullType))
+                {
+                    case CollisionHullTypes.ComplexBox:
+                        ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 centerOffset);
+                        ParseHelper.TryParseVector4(hullContentLines[lineIndex++], out Vector4 rotationVector4);
+                        ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 halfExtent);
+
+                        //Total parameter bytes 12 + 16 + 12 = 40 bytes
+                        MemoryMarshal.Write(byteBuffer[..(bufferIndex += 12)], ref centerOffset);
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 16)], ref rotationVector4);
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 12)], ref halfExtent);
+
+                        outputBytes.Add((byte) CollisionHullTypes.ComplexBox);
+                        for (int i = 0; i < 40; i++)
+                        {
+                            outputBytes.Add(byteBuffer[i]);
+                        }
+
+                        //skip whitespace line that separate the hulls.
+                        while (string.IsNullOrWhiteSpace(hullContentLines[lineIndex++])) ;
+
+                        break;
+                    case CollisionHullTypes.LineSegment:
+                        break;
+                }
+            }
+            
+            // ------------- SAVE OPCODES -------------
+            
+            string[] opcodeContentLines = opcodeContents.Split('\n');
+
+            for (int lineI = 0; lineI < opcodeContentLines.Length; lineI++)
+            {
+                if (string.IsNullOrWhiteSpace(opcodeContentLines[lineI]))
+                {
+                    continue;
+                }
+                
+                string[] opcodeAndTimeSplitArr = opcodeContentLines[lineI++].Split(' ');
+                
+                int bufferIndex = 0;
+                byteBuffer.Clear();
+
+                float time = float.Parse(opcodeAndTimeSplitArr[0]);
+                HitboxOpcodes opcode = Enum.Parse<HitboxOpcodes>(opcodeAndTimeSplitArr[1]);
+                
+                MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 4)], ref time);
+                byteBuffer[bufferIndex++] = (byte) opcode; 
+                
+                switch (opcode)
+                {
+                    case HitboxOpcodes.Act:
+                    case HitboxOpcodes.Deact:
+                        ushort parameterLength = 1;
+                        
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 2)], ref parameterLength);
+                        byteBuffer[bufferIndex++] = byte.Parse(opcodeContentLines[lineI++]);
+
+                        break;
+
+                    case HitboxOpcodes.Alt:
+                    case HitboxOpcodes.Slt:
+                        parameterLength = 12;
+                        ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
+                        
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 2)], ref parameterLength);
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += parameterLength)], ref translation);
+                        
+                        break;
+                    
+                    case HitboxOpcodes.Alrac:
+                    case HitboxOpcodes.Slrac:
+                        parameterLength = 16;
+                        ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
+                        
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += 2)], ref parameterLength);
+                        MemoryMarshal.Write(byteBuffer[bufferIndex..(bufferIndex += parameterLength)],
+                            ref rotationVector4);
+                        
+                        break;
+                }
+
+                for (int byteI = 0; byteI < bufferIndex; byteI++)
+                {
+                    outputBytes.Add(byteBuffer[byteI]);
+                }
+            }
+
+            return outputBytes.ToArray();
         }
 
         private void OpenFileDialogClosed(object? sender, EventArgs? args)
