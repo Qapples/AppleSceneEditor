@@ -179,14 +179,14 @@ namespace AppleSceneEditor.UI
             {
                 CollisionHullTypes hullType = (CollisionHullTypes) reader.ReadByte();
 
-                hullsTextBuilder.Append($"type: {hullType}");
+                hullsTextBuilder.Append($"type: {hullType}\n");
 
                 switch (hullType)
                 {
                     case CollisionHullTypes.ComplexBox:
-                        hullsTextBuilder.Append($"CenterOffset: {ReadVector3(reader)}");
-                        hullsTextBuilder.Append($"RotationOffset: {ReadVector4(reader)}");
-                        hullsTextBuilder.Append($"HalfExtent: {ReadVector3(reader)}");
+                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}\n"); //CenterOffset
+                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector4(reader))}\n"); //RotationOffset
+                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}"); //HalfExtent
 
                         break;
                 }
@@ -194,7 +194,7 @@ namespace AppleSceneEditor.UI
 
             //---------- LOAD OPCODES ----------
 
-            byte opcodeCount = reader.ReadByte();
+            ushort opcodeCount = reader.ReadUInt16();
 
             for (int i = 0; i < opcodeCount; i++)
             {
@@ -230,7 +230,7 @@ namespace AppleSceneEditor.UI
             }
 
             _hullsTextBox.Text = hullsTextBuilder.ToString();
-            _opcodesTextBox.Text = _opcodesTextBox.ToString();
+            _opcodesTextBox.Text = opcodesTextBuilder.ToString();
         }
 
         public void SaveHitboxFileContents(string fileLocation, string hullContents, string opcodeContents)
@@ -268,7 +268,8 @@ namespace AppleSceneEditor.UI
                         WriteVector3(writer, halfExtent);
 
                         //skip whitespace line that separate the hulls.
-                        while (string.IsNullOrWhiteSpace(hullContentLines[lineIndex++])) ;
+                        while (lineIndex < hullContentLines.Length &&
+                               string.IsNullOrWhiteSpace(hullContentLines[lineIndex++])) ;
 
                         break;
                     case CollisionHullTypes.LineSegment:
@@ -279,6 +280,11 @@ namespace AppleSceneEditor.UI
             // ------------- SAVE OPCODES -------------
             
             string[] opcodeContentLines = opcodeContents.Split('\n');
+            ushort opcodeCount = 0;
+            
+            //skip two bytes for room for a ushort that will represent the number of opcodes
+            int opcodeCountPos = (int) writer.BaseStream.Position; //position of this ushort in the byte stream
+            writer.Seek(2, SeekOrigin.Current);
 
             for (int lineI = 0; lineI < opcodeContentLines.Length; lineI++)
             {
@@ -304,7 +310,7 @@ namespace AppleSceneEditor.UI
                         ushort parameterLength = 1;
                         
                         writer.Write(parameterLength);
-                        writer.Write(opcodeContentLines[lineI++]);
+                        writer.Write(byte.Parse(opcodeContentLines[lineI++]));
 
                         break;
 
@@ -328,23 +334,31 @@ namespace AppleSceneEditor.UI
 
                         break;
                 }
+
+                opcodeCount++;
             }
+
+            writer.Seek(opcodeCountPos, SeekOrigin.Begin);
+            writer.Write(opcodeCount);
+            writer.Seek(0, SeekOrigin.End);
+            
+            writer.Flush();
         }
 
-        private Vector3 ReadVector3(BinaryReader reader) =>
+        private static Vector3 ReadVector3(BinaryReader reader) =>
             new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 
-        private Vector4 ReadVector4(BinaryReader reader) =>
+        private static Vector4 ReadVector4(BinaryReader reader) =>
             new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 
-        private void WriteVector3(BinaryWriter writer, Vector3 value)
+        private static void WriteVector3(BinaryWriter writer, Vector3 value)
         {
             writer.Write(value.X);
             writer.Write(value.Y);
             writer.Write(value.Z);
         }
 
-        private void WriteVector4(BinaryWriter writer, Vector4 value)
+        private static void WriteVector4(BinaryWriter writer, Vector4 value)
         {
             writer.Write(value.X);
             writer.Write(value.Y);
@@ -352,14 +366,17 @@ namespace AppleSceneEditor.UI
             writer.Write(value.W);
         }
 
+        private static string ToSpaceStr(Vector3 value) => $"{value.X} {value.Y} {value.Z}";
+        private static string ToSpaceStr(Vector4 value) => $"{value.X} {value.Y} {value.Z} {value.W}";
+
         private void OpenFileDialogClosed(object? sender, EventArgs? args)
         {
-            if (!_openFileDialog.Result || string.IsNullOrEmpty(_saveFileDialog.FilePath))
+            if (!_openFileDialog.Result || string.IsNullOrEmpty(_openFileDialog.FilePath))
             {
                 return;
             }
 
-            LoadHitboxFile(_saveFileDialog.FilePath);
+            LoadHitboxFile(_openFileDialog.FilePath);
         }
 
         private void SaveFileDialogClosed(object? sender, EventArgs? args)
