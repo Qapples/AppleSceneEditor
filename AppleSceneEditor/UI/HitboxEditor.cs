@@ -233,7 +233,7 @@ namespace AppleSceneEditor.UI
             _opcodesTextBox.Text = _opcodesTextBox.ToString();
         }
 
-        public void SaveHitboxFilContents(string fileLocation, string hullContents, string opcodeContents)
+        public void SaveHitboxFileContents(string fileLocation, string hullContents, string opcodeContents)
         {
             using FileStream fs = File.Open(fileLocation, FileMode.OpenOrCreate);
             using BinaryWriter writer = new(fs, Encoding.UTF8, false);
@@ -369,9 +369,7 @@ namespace AppleSceneEditor.UI
                 return;
             }
 
-            using FileStream fs = File.Create(_saveFileDialog.FilePath);
-            
-            LoadHitboxFile(_saveFileDialog.FilePath);
+            SaveHitboxFileContents(_saveFileDialog.FilePath, _hullsTextBox.Text, _opcodesTextBox.Text);
         }
     }
 }
