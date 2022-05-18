@@ -560,6 +560,8 @@ namespace AppleSceneEditor
             GraphicsDevice.Clear(Color.Black);
 
             _desktop.Render();
+            
+            _hitboxEditor.Draw();
 
             //greater than 1 widget usually means a window is opened (however, the top menu will also increase the
             //(widget count)

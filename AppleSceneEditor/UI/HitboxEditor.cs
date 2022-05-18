@@ -74,16 +74,19 @@ namespace AppleSceneEditor.UI
             _graphicsDevice = graphicsDevice;
             _hitboxEffect = new BasicEffect(graphicsDevice)
             {
-                Alpha = 1, 
-                VertexColorEnabled = true, 
+                Alpha = 1,
+                VertexColorEnabled = true,
                 LightingEnabled = true
             };
             _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
 
             _hitboxDrawSection = new Viewport();
             _hitboxDrawCamera = new Camera(Vector3.Zero,
-                Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f), graphicsDevice.DisplayMode.AspectRatio,
-                    1f, 1000f), _hitboxDrawSection, 2f);
+                Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
+                    graphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), _hitboxDrawSection, 2f)
+            {
+                LookAt = new Vector3(0f, 0f, 20f)
+            };
 
             if (style is not null)
             {
@@ -389,7 +392,6 @@ namespace AppleSceneEditor.UI
                 writer.Seek(opcodeCountPos, SeekOrigin.Begin);
                 writer.Write(opcodeCount);
                 writer.Seek(0, SeekOrigin.End);
-
                 writer.Flush();
             }
             
@@ -398,17 +400,13 @@ namespace AppleSceneEditor.UI
 
         public void Draw()
         {
-            if (!_hitboxData.HasValue) return;
+            if (!_hitboxData.HasValue || !Visible) return;
 
             HitboxData hitboxData = _hitboxData.Value;
             Matrix identity = Matrix.Identity;
 
-            hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _hitboxDrawCamera, null,
-                _vertexBuffer);
-        }
-
-        public void Update()
-        {
+            hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _hitboxDrawCamera,
+                WireframeState, _vertexBuffer);
         }
 
         public void Dispose()
@@ -479,5 +477,8 @@ namespace AppleSceneEditor.UI
 
             SaveHitboxFileContents(_saveFileDialog.FilePath, _hullsTextBox.Text, _opcodesTextBox.Text);
         }
+        
+        private static readonly RasterizerState WireframeState = new()
+            {FillMode = FillMode.WireFrame, CullMode = CullMode.None};
     }
 }
