@@ -186,10 +186,12 @@ namespace AppleSceneEditor.UI
                     case CollisionHullTypes.ComplexBox:
                         hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}\n"); //CenterOffset
                         hullsTextBuilder.Append($"{ToSpaceStr(ReadVector4(reader))}\n"); //RotationOffset
-                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}"); //HalfExtent
+                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}\n");   //HalfExtent
 
                         break;
                 }
+
+                hullsTextBuilder.Append('\n');
             }
 
             //---------- LOAD OPCODES ----------
@@ -206,6 +208,7 @@ namespace AppleSceneEditor.UI
 
                 byte hitboxId = reader.ReadByte();
                 opcodesTextBuilder.Append(hitboxId);
+                opcodesTextBuilder.Append('\n');
 
                 switch (opcode)
                 {
@@ -214,14 +217,14 @@ namespace AppleSceneEditor.UI
                     case HitboxOpcodes.Alt:
                     case HitboxOpcodes.Slt:
                         Vector3 translation = ReadVector3(reader);
-                        opcodesTextBuilder.Append($"{translation.X} {translation.Y} {translation.Z}");
+                        opcodesTextBuilder.Append($"{translation.X} {translation.Y} {translation.Z}\n");
 
                         break;
 
                     case HitboxOpcodes.Alrac:
                     case HitboxOpcodes.Slrac:
                         Vector4 rotation = ReadVector4(reader);
-                        opcodesTextBuilder.Append($"{rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
+                        opcodesTextBuilder.Append($"{rotation.X} {rotation.Y} {rotation.Z} {rotation.W}\n");
 
                         break;
                 }
@@ -269,7 +272,10 @@ namespace AppleSceneEditor.UI
 
                         //skip whitespace line that separate the hulls.
                         while (lineIndex < hullContentLines.Length &&
-                               string.IsNullOrWhiteSpace(hullContentLines[lineIndex++])) ;
+                               string.IsNullOrWhiteSpace(hullContentLines[lineIndex]))
+                        {
+                            lineIndex++;
+                        }
 
                         break;
                     case CollisionHullTypes.LineSegment:
@@ -316,20 +322,24 @@ namespace AppleSceneEditor.UI
 
                     case HitboxOpcodes.Alt:
                     case HitboxOpcodes.Slt:
-                        parameterLength = 12;
+                        parameterLength = 13;
+                        byte hullId = byte.Parse(opcodeContentLines[lineI++]);
                         ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
                         
                         writer.Write(parameterLength);
+                        writer.Write(hullId);
                         WriteVector3(writer, translation);
 
                         break;
                     
                     case HitboxOpcodes.Alrac:
                     case HitboxOpcodes.Slrac:
-                        parameterLength = 16;
+                        parameterLength = 17;
+                        hullId = byte.Parse(opcodeContentLines[lineI++]);
                         ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
                         
                         writer.Write(parameterLength);
+                        writer.Write(hullId);
                         WriteVector4(writer, rotationVector4);
 
                         break;
