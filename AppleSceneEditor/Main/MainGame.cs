@@ -212,7 +212,7 @@ namespace AppleSceneEditor
             };
 
             //create windows and dialogs
-            _hitboxEditor = new HitboxEditor();
+            _hitboxEditor = new HitboxEditor(GraphicsDevice);
 
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();

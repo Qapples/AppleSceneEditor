@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,9 +9,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using AppleSceneEditor.Extensions;
 using AppleSerialization;
+using DefaultEcs;
 using GrappleFightNET5.Collision;
 using GrappleFightNET5.Collision.Components;
+using GrappleFightNET5.Collision.Hulls;
+using GrappleFightNET5.Components;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.TextureAtlases;
@@ -20,7 +25,7 @@ using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.UI
 {
-    public class HitboxEditor : SingleItemContainer<Grid>
+    public class HitboxEditor : SingleItemContainer<Grid>, IDisposable
     {
         public string _hitboxFilePath;
 
@@ -45,11 +50,41 @@ namespace AppleSceneEditor.UI
         
         private HorizontalMenu _menuBar;
 
+        private World _world;
+        
+        private GraphicsDevice _graphicsDevice;
+        private BasicEffect _hitboxEffect;
+        private VertexBuffer _vertexBuffer;
+
+        private HitboxData? _hitboxData;
+        private Camera _hitboxDrawCamera; //camera used for drawing the hitboxes
+        
+        /// <summary>
+        /// Section of space on the entire screen where the hulls are actually drawn.
+        /// </summary>
+        private Viewport _hitboxDrawSection;
+
         private const float OpcodesTextBoxProportion = 3f / 4f;
         private const float HullTextBoxProportion = 1f - OpcodesTextBoxProportion;
         
-        public HitboxEditor(TreeStyle? style)
+        public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice)
         {
+            _world = new World();
+            
+            _graphicsDevice = graphicsDevice;
+            _hitboxEffect = new BasicEffect(graphicsDevice)
+            {
+                Alpha = 1, 
+                VertexColorEnabled = true, 
+                LightingEnabled = true
+            };
+            _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
+
+            _hitboxDrawSection = new Viewport();
+            _hitboxDrawCamera = new Camera(Vector3.Zero,
+                Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f), graphicsDevice.DisplayMode.AspectRatio,
+                    1f, 1000f), _hitboxDrawSection, 2f);
+
             if (style is not null)
             {
                 ApplyWidgetStyle(style);
@@ -150,16 +185,18 @@ namespace AppleSceneEditor.UI
             };
         }
         
-        public HitboxEditor() : this(Stylesheet.Current.TreeStyle)
+        public HitboxEditor(GraphicsDevice graphicsDevice) : this(Stylesheet.Current.TreeStyle, graphicsDevice)
         {
         }
 
-        public HitboxEditor(string hitboxFilePath) : this(Stylesheet.Current.TreeStyle)
+        public HitboxEditor(string hitboxFilePath, GraphicsDevice graphicsDevice) : 
+            this(Stylesheet.Current.TreeStyle, graphicsDevice)
         {
             HitboxFilePath = hitboxFilePath;
         }
 
-        public HitboxEditor(TreeStyle? style, string hitboxFilePath) : this(style)
+        public HitboxEditor(TreeStyle? style, string hitboxFilePath, GraphicsDevice graphicsDevice) : 
+            this(style, graphicsDevice)
         {
             HitboxFilePath = hitboxFilePath;
         }
@@ -238,121 +275,146 @@ namespace AppleSceneEditor.UI
 
         public void SaveHitboxFileContents(string fileLocation, string hullContents, string opcodeContents)
         {
-            using FileStream fs = File.Open(fileLocation, FileMode.OpenOrCreate);
-            using BinaryWriter writer = new(fs, Encoding.UTF8, false);
-            
-            //------------- SAVE HULLS ------------- 
-            
-            MatchCollection typeRegexMatches = new Regex("type: (.+)").Matches(hullContents);
-            
-            byte hullCount = (byte) typeRegexMatches.Count;
-            writer.Write(hullCount);
-            
-            string[] hullContentLines = hullContents.Split('\n');
-            int lineIndex = 0;
-            
-            for (int hullId = 0; hullId < hullCount; hullId++)
+            using (FileStream fs = File.Open(fileLocation, FileMode.OpenOrCreate))
             {
-                string hullType = typeRegexMatches[hullId].Groups[1].Value;
-                int bufferIndex = 0;
-                lineIndex++; //skip the line that defines the type of the hull.
+                using BinaryWriter writer = new(fs, Encoding.UTF8, false);
                 
-                switch (Enum.Parse<CollisionHullTypes>(hullType))
+                //------------- SAVE HULLS ------------- 
+
+                MatchCollection typeRegexMatches = new Regex("type: (.+)").Matches(hullContents);
+
+                byte hullCount = (byte) typeRegexMatches.Count;
+                writer.Write(hullCount);
+
+                string[] hullContentLines = hullContents.Split('\n');
+                int lineIndex = 0;
+
+                for (int hullId = 0; hullId < hullCount; hullId++)
                 {
-                    case CollisionHullTypes.ComplexBox:
-                        ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 centerOffset);
-                        ParseHelper.TryParseVector4(hullContentLines[lineIndex++], out Vector4 rotationVector4);
-                        ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 halfExtent);
+                    string hullType = typeRegexMatches[hullId].Groups[1].Value;
+                    int bufferIndex = 0;
+                    lineIndex++; //skip the line that defines the type of the hull.
 
-                        writer.Write((byte) CollisionHullTypes.ComplexBox);
-                        
-                        WriteVector3(writer, centerOffset);
-                        WriteVector4(writer, rotationVector4);
-                        WriteVector3(writer, halfExtent);
+                    switch (Enum.Parse<CollisionHullTypes>(hullType))
+                    {
+                        case CollisionHullTypes.ComplexBox:
+                            ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 centerOffset);
+                            ParseHelper.TryParseVector4(hullContentLines[lineIndex++], out Vector4 rotationVector4);
+                            ParseHelper.TryParseVector3(hullContentLines[lineIndex++], out Vector3 halfExtent);
 
-                        //skip whitespace line that separate the hulls.
-                        while (lineIndex < hullContentLines.Length &&
-                               string.IsNullOrWhiteSpace(hullContentLines[lineIndex]))
-                        {
-                            lineIndex++;
-                        }
+                            writer.Write((byte) CollisionHullTypes.ComplexBox);
 
-                        break;
-                    case CollisionHullTypes.LineSegment:
-                        break;
+                            WriteVector3(writer, centerOffset);
+                            WriteVector4(writer, rotationVector4);
+                            WriteVector3(writer, halfExtent);
+
+                            //skip whitespace line that separate the hulls.
+                            while (lineIndex < hullContentLines.Length &&
+                                   string.IsNullOrWhiteSpace(hullContentLines[lineIndex]))
+                            {
+                                lineIndex++;
+                            }
+
+                            break;
+                        case CollisionHullTypes.LineSegment:
+                            break;
+                    }
                 }
+
+                // ------------- SAVE OPCODES -------------
+
+                string[] opcodeContentLines = opcodeContents.Split('\n');
+                ushort opcodeCount = 0;
+
+                //skip two bytes for room for a ushort that will represent the number of opcodes
+                int opcodeCountPos = (int) writer.BaseStream.Position; //position of this ushort in the byte stream
+                writer.Seek(2, SeekOrigin.Current);
+
+                for (int lineI = 0; lineI < opcodeContentLines.Length; lineI++)
+                {
+                    if (string.IsNullOrWhiteSpace(opcodeContentLines[lineI]))
+                    {
+                        continue;
+                    }
+
+                    string[] opcodeAndTimeSplitArr = opcodeContentLines[lineI++].Split(' ');
+
+                    int bufferIndex = 0;
+
+                    float time = float.Parse(opcodeAndTimeSplitArr[0]);
+                    HitboxOpcodes opcode = Enum.Parse<HitboxOpcodes>(opcodeAndTimeSplitArr[1]);
+
+                    writer.Write(time);
+                    writer.Write((byte) opcode);
+
+                    switch (opcode)
+                    {
+                        case HitboxOpcodes.Act:
+                        case HitboxOpcodes.Deact:
+                            ushort parameterLength = 1;
+
+                            writer.Write(parameterLength);
+                            writer.Write(byte.Parse(opcodeContentLines[lineI++]));
+
+                            break;
+
+                        case HitboxOpcodes.Alt:
+                        case HitboxOpcodes.Slt:
+                            parameterLength = 13;
+                            byte hullId = byte.Parse(opcodeContentLines[lineI++]);
+                            ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
+
+                            writer.Write(parameterLength);
+                            writer.Write(hullId);
+                            WriteVector3(writer, translation);
+
+                            break;
+
+                        case HitboxOpcodes.Alrac:
+                        case HitboxOpcodes.Slrac:
+                            parameterLength = 17;
+                            hullId = byte.Parse(opcodeContentLines[lineI++]);
+                            ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
+
+                            writer.Write(parameterLength);
+                            writer.Write(hullId);
+                            WriteVector4(writer, rotationVector4);
+
+                            break;
+                    }
+
+                    opcodeCount++;
+                }
+
+                writer.Seek(opcodeCountPos, SeekOrigin.Begin);
+                writer.Write(opcodeCount);
+                writer.Seek(0, SeekOrigin.End);
+
+                writer.Flush();
             }
             
-            // ------------- SAVE OPCODES -------------
+            _hitboxData = new HitboxData(File.ReadAllBytes(fileLocation), _world.CreateEntity());
+        }
+
+        public void Draw()
+        {
+            if (!_hitboxData.HasValue) return;
+
+            HitboxData hitboxData = _hitboxData.Value;
+            Matrix identity = Matrix.Identity;
+
+            hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _hitboxDrawCamera, null,
+                _vertexBuffer);
+        }
+
+        public void Update()
+        {
             
-            string[] opcodeContentLines = opcodeContents.Split('\n');
-            ushort opcodeCount = 0;
+        }
+
+        public void Dispose()
+        {
             
-            //skip two bytes for room for a ushort that will represent the number of opcodes
-            int opcodeCountPos = (int) writer.BaseStream.Position; //position of this ushort in the byte stream
-            writer.Seek(2, SeekOrigin.Current);
-
-            for (int lineI = 0; lineI < opcodeContentLines.Length; lineI++)
-            {
-                if (string.IsNullOrWhiteSpace(opcodeContentLines[lineI]))
-                {
-                    continue;
-                }
-                
-                string[] opcodeAndTimeSplitArr = opcodeContentLines[lineI++].Split(' ');
-                
-                int bufferIndex = 0;
-                
-                float time = float.Parse(opcodeAndTimeSplitArr[0]);
-                HitboxOpcodes opcode = Enum.Parse<HitboxOpcodes>(opcodeAndTimeSplitArr[1]);
-                
-                writer.Write(time);
-                writer.Write((byte) opcode);
-
-                switch (opcode)
-                {
-                    case HitboxOpcodes.Act:
-                    case HitboxOpcodes.Deact:
-                        ushort parameterLength = 1;
-                        
-                        writer.Write(parameterLength);
-                        writer.Write(byte.Parse(opcodeContentLines[lineI++]));
-
-                        break;
-
-                    case HitboxOpcodes.Alt:
-                    case HitboxOpcodes.Slt:
-                        parameterLength = 13;
-                        byte hullId = byte.Parse(opcodeContentLines[lineI++]);
-                        ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
-                        
-                        writer.Write(parameterLength);
-                        writer.Write(hullId);
-                        WriteVector3(writer, translation);
-
-                        break;
-                    
-                    case HitboxOpcodes.Alrac:
-                    case HitboxOpcodes.Slrac:
-                        parameterLength = 17;
-                        hullId = byte.Parse(opcodeContentLines[lineI++]);
-                        ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
-                        
-                        writer.Write(parameterLength);
-                        writer.Write(hullId);
-                        WriteVector4(writer, rotationVector4);
-
-                        break;
-                }
-
-                opcodeCount++;
-            }
-
-            writer.Seek(opcodeCountPos, SeekOrigin.Begin);
-            writer.Write(opcodeCount);
-            writer.Seek(0, SeekOrigin.End);
-            
-            writer.Flush();
         }
 
         private static Vector3 ReadVector3(BinaryReader reader) =>
