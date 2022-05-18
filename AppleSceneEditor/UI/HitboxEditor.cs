@@ -409,12 +409,31 @@ namespace AppleSceneEditor.UI
 
         public void Update()
         {
-            
         }
 
         public void Dispose()
         {
+            _opcodesTextBox = null!;
+            _hullsTextBox = null!;
+
+            _opcodesScrollViewer = null!;
+            _hullScrollViewer = null!;
+
+            _openFileDialog = null!;
+            _saveFileDialog = null!;
+
+            _menuBar = null!;
             
+            _world.Dispose();
+            _world = null!;
+
+            _graphicsDevice = null!;
+            
+            _hitboxEffect.Dispose();
+            _hitboxEffect = null!;
+            
+            _vertexBuffer.Dispose();
+            _vertexBuffer = null!;
         }
 
         private static Vector3 ReadVector3(BinaryReader reader) =>

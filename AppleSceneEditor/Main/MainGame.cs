@@ -401,6 +401,7 @@ namespace AppleSceneEditor
             _settingsWindow = null;
             _hitboxEditorWindow = null;
 
+            _hitboxEditor.Dispose();
             _hitboxEditor = null!;
 
             _openFileDialog = null!;
