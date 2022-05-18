@@ -70,7 +70,7 @@ namespace AppleSceneEditor.UI
         public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice)
         {
             _world = new World();
-            
+
             _graphicsDevice = graphicsDevice;
             _hitboxEffect = new BasicEffect(graphicsDevice)
             {

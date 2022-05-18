@@ -212,8 +212,6 @@ namespace AppleSceneEditor
             };
 
             //create windows and dialogs
-            _hitboxEditor = new HitboxEditor(GraphicsDevice);
-
             _addComponentWindow = DialogFactory.CreateNewComponentDialog(_prototypes!.Keys, FinishButtonClick);
             _alreadyExistsWindow = DialogFactory.CreateAlreadyExistsDialog();
             _settingsWindow = DialogFactory.CreateSettingsDialogFromFile(_desktop, settingsMenuPath, _configPath);
@@ -222,15 +220,14 @@ namespace AppleSceneEditor
             const int hitboxEditorHeight = 500;
             _hitboxEditorWindow = new Window
             {
-                Content = _hitboxEditor,
+                Content = new HitboxEditor(GraphicsDevice) {Width = hitboxEditorWidth, Height = hitboxEditorHeight},
                 Width = hitboxEditorWidth,
                 Height = hitboxEditorHeight + 25,
                 MaxWidth = hitboxEditorWidth,
                 MaxHeight = hitboxEditorHeight + 25
             };
 
-            _hitboxEditor.Width = hitboxEditorWidth;
-            _hitboxEditor.Height = hitboxEditorHeight;
+            _hitboxEditor = (HitboxEditor) _hitboxEditorWindow.Content;
 
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
