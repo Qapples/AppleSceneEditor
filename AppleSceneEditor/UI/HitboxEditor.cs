@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using AppleSceneEditor.Extensions;
+using AppleSceneEditor.Input;
+using AppleSceneEditor.Input.Commands;
 using AppleSerialization;
 using DefaultEcs;
 using GrappleFightNET5.Collision;
@@ -49,12 +51,14 @@ namespace AppleSceneEditor.UI
         private FileDialog _saveFileDialog;
         
         private HorizontalMenu _menuBar;
-
+        
         private World _world;
         
         private GraphicsDevice _graphicsDevice;
         private BasicEffect _hitboxEffect;
         private VertexBuffer _vertexBuffer;
+
+        private InputHandler _inputHandler;
 
         private HitboxData? _hitboxData;
         private Camera _hitboxDrawCamera; //camera used for drawing the hitboxes
@@ -83,13 +87,22 @@ namespace AppleSceneEditor.UI
             _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
 
             _hitboxDrawSection = new Viewport();
-            _hitboxDrawCamera = new Camera(Vector3.Zero,
+            
+            _world.Set(new Camera(Vector3.Zero,
                 Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
                     graphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), _hitboxDrawSection, 2f)
             {
                 LookAt = new Vector3(0f, 0f, 20f)
-            };
-
+            });
+            
+            _world.Set(new CameraProperties
+            {
+                YawDegrees = 0f,
+                PitchDegrees = 0f,
+                CameraSpeed = 0.5f
+            });
+            
+            
             if (style is not null)
             {
                 ApplyWidgetStyle(style);
@@ -99,6 +112,7 @@ namespace AppleSceneEditor.UI
             {
                 ColumnSpacing = 4,
                 RowSpacing = 1,
+                AcceptsKeyboardFocus = true
             };
 
             InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 2.5f));
@@ -113,6 +127,7 @@ namespace AppleSceneEditor.UI
                 TextVerticalAlignment = VerticalAlignment.Stretch, 
                 Border = new SolidBrush(Color.White),
                 BorderThickness = new Thickness(borderThickness, borderThickness, 0, borderThickness),
+                AcceptsKeyboardFocus = true
             };
             
             _hullsTextBox = new TextBox
@@ -121,6 +136,7 @@ namespace AppleSceneEditor.UI
                 TextVerticalAlignment = VerticalAlignment.Stretch, 
                 Border = new SolidBrush(Color.White),
                 BorderThickness = new Thickness(borderThickness, 0, 0, 0),
+                AcceptsKeyboardFocus = true
             };
             
             _opcodesScrollViewer = new ScrollViewer
@@ -159,7 +175,7 @@ namespace AppleSceneEditor.UI
                     new MenuItem("SaveMenuItem", "Save")
                 }
             };
-            
+
             _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y - MenuBarHeight, InternalChild.GetColumnWidth(0),
                 Bounds.Height - MenuBarHeight);
 
@@ -401,6 +417,16 @@ namespace AppleSceneEditor.UI
             }
             
             _hitboxData = new HitboxData(File.ReadAllBytes(fileLocation), _world.CreateEntity());
+        }
+
+        public void UpdateCamera()
+        {
+            if (!Visible || !InternalChild.IsKeyboardFocused || _hullsTextBox.IsKeyboardFocused ||
+                _opcodesTextBox.IsKeyboardFocused)
+            {
+                return;
+            }
+            
         }
 
         public void Draw()

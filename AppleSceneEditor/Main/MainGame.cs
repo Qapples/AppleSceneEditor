@@ -380,8 +380,10 @@ namespace AppleSceneEditor
                     _currentScene = InitScene(parentDirectory.FullName);
                     
                     //init _inputHelper here since by then all the fields should have been initialized so far.
-                    (_notHeldInputHandler, _heldInputHandler) =
-                        CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
+                    _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
+                    _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
+                    // (_notHeldInputHandler, _heldInputHandler) =
+                    //     CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
                 }
             }
         }
@@ -446,6 +448,8 @@ namespace AppleSceneEditor
 
             KeyboardState kbState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
+            
+            _hitboxEditor.UpdateCamera();
 
             if (_currentScene is not null)
             {
