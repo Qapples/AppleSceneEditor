@@ -18,6 +18,7 @@ using GrappleFightNET5.Collision.Hulls;
 using GrappleFightNET5.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.TextureAtlases;
@@ -73,7 +74,7 @@ namespace AppleSceneEditor.UI
 
         private const int MenuBarHeight = 20;
         
-        public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice, string configFilePath)
+        public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice, string keybindFilePath)
         {
             _world = new World();
 
@@ -102,7 +103,7 @@ namespace AppleSceneEditor.UI
                 CameraSpeed = 0.5f
             });
 
-            _heldInputHandler = new InputHandler(configFilePath, TryGetCommandFromFunctionName, true);
+            _heldInputHandler = new InputHandler(keybindFilePath, TryGetCommandFromFunctionName, true);
 
             if (style is not null)
             {
@@ -210,19 +211,19 @@ namespace AppleSceneEditor.UI
             };
         }
 
-        public HitboxEditor(GraphicsDevice graphicsDevice, string configFilePath) : this(Stylesheet.Current.TreeStyle,
-            graphicsDevice, configFilePath)
+        public HitboxEditor(GraphicsDevice graphicsDevice, string keybindFilePath) : this(Stylesheet.Current.TreeStyle,
+            graphicsDevice, keybindFilePath)
         {
         }
 
-        public HitboxEditor(GraphicsDevice graphicsDevice, string hitboxFilePath, string configFilePath) :
-            this(Stylesheet.Current.TreeStyle, graphicsDevice, hitboxFilePath, configFilePath)
+        public HitboxEditor(GraphicsDevice graphicsDevice, string hitboxFilePath, string keybindFilePath) :
+            this(Stylesheet.Current.TreeStyle, graphicsDevice, hitboxFilePath, keybindFilePath)
         {
             HitboxFilePath = hitboxFilePath;
         }
 
         public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice, string hitboxFilePath,
-            string configFilePath) : this(style, graphicsDevice, configFilePath)
+            string keybindFilePath) : this(style, graphicsDevice, keybindFilePath)
         {
             HitboxFilePath = hitboxFilePath;
         }
@@ -421,14 +422,22 @@ namespace AppleSceneEditor.UI
             _hitboxData = new HitboxData(File.ReadAllBytes(fileLocation), _world.CreateEntity());
         }
 
-        public void UpdateCamera()
+        public void UpdateCamera(ref KeyboardState kbState, ref KeyboardState previousKbState)
         {
             if (!Visible || !InternalChild.IsKeyboardFocused || _hullsTextBox.IsKeyboardFocused ||
                 _opcodesTextBox.IsKeyboardFocused)
             {
                 return;
             }
-            
+
+            IKeyCommand[] heldCommands = _heldInputHandler.GetCommands(ref kbState, ref previousKbState);
+
+            foreach (IKeyCommand command in heldCommands)
+            {
+                if (command is EmptyCommand) break;
+                
+                command.Execute();
+            }
         }
 
         public void Draw()

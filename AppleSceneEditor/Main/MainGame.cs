@@ -220,7 +220,7 @@ namespace AppleSceneEditor
             const int hitboxEditorHeight = 500;
             _hitboxEditorWindow = new Window
             {
-                Content = new HitboxEditor(GraphicsDevice, _configPath)
+                Content = new HitboxEditor(GraphicsDevice, keybindPath)
                     {Width = hitboxEditorWidth, Height = hitboxEditorHeight},
                 Width = hitboxEditorWidth,
                 Height = hitboxEditorHeight + 25,
@@ -448,7 +448,7 @@ namespace AppleSceneEditor
             KeyboardState kbState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
             
-            _hitboxEditor.UpdateCamera();
+            _hitboxEditor.UpdateCamera(ref kbState, ref _previousKbState);
 
             if (_currentScene is not null)
             {
