@@ -382,8 +382,7 @@ namespace AppleSceneEditor
                     //init _inputHelper here since by then all the fields should have been initialized so far.
                     _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
                     _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
-                    // (_notHeldInputHandler, _heldInputHandler) =
-                    //     CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
+
                 }
             }
         }

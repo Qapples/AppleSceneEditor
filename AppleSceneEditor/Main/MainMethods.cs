@@ -132,9 +132,10 @@ namespace AppleSceneEditor
                 
                 _notHeldInputHandler.Dispose();
                 _heldInputHandler.Dispose();
-                
-                (_notHeldInputHandler, _heldInputHandler) =
-                    CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
+
+                string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
+                _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
+                _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
             };
 
             return fileDialog;
@@ -164,8 +165,9 @@ namespace AppleSceneEditor
                     _notHeldInputHandler.Dispose();
                     _heldInputHandler.Dispose();
 
-                    (_notHeldInputHandler, _heldInputHandler) =
-                        CreateInputHandlersFromFile(Path.Combine(_configPath, "Keybinds.txt"));
+                    string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
+                    _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
+                    _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
                 }
             };
 
@@ -269,113 +271,6 @@ namespace AppleSceneEditor
 
                 return true;
             });
-        }
-
-        //we can't have this method in InputHandler because it calls TryGetCommandFromFunctionName which uses private
-        //fields from MainGame :(.
-        public (InputHandler notHeldHandler, InputHandler heldHandler) CreateInputHandlersFromFile(string filePath)
-        {
-#if DEBUG
-            const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlersFromFile);
-#endif
-            using StreamReader reader = new(filePath, Encoding.ASCII);
-
-            InputHandler? notHeldHandler = null;
-            InputHandler? heldHandler = null;
-
-            //might be able to do this through regex but I'm too lazy to come up with a complicated regex query.
-            string? line = reader.ReadLine();
-            while (line is not null)
-            {
-                //# indicates a region. start looking for data after a region.
-                if (!string.IsNullOrEmpty(line) && line[0] == '#' && line[1..] is "HELD" or "NOTHELD")
-                {
-                    //#HELD indicates commands that activate when keys are pressed regardless if they were pressed the
-                    //previous frame (they can be held down)
-                    //#NOTHELD indicates the opposites (only actives once when the keys are first presssed)
-                    bool isHeld = line[1..] == "HELD";
-
-                    if (isHeld && heldHandler is null)
-                    {
-                        heldHandler = CreateInputHandlerFromStream(reader, true, out line);
-                    }
-                    else if (isHeld && heldHandler is not null)
-                    {
-                        Debug.WriteLine($"{methodName} (parse warning): multiple #HELD regions. Only returning" +
-                                        $"the first one.");
-                    }
-
-                    if (!isHeld && notHeldHandler is null)
-                    {
-                        notHeldHandler = CreateInputHandlerFromStream(reader, false, out line);
-                    }
-                    else if (!isHeld && notHeldHandler is not null)
-                    {
-                        Debug.WriteLine($"{methodName} (parse warning): multiple #NOTHELD regions. Only returning" +
-                                        $"the first one.");
-                    }
-                }
-                else
-                {
-                    line = reader.ReadLine();
-                }
-            }
-
-            if (heldHandler is null)
-            {
-                Debug.WriteLine($"{methodName}: did not find #HELD REGION! Returning an empty input handler.");
-            }
-
-            if (notHeldHandler is null)
-            {
-                Debug.WriteLine($"{methodName}: did not find #NOTHELD region! Returning an empty input handler.");
-            }
-
-            return (notHeldHandler ?? new InputHandler(false), heldHandler ?? new InputHandler(true));
-        }
-        
-        private InputHandler CreateInputHandlerFromStream(StreamReader reader, bool isHeld, out string? lastLine)
-        {
-            const string methodName = nameof(MainGame) + "." + nameof(CreateInputHandlerFromStream);
-
-            Dictionary<string, CommandEntry> commands = new();
-
-            //'#' indicates a region. stop searching when we hit a new region.
-            string? line;
-            while ((line = reader.ReadLine()) is not null && line[0] != '#')
-            {
-                int colonIndex = line.IndexOf(':');
-                
-                if (colonIndex > 0)
-                {
-                    //there should only be ONE space between the colon and the key. account for the space and colon by
-                    //adding two
-                    string funcName = line[..colonIndex];
-                    string keysStr = line[(colonIndex + 2)..];
-
-                    if (TryGetCommandFromFunctionName(funcName, out var command))
-                    {
-                        Keys[] keys = KeyboardExtensions.ParseKeyboardState(keysStr);
-                        
-                        if (keys.Length > 0)
-                        {
-                            commands[funcName] = new CommandEntry(keys, command);
-                        }
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"{methodName}: cannot get function name from following line: {line}");
-                    }
-                }
-                else
-                {
-                    Debug.WriteLine($"{methodName}: cannot find func name behind colon in the following line: " +
-                                    $"{line}. Skipping.");
-                }
-            }
-
-            lastLine = line;
-            return new InputHandler(commands, isHeld);
         }
 
         //------------------
