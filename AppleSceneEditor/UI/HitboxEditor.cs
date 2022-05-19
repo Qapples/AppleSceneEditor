@@ -78,7 +78,7 @@ namespace AppleSceneEditor.UI
             {
                 Alpha = 1,
                 VertexColorEnabled = true,
-                LightingEnabled = true
+                LightingEnabled = false
             };
             _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
 

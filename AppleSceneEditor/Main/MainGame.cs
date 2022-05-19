@@ -229,6 +229,11 @@ namespace AppleSceneEditor
 
             _hitboxEditor = (HitboxEditor) _hitboxEditorWindow.Content;
 
+            _hitboxEditorWindow.Closed += (_, _) =>
+            {
+                _hitboxEditor.Visible = false;
+            };
+
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
             List<string> missingWidgets = new() {"MainMenu", "MainPanel", "MainGrid", "ToolMenu"};

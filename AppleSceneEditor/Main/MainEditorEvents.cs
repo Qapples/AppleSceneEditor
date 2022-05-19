@@ -36,6 +36,7 @@ namespace AppleSceneEditor
         public void HitboxEditorOpen(object? sender, EventArgs? eventArgs)
         {
             GlobalFlag.SetFlag(GlobalFlags.UserControllingSceneViewer, false);
+            _hitboxEditor.Visible = true;
             _hitboxEditorWindow.Show(_desktop);
         }
 
