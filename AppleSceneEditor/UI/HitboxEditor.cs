@@ -66,6 +66,8 @@ namespace AppleSceneEditor.UI
 
         private const float OpcodesTextBoxProportion = 3f / 4f;
         private const float HullTextBoxProportion = 1f - OpcodesTextBoxProportion;
+
+        private const int MenuBarHeight = 20;
         
         public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice)
         {
@@ -157,6 +159,9 @@ namespace AppleSceneEditor.UI
                     new MenuItem("SaveMenuItem", "Save")
                 }
             };
+            
+            _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y - MenuBarHeight, InternalChild.GetColumnWidth(0),
+                Bounds.Height - MenuBarHeight);
 
             _menuBar.FindMenuItemById("OpenMenuItem").Selected += (_, _) => _openFileDialog.ShowModal(Desktop);
             _menuBar.FindMenuItemById("SaveMenuItem").Selected += (_, _) => _saveFileDialog.ShowModal(Desktop);
@@ -402,11 +407,19 @@ namespace AppleSceneEditor.UI
         {
             if (!_hitboxData.HasValue || !Visible) return;
 
+            Viewport previousViewport = _graphicsDevice.Viewport;
+            
+            _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y + MenuBarHeight, InternalChild.GetColumnWidth(0),
+                Bounds.Height - MenuBarHeight);
+            _graphicsDevice.Viewport = _hitboxDrawSection;
+
             HitboxData hitboxData = _hitboxData.Value;
             Matrix identity = Matrix.Identity;
-
+            
             hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _hitboxDrawCamera,
                 WireframeState, _vertexBuffer);
+
+            _graphicsDevice.Viewport = previousViewport;
         }
 
         public void Dispose()
