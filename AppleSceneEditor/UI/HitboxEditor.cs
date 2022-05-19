@@ -54,12 +54,12 @@ namespace AppleSceneEditor.UI
         
         private World _world;
         
+        private InputHandler _heldInputHandler;
+        
         private GraphicsDevice _graphicsDevice;
         private BasicEffect _hitboxEffect;
         private VertexBuffer _vertexBuffer;
-
-        private InputHandler _inputHandler;
-
+        
         private HitboxData? _hitboxData;
         private Camera _hitboxDrawCamera; //camera used for drawing the hitboxes
         
@@ -73,7 +73,7 @@ namespace AppleSceneEditor.UI
 
         private const int MenuBarHeight = 20;
         
-        public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice)
+        public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice, string configFilePath)
         {
             _world = new World();
 
@@ -101,8 +101,9 @@ namespace AppleSceneEditor.UI
                 PitchDegrees = 0f,
                 CameraSpeed = 0.5f
             });
-            
-            
+
+            _heldInputHandler = new InputHandler(configFilePath, TryGetCommandFromFunctionName, true);
+
             if (style is not null)
             {
                 ApplyWidgetStyle(style);
@@ -202,25 +203,26 @@ namespace AppleSceneEditor.UI
                 if (Height is not null)
                 {
                     int height = Height.Value - InternalChild.ColumnSpacing;
-                
+
                     _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
                     _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion) - 5;
                 }
             };
         }
-        
-        public HitboxEditor(GraphicsDevice graphicsDevice) : this(Stylesheet.Current.TreeStyle, graphicsDevice)
+
+        public HitboxEditor(GraphicsDevice graphicsDevice, string configFilePath) : this(Stylesheet.Current.TreeStyle,
+            graphicsDevice, configFilePath)
         {
         }
 
-        public HitboxEditor(string hitboxFilePath, GraphicsDevice graphicsDevice) : 
-            this(Stylesheet.Current.TreeStyle, graphicsDevice)
+        public HitboxEditor(GraphicsDevice graphicsDevice, string hitboxFilePath, string configFilePath) :
+            this(Stylesheet.Current.TreeStyle, graphicsDevice, hitboxFilePath, configFilePath)
         {
             HitboxFilePath = hitboxFilePath;
         }
 
-        public HitboxEditor(TreeStyle? style, string hitboxFilePath, GraphicsDevice graphicsDevice) : 
-            this(style, graphicsDevice)
+        public HitboxEditor(TreeStyle? style, GraphicsDevice graphicsDevice, string hitboxFilePath,
+            string configFilePath) : this(style, graphicsDevice, configFilePath)
         {
             HitboxFilePath = hitboxFilePath;
         }
@@ -460,9 +462,12 @@ namespace AppleSceneEditor.UI
             _saveFileDialog = null!;
 
             _menuBar = null!;
-            
+
             _world.Dispose();
             _world = null!;
+            
+            _heldInputHandler.Dispose();
+            _heldInputHandler = null!;
 
             _graphicsDevice = null!;
             
@@ -516,7 +521,25 @@ namespace AppleSceneEditor.UI
 
             SaveHitboxFileContents(_saveFileDialog.FilePath, _hullsTextBox.Text, _opcodesTextBox.Text);
         }
-        
+
+        private bool TryGetCommandFromFunctionName(string funcName, out IKeyCommand command) =>
+            (command = funcName switch
+            {
+                "move_camera_forward" =>
+                    new MoveCameraCommand(MovementHelper.Direction.Forward, _world),
+                "move_camera_backward" =>
+                    new MoveCameraCommand(MovementHelper.Direction.Backwards, _world),
+                "move_camera_left" =>
+                    new MoveCameraCommand(MovementHelper.Direction.Left, _world),
+                "move_camera_right" =>
+                    new MoveCameraCommand(MovementHelper.Direction.Right, _world),
+                "move_camera_up" =>
+                    new MoveCameraCommand(MovementHelper.Direction.Up, _world),
+                "move_camera_down" =>
+                    new MoveCameraCommand(MovementHelper.Direction.Down, _world),
+                _ => IKeyCommand.EmptyCommand
+            }) is not EmptyCommand;
+
         private static readonly RasterizerState WireframeState = new()
             {FillMode = FillMode.WireFrame, CullMode = CullMode.None};
     }

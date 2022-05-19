@@ -220,7 +220,8 @@ namespace AppleSceneEditor
             const int hitboxEditorHeight = 500;
             _hitboxEditorWindow = new Window
             {
-                Content = new HitboxEditor(GraphicsDevice) {Width = hitboxEditorWidth, Height = hitboxEditorHeight},
+                Content = new HitboxEditor(GraphicsDevice, _configPath)
+                    {Width = hitboxEditorWidth, Height = hitboxEditorHeight},
                 Width = hitboxEditorWidth,
                 Height = hitboxEditorHeight + 25,
                 MaxWidth = hitboxEditorWidth,
@@ -378,11 +379,10 @@ namespace AppleSceneEditor
                 else
                 {
                     _currentScene = InitScene(parentDirectory.FullName);
-                    
+
                     //init _inputHelper here since by then all the fields should have been initialized so far.
                     _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
                     _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
-
                 }
             }
         }
