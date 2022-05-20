@@ -447,8 +447,8 @@ namespace AppleSceneEditor
 
             KeyboardState kbState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();
-            
-            _hitboxEditor.UpdateCamera(ref kbState, ref _previousKbState);
+
+            _hitboxEditor.UpdateCamera(ref kbState, ref _previousKbState, ref mouseState, ref _previousMouseState);
 
             if (_currentScene is not null)
             {

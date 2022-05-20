@@ -62,7 +62,6 @@ namespace AppleSceneEditor.UI
         private VertexBuffer _vertexBuffer;
         
         private HitboxData? _hitboxData;
-        private Camera _hitboxDrawCamera; //camera used for drawing the hitboxes
         
         /// <summary>
         /// Section of space on the entire screen where the hulls are actually drawn.
@@ -250,7 +249,7 @@ namespace AppleSceneEditor.UI
                     case CollisionHullTypes.ComplexBox:
                         hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}\n"); //CenterOffset
                         hullsTextBuilder.Append($"{ToSpaceStr(ReadVector4(reader))}\n"); //RotationOffset
-                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}\n");   //HalfExtent
+                        hullsTextBuilder.Append($"{ToSpaceStr(ReadVector3(reader))}\n"); //HalfExtent
 
                         break;
                 }
@@ -422,7 +421,8 @@ namespace AppleSceneEditor.UI
             _hitboxData = new HitboxData(File.ReadAllBytes(fileLocation), _world.CreateEntity());
         }
 
-        public void UpdateCamera(ref KeyboardState kbState, ref KeyboardState previousKbState)
+        public void UpdateCamera(ref KeyboardState kbState, ref KeyboardState previousKbState,
+            ref MouseState mouseState, ref MouseState previousMouseState)
         {
             if (!Visible || !InternalChild.IsKeyboardFocused || _hullsTextBox.IsKeyboardFocused ||
                 _opcodesTextBox.IsKeyboardFocused)
@@ -438,6 +438,13 @@ namespace AppleSceneEditor.UI
                 
                 command.Execute();
             }
+            
+            ref var properties = ref _world.Get<CameraProperties>();
+            ref var camera = ref _world.Get<Camera>();
+
+            properties.YawDegrees += (previousMouseState.X - mouseState.X) / camera.Sensitivity;
+            properties.PitchDegrees += (previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
+            camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
         }
 
         public void Draw()
@@ -452,8 +459,8 @@ namespace AppleSceneEditor.UI
 
             HitboxData hitboxData = _hitboxData.Value;
             Matrix identity = Matrix.Identity;
-            
-            hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _hitboxDrawCamera,
+
+            hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _world.Get<Camera>(),
                 WireframeState, _vertexBuffer);
 
             _graphicsDevice.Viewport = previousViewport;
