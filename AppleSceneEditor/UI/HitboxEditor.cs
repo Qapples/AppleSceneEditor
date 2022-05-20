@@ -430,6 +430,11 @@ namespace AppleSceneEditor.UI
                 return;
             }
 
+            if (kbState.IsKeyDown(Keys.Escape) && !previousKbState.IsKeyDown(Keys.Escape))
+            {
+                _hullsTextBox.SetKeyboardFocus();
+            }
+
             IKeyCommand[] heldCommands = _heldInputHandler.GetCommands(ref kbState, ref previousKbState);
 
             foreach (IKeyCommand command in heldCommands)
