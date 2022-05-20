@@ -449,6 +449,7 @@ namespace AppleSceneEditor
             MouseState mouseState = Mouse.GetState();
 
             _hitboxEditor.UpdateCamera(ref kbState, ref _previousKbState, ref mouseState, ref _previousMouseState);
+            _hitboxEditor.UpdateHitboxPlayback(gameTime.ElapsedGameTime);
 
             if (_currentScene is not null)
             {

@@ -42,6 +42,25 @@ namespace AppleSceneEditor.UI
             }
         }
 
+        public bool _isPlaying;
+
+        public bool IsPlaying
+        {
+            get => _isPlaying;
+            set
+            {
+                _isPlaying = value;
+
+                if (_hitboxData.HasValue)
+                {
+                    HitboxData newData = _hitboxData.Value;
+                    newData.Active = value;
+
+                    _hitboxData = newData;
+                }
+            }
+        }
+
         private TextBox _opcodesTextBox;
         private TextBox _hullsTextBox;
         
@@ -173,7 +192,8 @@ namespace AppleSceneEditor.UI
                 Items =
                 {
                     new MenuItem("OpenMenuItem", "Open"),
-                    new MenuItem("SaveMenuItem", "Save")
+                    new MenuItem("SaveMenuItem", "Save"),
+                    new MenuItem("PlayMenuItem", "Play")
                 }
             };
 
@@ -182,6 +202,7 @@ namespace AppleSceneEditor.UI
 
             _menuBar.FindMenuItemById("OpenMenuItem").Selected += (_, _) => _openFileDialog.ShowModal(Desktop);
             _menuBar.FindMenuItemById("SaveMenuItem").Selected += (_, _) => _saveFileDialog.ShowModal(Desktop);
+            _menuBar.FindMenuItemById("PlayMenuItem").Selected += (_, _) => IsPlaying = true;
 
             _openFileDialog.Closed += OpenFileDialogClosed;
             _saveFileDialog.Closed += SaveFileDialogClosed;
@@ -450,6 +471,19 @@ namespace AppleSceneEditor.UI
             properties.YawDegrees += (previousMouseState.X - mouseState.X) / camera.Sensitivity;
             properties.PitchDegrees += (previousMouseState.Y - mouseState.Y) / camera.Sensitivity;
             camera.RotateFromDegrees(properties.YawDegrees, properties.PitchDegrees);
+        }
+
+        public void UpdateHitboxPlayback(in TimeSpan elapsedTime)
+        {
+            if (!_hitboxData.HasValue || !Visible)
+            {
+                IsPlaying = false;
+                return;
+            }
+            
+            if (!IsPlaying) return;
+
+            _hitboxData?.Update(in elapsedTime);
         }
 
         public void Draw()
