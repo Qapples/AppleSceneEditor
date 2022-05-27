@@ -50,14 +50,7 @@ namespace AppleSceneEditor.UI
             set
             {
                 _isPlaying = value;
-
-                if (_hitboxData.HasValue)
-                {
-                    HitboxData newData = _hitboxData.Value;
-                    newData.Active = value;
-                    
-                    _hitboxData = newData;
-                }
+                _hitboxData.Active = value;
             }
         }
 
@@ -80,12 +73,14 @@ namespace AppleSceneEditor.UI
         private BasicEffect _hitboxEffect;
         private VertexBuffer _vertexBuffer;
         
-        private HitboxData? _hitboxData;
+        private HitboxData _hitboxData;
         
         /// <summary>
         /// Section of space on the entire screen where the hulls are actually drawn.
         /// </summary>
         private Viewport _hitboxDrawSection;
+
+        private bool _isHitboxDataInstantiated;
 
         private const float OpcodesTextBoxProportion = 3f / 4f;
         private const float HullTextBoxProportion = 1f - OpcodesTextBoxProportion;
@@ -137,6 +132,7 @@ namespace AppleSceneEditor.UI
                 RowSpacing = 1,
                 AcceptsKeyboardFocus = true
             };
+            
 
             InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 2.5f));
             //InternalChild.RowsProportions.Add(new Proportion(ProportionType.Part, 3f / 1f));
@@ -474,31 +470,35 @@ namespace AppleSceneEditor.UI
 
         public void UpdateHitboxPlayback(in TimeSpan elapsedTime)
         {
-            if (!_hitboxData.HasValue || !Visible)
+            if (!_isHitboxDataInstantiated || !Visible)
             {
                 IsPlaying = false;
-                return;
+                return; 
             }
-            
+
             if (!IsPlaying) return;
 
-            _hitboxData?.Update(in elapsedTime);
+            _hitboxData.Update(in elapsedTime, true);
+
+            if (!_hitboxData.Active)
+            {
+                IsPlaying = false;
+            }
         }
 
         public void Draw()
         {
-            if (!_hitboxData.HasValue || !Visible) return;
+            if (!_isHitboxDataInstantiated || !Visible) return;
 
             Viewport previousViewport = _graphicsDevice.Viewport;
             
             _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y + MenuBarHeight, InternalChild.GetColumnWidth(0),
                 Bounds.Height - MenuBarHeight);
             _graphicsDevice.Viewport = _hitboxDrawSection;
-
-            HitboxData hitboxData = _hitboxData.Value;
+            
             Matrix identity = Matrix.Identity;
 
-            hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _world.Get<Camera>(),
+            _hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _world.Get<Camera>(),
                 WireframeState, _vertexBuffer);
 
             _graphicsDevice.Viewport = previousViewport;
@@ -565,6 +565,7 @@ namespace AppleSceneEditor.UI
 
             LoadHitboxFile(_openFileDialog.FilePath);
             _hitboxData = new HitboxData(File.ReadAllBytes(_openFileDialog.FilePath), _world.CreateEntity());
+            _isHitboxDataInstantiated = true;
         }
 
         private void SaveFileDialogClosed(object? sender, EventArgs? args)
@@ -576,7 +577,7 @@ namespace AppleSceneEditor.UI
 
             SaveHitboxFileContents(_saveFileDialog.FilePath, _hullsTextBox.Text, _opcodesTextBox.Text);
             _hitboxData = new HitboxData(File.ReadAllBytes(_saveFileDialog.FilePath), _world.CreateEntity());
-
+            _isHitboxDataInstantiated = true;
         }
 
         private bool TryGetCommandFromFunctionName(string funcName, out IKeyCommand command) =>
