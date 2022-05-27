@@ -22,10 +22,20 @@
       }
     },
     {
-      "$type": "CollisionBoxInfo",
-      "centerOffset": "0 0 0",
-      "rotationOffset": "0 0 0",
-      "halfExtent": "0 0 0"
+      "$type": "CollisionHullCollectionInfo",
+      "hullInfos": [
+        {
+          "$type": "SingleHullInfo",
+          "layer": "0000000000000001",
+          "mask": "0000000000000000",
+          "hull": {
+            "$type": "CollisionBoxInfo",
+            "centerOffset": "0 0 0",
+            "rotationOffset": "0 0 0",
+            "halfExtent": "0 0 0"
+          }
+        }
+      ]
     },
     {
       "$type": "ScriptInfo",
