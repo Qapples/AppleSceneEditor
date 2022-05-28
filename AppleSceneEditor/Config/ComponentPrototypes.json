@@ -73,10 +73,13 @@
     },
     {
       "$type": "HitboxInfo",
-      "hitboxFilePath": {
-        "path": "",
-        "isContentPath": true
-      }
+      "hitboxFilePaths": [
+        {
+          "$type": "ContentPath",
+          "path": "",
+          "isContentPath": true
+        }
+      ]
     }
   ]
 }
