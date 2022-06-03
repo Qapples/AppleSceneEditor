@@ -18,8 +18,6 @@ namespace AppleSceneEditor.Factories
     //TODO: Add docs. Not super important but do it at some point.
     public static class ValueEditorFactory
     {
-        private const int MaxTextLength = 25;
-        
         //-----------------
         // PUBLIC METHODS
         //-----------------
@@ -62,7 +60,7 @@ namespace AppleSceneEditor.Factories
 
             textBox.TextChanged += (s, ea) =>
             {
-                if (textBox.Text is null || textBox.Text.Length > MaxTextLength) return;
+                if (textBox.Text is null) return;
 
                 if (changeName) property.Name = textBox.Text;
                 else property.Value = textBox.Text;
@@ -87,7 +85,7 @@ namespace AppleSceneEditor.Factories
 
             textBox.TextChanged += (s, e) =>
             {
-                if (textBox.Text is null || textBox.Text.Length > MaxTextLength) return;
+                if (textBox.Text is null) return;
 
                 name.Name = textBox.Text;
             };
