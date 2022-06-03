@@ -14,6 +14,7 @@
     },
     {
       "$type": "MeshInfo",
+      "effectName": "",
       "meshIndex": 0,
       "skinIndex": 0,
       "meshPath": {
