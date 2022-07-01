@@ -9,6 +9,7 @@
     <ItemGroup>
         <PackageReference Include="DefaultEcs" Version="0.17.2" />
         <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.5" />
+        <PackageReference Include="LiteNetLib" Version="1.0.0-rc.3" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.2000-develop" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
         <PackageReference Include="System.CodeDom" Version="6.0.0-preview.6.21352.12" />
@@ -29,6 +30,9 @@
       </Reference>
       <Reference Include="GrappleFightNET5.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Game\bin\Debug\net5.0\GrappleFightNET5.Components.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFightNET5.Network, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Network\bin\Debug\net5.0\GrappleFightNET5.Network.dll</HintPath>
       </Reference>
       <Reference Include="GrappleFightNET5.Runtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Game\bin\Debug\net5.0\GrappleFightNET5.Runtime.dll</HintPath>
