@@ -68,10 +68,8 @@ namespace AppleSceneEditor.Systems
                     ref var animComponent = ref entity.Get<AnimationComponent>();
                     animComponent.IncrementActives(gameTime.ElapsedGameTime);
 
-                    ReadOnlySpan<ActiveAnimation> inAnimations =
-                        CollectionsMarshal.AsSpan(animComponent.ActiveAnimations);
                     meshData.Draw(in transform.Matrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
-                        in inAnimations, SolidState);
+                        animComponent.ActiveAnimations, ReadOnlySpan<Matrix>.Empty, SolidState);
 
                     //update events if they have one.
                     if (entity.Has<AnimationEvents>())
@@ -90,7 +88,7 @@ namespace AppleSceneEditor.Systems
                 else
                 {
                     meshData.Draw(in transform.Matrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
-                        ReadOnlySpan<ActiveAnimation>.Empty, SolidState);
+                        Array.Empty<ActiveAnimation>(), ReadOnlySpan<Matrix>.Empty, SolidState);
                 }
             }
 
