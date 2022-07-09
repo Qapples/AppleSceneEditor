@@ -40,6 +40,9 @@
        <Reference Include="GrappleFightNET5.Resource Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Game\bin\Debug\net5.0\GrappleFightNET5.Resource.dll</HintPath>
       </Reference>
+       <Reference Include="GrappleFightNET5.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+         <HintPath>..\..\GrappleFightNET5\GrappleFightNET5.Utils\bin\Debug\net5.0\GrappleFightNET5.Utils.dll</HintPath>
+       </Reference>
       <Reference Include="GrappleFightScripts, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\..\GrappleFightBuilder\GrappleFightBuilder\bin\Debug\net5.0\GrappleFightScripts.dll</HintPath>
       </Reference>

@@ -6,6 +6,7 @@ using DefaultEcs.Threading;
 using GrappleFightNET5.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using GrappleFightNET5.Utils;
 
 namespace AppleSceneEditor.Systems
 {
@@ -68,7 +69,7 @@ namespace AppleSceneEditor.Systems
                 _vertexBuffer.SetData(_vertices);
 
                 Matrix finalTransform =
-                    MonogameExtensions.CreateBillboad(camera.LocalPosition + entityTransform.Matrix.Translation,
+                    MonogameExtensions.CreateBillboard(camera.LocalPosition + entityTransform.Matrix.Translation,
                         worldCam.ViewMatrix);
 
                 DrawIcon(ref finalTransform, ref worldCam, _vertexBuffer, _effect);
