@@ -35,6 +35,8 @@ namespace AppleSceneEditor.UI
         private string? _makeChildEntityName;
         private TextButton? _previousChildButton;
 
+        private const string EntityDropDownGridId = "DropDownGrid";
+
         public EntityViewer(string entitiesDirectory, World world, StackPanel buttonStackPanel,
             List<JsonObject> entityJsonObjects, CommandStream commands, Desktop desktop)
         {
@@ -94,17 +96,6 @@ namespace AppleSceneEditor.UI
                 return foundGrid as Grid;
             }
             
-            Grid outGrid = new()
-            {
-                ColumnSpacing = 4,
-                RowSpacing = 4,
-                Id = $"{EntityGridIdPrefix}{id}"
-            };
-
-            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
-            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Fill));
-            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
-            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
             
             TextButton entityButton = new()
             {
@@ -125,6 +116,8 @@ namespace AppleSceneEditor.UI
                     
                 }
             };
+
+            Grid dropDownGrid = MyraExtensions.CreateDropDown(new Panel(), entityButton, EntityDropDownGridId);
 
             HorizontalStackPanel buttonStack = new()
             {
@@ -172,15 +165,14 @@ namespace AppleSceneEditor.UI
 
             buttonStack.AddChild(makeChildButton);
             buttonStack.AddChild(removeButton);
+            
+            dropDownGrid.AddChild(buttonStack);
 
-            outGrid.AddChild(entityButton);
-            outGrid.AddChild(removeButton);
-            outGrid.AddChild(buttonStack);
-
-            EntityButtonStackPanel.AddChild(outGrid);
+            EntityButtonStackPanel.AddChild(dropDownGrid);
 
             alreadyExists = false;
-            return outGrid;
+
+            return dropDownGrid;
         }
 
         public Grid? RemoveEntityButtonGrid(string id)
@@ -275,7 +267,7 @@ namespace AppleSceneEditor.UI
             string id = Path.GetFileNameWithoutExtension(entityPath);
             AddEntity(id, GenerateBlankEntityFile(id));
         }
-        
+
         private static string GenerateBlankEntityFile(string entityId) => $@"{{
     ""components"": [
         {{
