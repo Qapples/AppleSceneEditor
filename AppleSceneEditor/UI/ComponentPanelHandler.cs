@@ -14,6 +14,7 @@ using AppleSerialization.Json;
 using GrappleFightNET5.Resource.Info.Interfaces;
 using GrappleFightNET5.Runtime;
 using Microsoft.Xna.Framework;
+using Myra;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Styles;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
@@ -122,7 +123,7 @@ namespace AppleSceneEditor.UI
                 //a bit of a hack being done here in order to pass in the dropDown grid into the RemoveComponentCommand
                 //constructor despite it not being instantiated
                 Grid dropDown = null!;
-                dropDown = MyraExtensions.CreateDropDown(widgets, GetHeader(jsonObj)!, ComponentGridId,
+                dropDown = CreateDropDown(widgets, GetHeader(jsonObj)!,
                     (_, _) => _commands.AddCommandAndExecute(new RemoveComponentCommand(jsonObj, dropDown)));
                 PropertyStackPanel.AddChild(dropDown);
             }
@@ -198,7 +199,7 @@ namespace AppleSceneEditor.UI
             foreach (JsonArray array in obj.Arrays)
             {
                 VerticalStackPanel arrStackPanel = new();
-                Grid arrDropDown = MyraExtensions.CreateDropDown(arrStackPanel, array.Name!, ComponentGridId);
+                Grid arrDropDown = CreateDropDown(arrStackPanel, array.Name!);
 
                 foreach (JsonObject arrObj in array)
                 {
@@ -206,7 +207,7 @@ namespace AppleSceneEditor.UI
                     if (widgets is null) continue;
 
                     Grid dropDown = null!;
-                    dropDown = MyraExtensions.CreateDropDown(widgets, GetHeader(arrObj)!, ComponentGridId,
+                    dropDown = CreateDropDown(widgets, GetHeader(arrObj)!,
                         (_, _) => commands.AddCommandAndExecute(
                             new RemoveArrayElementCommand(array, arrObj, dropDown)));
 
@@ -263,6 +264,26 @@ namespace AppleSceneEditor.UI
             return null;
         }
 
+        private static Grid CreateDropDown<T>(T widgetsContrainer, string header, EventHandler? onRemoveClick = null) where T : Widget, IMultipleItemsContainer
+        {
+            Label headerLabel = new(null) {Text = header};
+            headerLabel.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
+           
+            Grid dropDownGrid = MyraExtensions.CreateDropDown(widgetsContrainer, headerLabel, ComponentGridId);
+            
+            TextButton removeButton = new()
+            {
+                Text = "-",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                GridColumn = 1
+            };
+
+            removeButton.Click += onRemoveClick;
+            dropDownGrid.AddChild(removeButton);
+
+            return dropDownGrid;
+        }
+
         private static HorizontalStackPanel GenerateLabelAndEditor(string? label, Widget? editor) => new()
         {
             Widgets =
@@ -297,7 +318,7 @@ namespace AppleSceneEditor.UI
                 if (widgets is null) return;
 
                 Grid dropDown = null!;
-                dropDown = MyraExtensions.CreateDropDown(widgets, GetHeader(newObj)!, ComponentGridId,
+                dropDown = CreateDropDown(widgets, GetHeader(newObj)!,
                     (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, newObj, dropDown)));
 
                 commands.AddCommandAndExecute(new AddArrayElementCommand(array, arrayWidgets, newObj, dropDown));
