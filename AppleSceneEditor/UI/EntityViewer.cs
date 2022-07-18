@@ -33,6 +33,7 @@ namespace AppleSceneEditor.UI
         private bool _disposed;
 
         private string? _makeChildEntityName;
+        private TextButton? _previousChildButton;
 
         public EntityViewer(string entitiesDirectory, World world, StackPanel buttonStackPanel,
             List<JsonObject> entityJsonObjects, CommandStream commands, Desktop desktop)
@@ -136,12 +137,32 @@ namespace AppleSceneEditor.UI
             {
                 Text = "-",
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Padding = new Thickness(3, 0)
+                Padding = new Thickness(3, 0),
             };
 
             removeButton.Click += (_, _) => RemoveEntity(id);
-            makeChildButton.Click += (_, _) => _makeChildEntityName = id;
-    
+            makeChildButton.Click += (_, _) =>
+            {
+                if (_makeChildEntityName == id)
+                {
+                    _makeChildEntityName = null;
+                    makeChildButton.IsPressed = false;
+                    _previousChildButton = null;
+                }
+                else
+                {
+                    _makeChildEntityName = id;
+                    makeChildButton.IsPressed = true;
+
+                    if (_previousChildButton is not null)
+                    {
+                        _previousChildButton.IsPressed = false;
+                    }
+                    
+                    _previousChildButton = makeChildButton;
+                }
+            };
+
             buttonStack.AddChild(makeChildButton);
             buttonStack.AddChild(removeButton);
 
