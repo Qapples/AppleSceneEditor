@@ -55,8 +55,8 @@ namespace AppleSceneEditor.Systems
             //get the camera from the world. The camera can be apart of any entity, but there should be only one
             //camera per world.
             ref var worldCam = ref World.Get<Camera>();
-            ref var transform = ref entity.Get<Transform>();
-
+            Matrix entityWorldMatrix = entity.GetWorldMatrix();
+ 
             if (entity.Has<MeshData>())
             {
                 var meshData = entity.Get<MeshData>();
@@ -68,7 +68,7 @@ namespace AppleSceneEditor.Systems
                     ref var animComponent = ref entity.Get<AnimationComponent>();
                     animComponent.IncrementActives(gameTime.ElapsedGameTime);
 
-                    meshData.Draw(in transform.Matrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
+                    meshData.Draw(in entityWorldMatrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
                         animComponent.ActiveAnimations, ReadOnlySpan<Matrix>.Empty, SolidState);
 
                     //update events if they have one.
@@ -87,7 +87,7 @@ namespace AppleSceneEditor.Systems
                 }
                 else
                 {
-                    meshData.Draw(in transform.Matrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
+                    meshData.Draw(in entityWorldMatrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
                         Array.Empty<ActiveAnimation>(), ReadOnlySpan<Matrix>.Empty, SolidState);
                 }
             }
@@ -96,7 +96,7 @@ namespace AppleSceneEditor.Systems
             {
                 ref var hulls = ref entity.Get<CollisionHullCollection>();
                 
-                transform.Matrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
+                entityWorldMatrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
 
                 for (int layer = 0; layer < CollisionHullPools.LayerCount; layer++)
                 {

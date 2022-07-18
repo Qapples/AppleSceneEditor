@@ -56,7 +56,7 @@ namespace AppleSceneEditor.Systems
 
             if (selectedEntity.Has<Transform>())
             {
-                ref var selectedTransform = ref selectedEntity.Get<Transform>();
+                Matrix selectedTransform = selectedEntity.GetWorldMatrix();
 
                 IAxis? currentAxis = axisType switch
                 {

@@ -23,7 +23,7 @@ namespace AppleSceneEditor.Systems.Axis
 
         private int _axisSelectedFlag;
 
-        private Transform _previousTransform;
+        private Matrix _previousTransform;
         private MouseState _previousMouseState;
 
         public MoveAxis(World world, GraphicsDevice graphicsDevice)
@@ -46,9 +46,9 @@ namespace AppleSceneEditor.Systems.Axis
         }
         
 
-        public void Draw(Effect effect, VertexBuffer buffer, ref Transform transform, ref Camera worldCam)
+        public void Draw(Effect effect, VertexBuffer buffer, ref Matrix transform, ref Camera worldCam)
         {
-            transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+            transform.Decompose(out _, out Quaternion rotation, out Vector3 position);
 
             //we can save a few matrix copies by getting the view matrix here.
             //none of the boxes here have any valuable offset so we only need one world matrix
@@ -64,13 +64,13 @@ namespace AppleSceneEditor.Systems.Axis
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,
             Entity selectedEntity)
         {
-            ref var transform = ref selectedEntity.Get<Transform>();
+            Matrix entityWorldMatrix = selectedEntity.GetWorldMatrix();
 
             if (isRayFired && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
 
-                transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+                entityWorldMatrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
                 
                 //the axis boxes do NOT have offsets.
                 int xHit = worldCam.FireRayHit(ref _xAxisBox, ref position, ref rotation, ref viewport) ? 1 : 0;
@@ -82,12 +82,12 @@ namespace AppleSceneEditor.Systems.Axis
                 if (xHit + yHit + zHit == 1)
                 {
                     _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
-                    _previousTransform = transform;
+                    _previousTransform = entityWorldMatrix;
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
-                transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+                entityWorldMatrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
                 
                 int movementValue = mouseState.Y - _previousMouseState.Y;
 
@@ -99,13 +99,15 @@ namespace AppleSceneEditor.Systems.Axis
                     _ => Vector3.Zero
                 };
 
+                //doesnt matter if we apply the translation matrix in world space or in local space.
+                ref var transform = ref selectedEntity.Get<Transform>();
                 transform.Matrix *= Matrix.CreateTranslation(movementVector * 0.25f);
             }
             else if (mouseState.LeftButton == ButtonState.Released && _axisSelectedFlag > 0)
             {
                 _axisSelectedFlag = 0;
 
-                return new ChangeTransformCommand(selectedEntity, _previousTransform, transform);
+                return new ChangeTransformCommand(selectedEntity, _previousTransform, entityWorldMatrix);
             }
 
             _previousMouseState = mouseState;

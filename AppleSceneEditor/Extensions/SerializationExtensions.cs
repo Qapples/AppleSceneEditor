@@ -11,7 +11,7 @@ namespace AppleSceneEditor.Extensions
     //TODO: Add docs
     public static class SerializationExtensions
     {
-        public static void UpdateTransform(this JsonObject obj, Transform transform)
+        public static void UpdateTransform(this JsonObject obj, Matrix transform)
         {
 #if DEBUG
             const string methodName = nameof(SerializationExtensions) + "." + nameof(UpdateTransform);
@@ -47,7 +47,7 @@ namespace AppleSceneEditor.Extensions
                 throw new Exception("Transform property is missing.");
             }
 
-            transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+            transform.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
 
             /*
              * TODO: Getting euler angles from quaternions may lead to some ugly results.
@@ -58,7 +58,6 @@ namespace AppleSceneEditor.Extensions
             positionProp.Value = ToSpacedStr(translation);
             scaleProp.Value = ToSpacedStr(scale);
             rotationProp.Value = ToSpacedStr(GetEulerAnglesFromQuaternion(rotation, false));
-            velocityProp.Value = ToSpacedStr(transform.Velocity);
         }
 
         public static JsonObject? FindJsonObjectById(this IEnumerable<JsonObject> enumerable, string id) =>

@@ -1,5 +1,6 @@
 using DefaultEcs;
 using GrappleFightNET5.Components;
+using Microsoft.Xna.Framework;
 
 namespace AppleSceneEditor.ComponentFlags
 {
@@ -9,10 +10,10 @@ namespace AppleSceneEditor.ComponentFlags
         
         public readonly Entity ChangedEntity;
 
-        public readonly Transform CurrentTransform => ChangedEntity.Get<Transform>();
-        public readonly Transform PreviousTransform;
+        public readonly Matrix CurrentTransform => ChangedEntity.GetWorldMatrix();
+        public readonly Matrix PreviousTransform;
 
-        public EntityTransformChangedFlag(Entity changedEntity, Transform previousTransform) =>
+        public EntityTransformChangedFlag(Entity changedEntity, Matrix previousTransform) =>
             (ChangedEntity, PreviousTransform) = (changedEntity, previousTransform);
     }
 }

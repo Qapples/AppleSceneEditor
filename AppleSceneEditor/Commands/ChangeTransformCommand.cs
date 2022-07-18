@@ -13,12 +13,12 @@ namespace AppleSceneEditor.Commands
 
         private readonly Entity _entity;
         private Vector3 _entityBoxExtent;
-        private Transform _oldTransform;
-        private Transform _newTransform;
+        private Matrix _oldTransform;
+        private Matrix _newTransform;
 
         private readonly bool _scaleComplexBox;
 
-        public ChangeTransformCommand(Entity entity, Transform oldTransform, Transform newTransform,
+        public ChangeTransformCommand(Entity entity, Matrix oldTransform, Matrix newTransform,
             bool scaleComplexBox = false)
         {
             (_entity, _oldTransform, _newTransform, Disposed) = (entity, oldTransform, newTransform, false);
@@ -42,15 +42,15 @@ namespace AppleSceneEditor.Commands
 
         public void Redo() => Execute();
 
-        private void MoveEntity(ref Transform newTransform)
+        private void MoveEntity(ref Matrix newTransform)
         {
-            _entity.Set(newTransform);
+            _entity.SetWorldMatrix(newTransform);
 
             if (_scaleComplexBox && _entity.Has<ComplexBox>())
             {
                ref var box = ref _entity.Get<ComplexBox>();
 
-               if (newTransform.Matrix.Decompose(out Vector3 newScale, out _, out _))
+               if (newTransform.Decompose(out Vector3 newScale, out _, out _))
                {
                    box.HalfExtent = _entityBoxExtent * newScale;
                }

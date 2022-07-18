@@ -55,9 +55,7 @@ namespace AppleSceneEditor.Systems
         protected override void Update(GameTime state, in Entity entity)
         {
             ref var worldCam = ref World.Get<Camera>();
-            ref var worldCamProp = ref World.Get<CameraProperties>();
-            ref var entityTransform = ref entity.Get<Transform>();
-            
+
             if (entity.Has<Camera>())
             {
                 ref var camera = ref entity.Get<Camera>();
@@ -69,7 +67,7 @@ namespace AppleSceneEditor.Systems
                 _vertexBuffer.SetData(_vertices);
 
                 Matrix finalTransform =
-                    MonogameExtensions.CreateBillboard(camera.LocalPosition + entityTransform.Matrix.Translation,
+                    MonogameExtensions.CreateBillboard(camera.LocalPosition + entity.GetWorldMatrix().Translation,
                         worldCam.ViewMatrix);
 
                 DrawIcon(ref finalTransform, ref worldCam, _vertexBuffer, _effect);

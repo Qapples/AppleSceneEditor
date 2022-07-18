@@ -25,7 +25,7 @@ namespace AppleSceneEditor.Systems.Axis
 
         private int _axisSelectedFlag;
 
-        private Transform _previousTransform;
+        private Matrix _previousTransform;
         private MouseState _previousMouseState;
 
         private Vector3 _entityBoxExtent;
@@ -66,12 +66,12 @@ namespace AppleSceneEditor.Systems.Axis
             };
         }
 
-        public void Draw(Effect effect, VertexBuffer buffer, ref Transform transform, ref Camera worldCam)
+        public void Draw(Effect effect, VertexBuffer buffer, ref Matrix transform, ref Camera worldCam)
         {
             //draw the lines to the boxes
             buffer.SetData(_axisLines);
 
-            transform.Matrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
+            transform.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
             Matrix posMatrix = Matrix.CreateTranslation(position);
 
             if (effect is IEffectMatrices matrices)
@@ -107,15 +107,14 @@ namespace AppleSceneEditor.Systems.Axis
         public IEditorCommand? HandleInput(ref MouseState mouseState, ref Camera worldCam, bool isRayFired,
             Entity selectedEntity)
         {
-            ref var transform = ref selectedEntity.Get<Transform>();
-
+            Matrix entityWorldMatrix = selectedEntity.GetWorldMatrix();
             bool hasBox = selectedEntity.Has<ComplexBox>();
 
             if (isRayFired && _axisSelectedFlag == 0)
             {
                 Viewport viewport = GraphicsDevice.Viewport;
 
-                transform.Matrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
+                entityWorldMatrix.Decompose(out _, out Quaternion rotation, out Vector3 position);
                 
                 Matrix posMatrix = Matrix.CreateTranslation(position);
    
@@ -132,14 +131,14 @@ namespace AppleSceneEditor.Systems.Axis
                 if (xHit + yHit + zHit == 1)
                 {
                     _axisSelectedFlag = (xHit) + (yHit * 2) + (zHit * 3);
-                    _previousTransform = transform;
+                    _previousTransform = entityWorldMatrix;
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Pressed && _axisSelectedFlag > 0)
             {
                 float movementValue = (mouseState.Y - _previousMouseState.Y) * 0.035f;
                 
-                transform.Matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+                entityWorldMatrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
                 
                 Vector3 scaleAxis = _axisSelectedFlag switch
                 {
@@ -152,10 +151,10 @@ namespace AppleSceneEditor.Systems.Axis
                 Vector3 newScale = scale + scaleAxis;
 
                 //reconstruct the matrix
-                transform.Matrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
-                                   Matrix.CreateScale(newScale) *
-                                   Matrix.CreateFromQuaternion(rotation) *
-                                   Matrix.CreateTranslation(position);
+                selectedEntity.SetWorldMatrix(Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up) *
+                                              Matrix.CreateScale(newScale) *
+                                              Matrix.CreateFromQuaternion(rotation) *
+                                              Matrix.CreateTranslation(position));
 
                 //we are changing the box extent here so that the user can see the changes in real time.
                 //ChangeTransformCommand is responsible for actually changing it, as it can be undo/redone.
@@ -184,7 +183,7 @@ namespace AppleSceneEditor.Systems.Axis
                 
                 _entityBoxExtent = Vector3.Zero;
 
-                return new ChangeTransformCommand(selectedEntity, _previousTransform, transform, true);
+                return new ChangeTransformCommand(selectedEntity, _previousTransform, entityWorldMatrix, true);
             }
 
             _previousMouseState = mouseState;
