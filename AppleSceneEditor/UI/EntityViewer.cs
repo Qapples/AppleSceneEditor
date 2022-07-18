@@ -9,6 +9,7 @@ using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using DefaultEcs;
 using GrappleFightNET5.Resource.Info;
+using Myra.Graphics2D;
 using Myra.Graphics2D.UI;
 
 namespace AppleSceneEditor.UI
@@ -30,6 +31,8 @@ namespace AppleSceneEditor.UI
         private Window _addEntityWindow;
         private EntityMap<string> _entityIdMap;
         private bool _disposed;
+
+        private string? _makeChildEntityName;
 
         public EntityViewer(string entitiesDirectory, World world, StackPanel buttonStackPanel,
             List<JsonObject> entityJsonObjects, CommandStream commands, Desktop desktop)
@@ -115,17 +118,36 @@ namespace AppleSceneEditor.UI
                 World.Set(new SelectedEntityFlag(entity));
             };
 
+            HorizontalStackPanel buttonStack = new()
+            {
+                HorizontalAlignment = HorizontalAlignment.Right,
+                GridColumn = 1,
+                Spacing = 10
+            };
+            
+            TextButton makeChildButton = new()
+            {
+                Text = "Child",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Padding = new Thickness(3, 0)
+            };
+
             TextButton removeButton = new()
             {
                 Text = "-",
                 HorizontalAlignment = HorizontalAlignment.Right,
-                GridColumn = 1
+                Padding = new Thickness(3, 0)
             };
 
             removeButton.Click += (_, _) => RemoveEntity(id);
+            makeChildButton.Click += (_, _) => _makeChildEntityName = id;
+    
+            buttonStack.AddChild(makeChildButton);
+            buttonStack.AddChild(removeButton);
 
             outGrid.AddChild(entityButton);
             outGrid.AddChild(removeButton);
+            outGrid.AddChild(buttonStack);
 
             EntityButtonStackPanel.AddChild(outGrid);
 
