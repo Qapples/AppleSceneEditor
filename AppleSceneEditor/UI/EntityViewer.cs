@@ -113,10 +113,17 @@ namespace AppleSceneEditor.UI
                 HorizontalAlignment = HorizontalAlignment.Left
             };
             
-            entityButton.TouchDown += (_, _) =>
+            entityButton.Click += (_, _) =>
             {
-                GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
-                World.Set(new SelectedEntityFlag(entity));
+                if (_makeChildEntityName is null)
+                {
+                    GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
+                    World.Set(new SelectedEntityFlag(entity));
+                }
+                else
+                {
+                    
+                }
             };
 
             HorizontalStackPanel buttonStack = new()

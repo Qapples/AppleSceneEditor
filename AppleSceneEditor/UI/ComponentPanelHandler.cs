@@ -122,78 +122,10 @@ namespace AppleSceneEditor.UI
                 //a bit of a hack being done here in order to pass in the dropDown grid into the RemoveComponentCommand
                 //constructor despite it not being instantiated
                 Grid dropDown = null!;
-                dropDown = CreateDropDown(widgets, GetHeader(jsonObj)!,
+                dropDown = MyraExtensions.CreateDropDown(widgets, GetHeader(jsonObj)!, ComponentGridId,
                     (_, _) => _commands.AddCommandAndExecute(new RemoveComponentCommand(jsonObj, dropDown)));
                 PropertyStackPanel.AddChild(dropDown);
             }
-        }
-
-        private static Grid CreateDropDown<T>(T widgetsContainer, string header, EventHandler? onRemoveClick = null)
-            where T : Widget, IMultipleItemsContainer
-        {
-            widgetsContainer.GridRow = 1;
-            widgetsContainer.GridColumn = 1;
-
-            Grid outGrid = new()
-            {
-                ColumnSpacing = 4,
-                RowSpacing = 4,
-                Id = ComponentGridId
-            };
-            
-            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
-            outGrid.ColumnsProportions.Add(new Proportion(ProportionType.Fill));
-            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
-            outGrid.RowsProportions.Add(new Proportion(ProportionType.Auto));
-            
-            ImageButton mark = new(null)
-            {
-                Toggleable = true,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            
-            mark.PressedChanged += (_, _) =>
-            {
-                if (mark.IsPressed)
-                {
-                    outGrid.AddChild(widgetsContainer);
-                }
-                else
-                {
-                    outGrid.RemoveChild(widgetsContainer);
-                }
-            };
-            
-            mark.ApplyImageButtonStyle(Stylesheet.Current.TreeStyle.MarkStyle);
-            outGrid.AddChild(mark);
-
-            Label label = new(null)
-            {
-                Text = header,
-                GridColumn = 1
-            };
-            
-            label.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
-            outGrid.AddChild(label);
-
-            if (onRemoveClick is null)
-            {
-                return outGrid;
-            }
-
-            //only add the remove button if a onRemoveClick is specified
-            TextButton removeButton = new()
-            {
-                Text = "-",
-                HorizontalAlignment = HorizontalAlignment.Right,
-                GridColumn = 1
-            };
-
-            removeButton.Click += onRemoveClick;
-            outGrid.AddChild(removeButton);
-
-            return outGrid;
         }
 
         private static Panel? CreateComponentWidgets(JsonObject obj, CommandStream commands, Type? objectType = null)
@@ -262,28 +194,29 @@ namespace AppleSceneEditor.UI
 
             if (hasArray && (hasChild || hasProp)) stackPanel.AddChild(new Label());
 
-             //arrays to stack panel
-             foreach (JsonArray array in obj.Arrays)
-             {
-                 VerticalStackPanel arrStackPanel = new();
-                 Grid arrDropDown = CreateDropDown(arrStackPanel, array.Name!);
+            //arrays to stack panel
+            foreach (JsonArray array in obj.Arrays)
+            {
+                VerticalStackPanel arrStackPanel = new();
+                Grid arrDropDown = MyraExtensions.CreateDropDown(arrStackPanel, array.Name!, ComponentGridId);
 
-                 foreach (JsonObject arrObj in array)
-                 {
-                     Panel? widgets = CreateComponentWidgets(arrObj, commands);
-                     if (widgets is null) continue;
-                     
-                     Grid dropDown = null!;
-                     dropDown = CreateDropDown(widgets, GetHeader(arrObj)!,
-                         (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, arrObj, dropDown)));
+                foreach (JsonObject arrObj in array)
+                {
+                    Panel? widgets = CreateComponentWidgets(arrObj, commands);
+                    if (widgets is null) continue;
 
-                     arrStackPanel.AddChild(dropDown);
-                 }
+                    Grid dropDown = null!;
+                    dropDown = MyraExtensions.CreateDropDown(widgets, GetHeader(arrObj)!, ComponentGridId,
+                        (_, _) => commands.AddCommandAndExecute(
+                            new RemoveArrayElementCommand(array, arrObj, dropDown)));
 
-                 arrStackPanel.AddChild(CreateAddArrayElementButton(array, arrStackPanel, commands));
-                 stackPanel.AddChild(arrDropDown);
-             }
-            
+                    arrStackPanel.AddChild(dropDown);
+                }
+
+                arrStackPanel.AddChild(CreateAddArrayElementButton(array, arrStackPanel, commands));
+                stackPanel.AddChild(arrDropDown);
+            }
+
             return new Panel {Widgets = {stackPanel}};
         }
 
@@ -364,7 +297,7 @@ namespace AppleSceneEditor.UI
                 if (widgets is null) return;
 
                 Grid dropDown = null!;
-                dropDown = CreateDropDown(widgets, GetHeader(newObj)!,
+                dropDown = MyraExtensions.CreateDropDown(widgets, GetHeader(newObj)!, ComponentGridId,
                     (_, _) => commands.AddCommandAndExecute(new RemoveArrayElementCommand(array, newObj, dropDown)));
 
                 commands.AddCommandAndExecute(new AddArrayElementCommand(array, arrayWidgets, newObj, dropDown));
@@ -372,7 +305,7 @@ namespace AppleSceneEditor.UI
 
             return outButton;
         }
-        
+
         private static string? GetHeader(JsonObject obj) => string.IsNullOrWhiteSpace(obj.Name)
             ? obj.FindProperty("$type")?.Value as string
             : obj.Name;
