@@ -22,6 +22,7 @@ namespace AppleSceneEditor.UI
         
         public const string EntityDropDownGridId = "DropDownGrid";
         public const string WidgetStackPanelName = "WidgetStackPanel";
+        public const string EntityButtonName = "EntityBytton";
 
         public string EntitiesDirectory { get; private set; }
                 
@@ -101,7 +102,7 @@ namespace AppleSceneEditor.UI
             TextButton entityButton = new()
             {
                 Text = id, 
-                Id = $"{EntityButtonIdPrefix}{id}",
+                Id = EntityButtonName,
                 HorizontalAlignment = HorizontalAlignment.Left
             };
             
@@ -118,7 +119,7 @@ namespace AppleSceneEditor.UI
             };
 
             Grid dropDownGrid = MyraExtensions.CreateDropDown(new VerticalStackPanel {Id = WidgetStackPanelName},
-                entityButton, EntityDropDownGridId);
+                entityButton, $"{EntityGridIdPrefix}{id}");
 
             HorizontalStackPanel buttonStack = new()
             {
@@ -178,6 +179,11 @@ namespace AppleSceneEditor.UI
 
         public Grid? RemoveEntityButtonGrid(string id)
         {
+            foreach (Widget widgetEnum in EntityButtonStackPanel.Widgets)
+            {
+                Debug.WriteLine(widgetEnum.Id);
+            }
+            
             Widget? widget = EntityButtonStackPanel.FindWidgetById($"{EntityGridIdPrefix}{id}");
             widget?.RemoveFromParent();
 
