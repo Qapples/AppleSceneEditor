@@ -11,3 +11,4 @@ CameraInfo "GrappleFightNET5.Resource.Info.CameraInfo, GrappleFightNET5.Resource
 CollisionHullCollectionInfo "GrappleFightNET5.Resource.Info.CollisionHullCollectionInfo, GrappleFightNET5.Resource"
 SingleHullInfo "GrappleFightNET5.Resource.Info.SingleHullInfo, GrappleFightNET5.Resource"
 HitboxInfo "GrappleFightNET5.Resource.Info.HitboxInfo, GrappleFightNET5.Resource"
+ParentInfo "GrappleFightNET5.Resource.Info.ParentInfo, GrappleFightNET5.Resource"

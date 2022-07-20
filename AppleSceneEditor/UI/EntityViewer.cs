@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
@@ -18,6 +19,9 @@ namespace AppleSceneEditor.UI
     {
         public const string EntityButtonIdPrefix = "EntityButton_";
         public const string EntityGridIdPrefix = "EntityGrid_";
+        
+        public const string EntityDropDownGridId = "DropDownGrid";
+        public const string WidgetStackPanelName = "WidgetStackPanel";
 
         public string EntitiesDirectory { get; private set; }
                 
@@ -34,8 +38,6 @@ namespace AppleSceneEditor.UI
 
         private string? _makeChildEntityName;
         private TextButton? _previousChildButton;
-
-        private const string EntityDropDownGridId = "DropDownGrid";
 
         public EntityViewer(string entitiesDirectory, World world, StackPanel buttonStackPanel,
             List<JsonObject> entityJsonObjects, CommandStream commands, Desktop desktop)
@@ -80,8 +82,8 @@ namespace AppleSceneEditor.UI
             
             World.Remove<RemovedEntityFlag>();
         }
-        
-        public Grid? CreateEntityButtonGrid(string id, Entity entity, out bool alreadyExists)
+
+        public Grid CreateEntityButtonGrid(string id, Entity entity, out bool alreadyExists)
         {
 #if DEBUG
             const string methodName = nameof(EntityViewer) + "." + nameof(CreateEntityButtonGrid);
@@ -93,10 +95,9 @@ namespace AppleSceneEditor.UI
             {
                 Debug.WriteLine($"{methodName}: entity with id {id} already exists within the stack panel.");
                 alreadyExists = true;
-                return foundGrid as Grid;
+                return (Grid) foundGrid;
             }
-            
-            
+
             TextButton entityButton = new()
             {
                 Text = id, 
@@ -113,11 +114,11 @@ namespace AppleSceneEditor.UI
                 }
                 else
                 {
-                    
                 }
             };
 
-            Grid dropDownGrid = MyraExtensions.CreateDropDown(new Panel(), entityButton, EntityDropDownGridId);
+            Grid dropDownGrid = MyraExtensions.CreateDropDown(new VerticalStackPanel {Id = WidgetStackPanelName},
+                entityButton, EntityDropDownGridId);
 
             HorizontalStackPanel buttonStack = new()
             {
@@ -194,6 +195,9 @@ namespace AppleSceneEditor.UI
             EntityButtonStackPanel.Widgets.Clear();
             EntityButtonStackPanel.AddChild(new Label {Text = "Holder"});
 
+            Dictionary<string, Grid> idButtonGridDict = new();
+            Dictionary<string, string> parentDict = new();
+
             foreach (string entityPath in Directory.GetFiles(entitiesDirectory)
                 .Where(f => Path.GetExtension(f) == ".entity"))
             {
@@ -201,9 +205,46 @@ namespace AppleSceneEditor.UI
 
                 if (_entityIdMap.ContainsKey(id))
                 {
-                   CreateEntityButtonGrid(id, _entityIdMap[id], out _);
+                    idButtonGridDict[id] = CreateEntityButtonGrid(id, _entityIdMap[id], out _);
+
+                    string? parentId = GetParentIdFromEntityContents(File.ReadAllText(entityPath));
+                    if (parentId is not null)
+                    {
+                        parentDict[id] = parentId;
+                    }
                 }
             }
+
+            foreach (var (id, parentId) in parentDict)
+            {
+                VerticalStackPanel? parentWidgetContainer = idButtonGridDict[parentId]
+                    .TryFindWidgetById<VerticalStackPanel>(WidgetStackPanelName);
+                if (parentWidgetContainer is null) continue;
+
+                Grid buttonGrid = idButtonGridDict[id];
+                buttonGrid.RemoveFromParent();
+                parentWidgetContainer.Widgets.Add(buttonGrid);
+            }
+        }
+
+        //TODO: WARNING! If ParentInfo is modified (i.e. "parentID" is renamed to "parentName") then this regex will stop working!!!!
+        private static readonly Regex GetParentIdRegex =
+            new($@"""\$type"":\W*""{nameof(ParentInfo)}"",$\W*""parentId"":\W*""(.+)""", RegexOptions.Multiline);
+
+        //see above comment on GetParentIdRegex
+        private string? GetParentIdFromEntityContents(string entityContents)
+        {
+#if DEBUG
+            const string methodName = nameof(EntityViewer) + "." + nameof(GetParentIdFromEntityContents);
+#endif
+            MatchCollection matches = GetParentIdRegex.Matches(entityContents);
+
+            if (matches.Count > 1)
+            {
+                Debug.WriteLine($"{methodName} (WARNING): one more match for parentId is found!");
+            }
+
+            return matches.Count == 0 ? null : matches[0].Groups[1].Value;
         }
 
         private void InitAddEntityButtonEvent(Desktop desktop)

@@ -147,6 +147,7 @@ namespace AppleSceneEditor
             AddExternalType(typeof(SingleHullInfo));
             AddExternalType(typeof(HitboxInfo));
             AddExternalType(typeof(ContentPath));
+            AddExternalType(typeof(ParentInfo));
 
             string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
             Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
@@ -565,7 +566,7 @@ namespace AppleSceneEditor
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-
+            
             _desktop.Render();
             
             _hitboxEditor.Draw();
@@ -606,7 +607,7 @@ namespace AppleSceneEditor
             }
 
             GraphicsDevice.Viewport = _overallViewport;
-            
+
             base.Draw(gameTime);
         }
         

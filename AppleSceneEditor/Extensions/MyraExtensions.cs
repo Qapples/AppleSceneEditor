@@ -59,23 +59,16 @@ namespace AppleSceneEditor.Extensions
                 VerticalAlignment = VerticalAlignment.Center
             };
 
-            mark.PressedChanged += (_, _) =>
-            {
-                if (mark.IsPressed)
-                {
-                    outGrid.AddChild(widgetsContainer);
-                }
-                else
-                {
-                    outGrid.RemoveChild(widgetsContainer);
-                }
-            };
+            mark.PressedChanged += (_, _) => widgetsContainer.Visible = mark.IsPressed;
 
             mark.ApplyImageButtonStyle(Stylesheet.Current.TreeStyle.MarkStyle);
             outGrid.AddChild(mark);
 
             header.GridColumn = 1;
             outGrid.AddChild(header);
+
+            widgetsContainer.Visible = false;
+            outGrid.AddChild(widgetsContainer);
 
             return outGrid;
         }
