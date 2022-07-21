@@ -17,9 +17,8 @@ namespace AppleSceneEditor.UI
 {
     public class EntityViewer : IDisposable
     {
-        public const string EntityButtonIdPrefix = "EntityButton_";
         public const string EntityGridIdPrefix = "EntityGrid_";
-        
+
         public const string EntityDropDownGridId = "DropDownGrid";
         public const string WidgetStackPanelName = "WidgetStackPanel";
         public const string EntityButtonName = "EntityBytton";
@@ -115,6 +114,13 @@ namespace AppleSceneEditor.UI
                 }
                 else
                 {
+                    JsonObject? childJsonObject = EntityJsonObjects.FindJsonObjectById(_makeChildEntityName);
+
+                    if (childJsonObject is not null)
+                    {
+                        _commands.AddCommandAndExecute(new AssignParentToEntityCommand(entity.Get<string>(),
+                            _makeChildEntityName, childJsonObject, this));
+                    }
                 }
             };
 
@@ -179,11 +185,6 @@ namespace AppleSceneEditor.UI
 
         public Grid? RemoveEntityButtonGrid(string id)
         {
-            foreach (Widget widgetEnum in EntityButtonStackPanel.Widgets)
-            {
-                Debug.WriteLine(widgetEnum.Id);
-            }
-            
             Widget? widget = EntityButtonStackPanel.FindWidgetById($"{EntityGridIdPrefix}{id}");
             widget?.RemoveFromParent();
 
