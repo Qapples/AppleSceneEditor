@@ -107,6 +107,12 @@ namespace AppleSceneEditor.UI
             
             entityButton.Click += (_, _) =>
             {
+                if (_makeChildEntityName == id)
+                {
+                    _makeChildEntityName = null;
+                    return;
+                }
+                
                 if (_makeChildEntityName is null)
                 {
                     GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
@@ -122,6 +128,8 @@ namespace AppleSceneEditor.UI
                             _makeChildEntityName, childJsonObject, this));
                     }
                 }
+
+                _makeChildEntityName = null;
             };
 
             Grid dropDownGrid = MyraExtensions.CreateDropDown(new VerticalStackPanel {Id = WidgetStackPanelName},
