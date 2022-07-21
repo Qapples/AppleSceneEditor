@@ -179,6 +179,16 @@ namespace AppleSceneEditor.UI
                 }
             };
 
+            entityButton.Click += (_, _) =>
+            {
+                makeChildButton.IsPressed = false;
+
+                if (_previousChildButton is not null)
+                {
+                    _previousChildButton.IsPressed = false;
+                }
+            };
+
             buttonStack.AddChild(makeChildButton);
             buttonStack.AddChild(removeButton);
             
