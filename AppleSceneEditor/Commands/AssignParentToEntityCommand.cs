@@ -41,7 +41,7 @@ namespace AppleSceneEditor.Commands
             ChildId = childId;
             ChildJsonObject = childJsonObject;
             _entityViewer = entityViewer;
-            
+
             JsonArray? childComponentsJson = ChildJsonObject.FindArray("components");
             if (childComponentsJson is null)
             {
@@ -50,14 +50,14 @@ namespace AppleSceneEditor.Commands
 
             JsonObject? parentJsonObject = (from component in childComponentsJson.Objects
                 where component.FindProperty("$type").Value as string == nameof(ParentInfo)
-                select component).FirstOrDefault(); 
+                select component).FirstOrDefault();
             _childJsonObjectHasParentComponent = parentJsonObject is not null;
 
             _parentJsonObject = parentJsonObject ?? new JsonObject(null, ChildJsonObject);
             _parentNameProp = _parentJsonObject.FindProperty("parentId") ??
-                              new JsonProperty("$type", parentId, _parentJsonObject, JsonValueKind.String);
+                              new JsonProperty("parentId", parentId, _parentJsonObject, JsonValueKind.String);
             _previousParentName = _parentJsonObject.FindProperty("parentId")?.Value as string;
-            
+
             _parentStackPanel = _entityViewer.EntityButtonStackPanel
                 .TryFindWidgetById<Grid>($"{EntityViewer.EntityGridIdPrefix}{ParentId}")
                 ?.TryFindWidgetById<VerticalStackPanel>(EntityViewer.WidgetStackPanelName);
@@ -65,6 +65,13 @@ namespace AppleSceneEditor.Commands
                 _entityViewer.EntityButtonStackPanel.TryFindWidgetById<Grid>(
                     $"{EntityViewer.EntityGridIdPrefix}{ChildId}");
             _childStackPanel = _childGrid?.Parent.Parent as VerticalStackPanel; //i have no clue why is it two parents.
+
+            if (!_childJsonObjectHasParentComponent)
+            {
+                _parentJsonObject.Properties.Add(new JsonProperty("$type", nameof(ParentInfo), _parentJsonObject,
+                    JsonValueKind.String));
+                _parentJsonObject.Properties.Add(_parentNameProp);
+            }
         }
 
 
