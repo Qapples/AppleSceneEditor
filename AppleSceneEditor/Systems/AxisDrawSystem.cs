@@ -3,7 +3,7 @@ using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Systems.Axis;
 using DefaultEcs;
 using DefaultEcs.System;
-using GrappleFightNET5.Components;
+using GrappleFight.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

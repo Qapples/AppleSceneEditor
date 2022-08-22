@@ -1,6 +1,6 @@
 using AppleSceneEditor.Commands;
 using DefaultEcs;
-using GrappleFightNET5.Components;
+using GrappleFight.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

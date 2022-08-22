@@ -5,8 +5,8 @@ using AppleSceneEditor.Extensions;
 using AppleSceneEditor.UI;
 using AppleSerialization.Json;
 using DefaultEcs;
-using GrappleFightNET5.Components;
-using GrappleFightNET5.Resource.Info;
+using GrappleFight.Components;
+using GrappleFight.Resource.Info;
 using Myra.Graphics2D.UI;
 using JsonProperty = AppleSerialization.Json.JsonProperty;
 

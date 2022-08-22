@@ -9,7 +9,7 @@ using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using DefaultEcs;
-using GrappleFightNET5.Resource.Info;
+using GrappleFight.Resource.Info;
 using Myra.Graphics2D;
 using Myra.Graphics2D.UI;
 

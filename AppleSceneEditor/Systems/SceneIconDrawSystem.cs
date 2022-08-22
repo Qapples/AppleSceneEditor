@@ -3,10 +3,10 @@ using AppleSceneEditor.Extensions;
 using DefaultEcs;
 using DefaultEcs.System;
 using DefaultEcs.Threading;
-using GrappleFightNET5.Components;
+using GrappleFight.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using GrappleFightNET5.Utils;
+using GrappleFight.Utils;
 
 namespace AppleSceneEditor.Systems
 {

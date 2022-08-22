@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AppleSerialization.Json;
-using GrappleFightNET5.Components;
+using GrappleFight.Components;
 using Microsoft.Xna.Framework;
 
 namespace AppleSceneEditor.Extensions

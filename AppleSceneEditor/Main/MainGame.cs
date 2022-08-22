@@ -18,8 +18,8 @@ using AssetManagementBase;
 using DefaultEcs;
 using DefaultEcs.System;
 using FontStashSharp;
-using GrappleFightNET5.Components;
-using GrappleFightNET5.Resource.Info;
+using GrappleFight.Components;
+using GrappleFight.Resource.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -30,7 +30,7 @@ using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
 using Myra.Utility;
 using Environment = AppleSerialization.Environment;
-using Scene = GrappleFightNET5.Runtime.Scene;
+using Scene = GrappleFight.Runtime.Scene;
 
 namespace AppleSceneEditor
 {

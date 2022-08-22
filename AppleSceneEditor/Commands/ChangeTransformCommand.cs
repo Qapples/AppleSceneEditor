@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using AppleSceneEditor.ComponentFlags;
 using DefaultEcs;
-using GrappleFightNET5.Collision.Hulls;
-using GrappleFightNET5.Components;
+using GrappleFight.Collision.Hulls;
+using GrappleFight.Components;
 using Microsoft.Xna.Framework;
 
 namespace AppleSceneEditor.Commands

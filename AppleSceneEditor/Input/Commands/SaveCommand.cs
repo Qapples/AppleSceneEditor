@@ -1,5 +1,5 @@
 using AppleSceneEditor.UI;
-using GrappleFightNET5.Runtime;
+using GrappleFight.Runtime;
 
 namespace AppleSceneEditor.Input.Commands
 {

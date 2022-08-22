@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using AppleSerialization.Json;
-using GrappleFightNET5.Resource.Info;
+using GrappleFight.Resource.Info;
 using Microsoft.Xna.Framework.Graphics;
 using Myra.Graphics2D;
 using Myra.Graphics2D.TextureAtlases;

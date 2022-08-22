@@ -9,7 +9,7 @@ using AppleSceneEditor.ComponentFlags;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using DefaultEcs;
-using GrappleFightNET5.Runtime;
+using GrappleFight.Runtime;
 
 namespace AppleSceneEditor.Extensions
 {
