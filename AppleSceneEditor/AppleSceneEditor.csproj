@@ -9,9 +9,9 @@
 
     <ItemGroup>
         <PackageReference Include="DefaultEcs" Version="0.17.2" />
-        <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.5" />
+        <PackageReference Include="FontStashSharp.MonoGame" Version="1.1.8" />
         <PackageReference Include="LiteNetLib" Version="1.0.0-rc.3" />
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.2000-develop" />
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
         <PackageReference Include="System.CodeDom" Version="6.0.0-preview.6.21352.12" />
     </ItemGroup>
@@ -26,30 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="GrappleFight.Collision, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFight\GrappleFight.Collision\bin\Debug\net6.0\GrappleFight.Collision.dll</HintPath>
-      </Reference>
-      <Reference Include="GrappleFight.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFight\GrappleFight.Game\bin\Debug\net6.0\GrappleFight.Components.dll</HintPath>
-      </Reference>
-      <Reference Include="GrappleFight.Network, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFight\GrappleFight.Network\bin\Debug\net6.0\GrappleFight.Network.dll</HintPath>
-      </Reference>
-      <Reference Include="GrappleFight.Runtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFight\GrappleFight.Game\bin\Debug\net6.0\GrappleFight.Runtime.dll</HintPath>
-      </Reference>
-       <Reference Include="GrappleFight.Resource Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFight\GrappleFight.Game\bin\Debug\net6.0\GrappleFight.Resource.dll</HintPath>
-      </Reference>
-       <Reference Include="GrappleFight.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-         <HintPath>..\..\GrappleFight\GrappleFight.Utils\bin\Debug\net6.0\GrappleFight.Utils.dll</HintPath>
-       </Reference>
-      <Reference Include="GrappleFightScripts, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\GrappleFightBuilder\GrappleFightBuilder\bin\Debug\net6.0\GrappleFightScripts.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
       <EmbeddedResource Include="Content\Fonts\Default\Inter-Regular.ttf" />
       <EmbeddedResource Include="Content\Stylesheets\editor_ui_skin.png" />
       <EmbeddedResource Include="Content\Stylesheets\editor_ui_skin.xmat" />
@@ -59,6 +35,30 @@
     <ItemGroup>
       <Folder Include="Content\Textures\SceneIcons" />
       <Folder Include="Examples\OctantWorld" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="GrappleFight.Collision">
+        <HintPath>..\..\GrappleFight\GrappleFight.Collision\bin\Debug\net6.0\GrappleFight.Collision.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFight.Components">
+        <HintPath>..\..\GrappleFight\GrappleFight.Components\bin\Debug\net6.0\GrappleFight.Components.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFight.Exceptions">
+        <HintPath>..\..\GrappleFight\GrappleFight.Exceptions\bin\Debug\net6.0\GrappleFight.Exceptions.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFight.Input">
+        <HintPath>..\..\GrappleFight\GrappleFight.Input\bin\Debug\net6.0\GrappleFight.Input.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFight.Resource">
+        <HintPath>..\..\GrappleFight\GrappleFight.Resource\bin\Debug\net6.0\GrappleFight.Resource.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFight.Runtime">
+        <HintPath>..\..\GrappleFight\GrappleFight.Runtime\bin\Debug\net6.0\GrappleFight.Runtime.dll</HintPath>
+      </Reference>
+      <Reference Include="GrappleFight.Utils">
+        <HintPath>..\..\GrappleFight\GrappleFight.Utils\bin\Debug\net6.0\GrappleFight.Utils.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
