@@ -140,7 +140,7 @@ namespace AppleSceneEditor
             AddExternalType(typeof(ScriptInfo));
             AddExternalType(typeof(SingleScriptInfo));
             AddExternalType(typeof(TransformInfo));
-            AddExternalType(typeof(PlayerControllerInfo));
+            AddExternalType(typeof(PlayerPropertiesInfo));
             AddExternalType(typeof(ValueInfo));
             AddExternalType(typeof(CameraInfo));
             AddExternalType(typeof(CollisionHullCollectionInfo));
