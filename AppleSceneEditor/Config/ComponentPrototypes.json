@@ -9,7 +9,7 @@
       "$type": "TextureInfo",
       "texturePath": {
         "path": "",
-        "isContentPath": true
+        "pathType": "Local"
       }
     },
     {
@@ -19,7 +19,7 @@
       "skinIndex": 0,
       "meshPath": {
         "path": "",
-        "isContentPath": true
+        "pathType": "Local"
       }
     },
     {
@@ -78,7 +78,7 @@
         {
           "$type": "ContentPath",
           "path": "",
-          "isContentPath": true
+          "pathType": "Local"
         }
       ]
     }
