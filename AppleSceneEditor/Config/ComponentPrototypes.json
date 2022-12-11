@@ -44,7 +44,8 @@
         {
           "$type": "SingleScriptInfo",
           "name": "",
-          "enabled": true
+          "enabled": true,
+          "isGlobalScript": false
         }
       ]
     },
