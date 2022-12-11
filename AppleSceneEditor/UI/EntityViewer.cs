@@ -9,9 +9,11 @@ using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
 using AppleSerialization.Json;
 using DefaultEcs;
+using GrappleFight.Components;
 using GrappleFight.Resource.Info;
 using Myra.Graphics2D;
 using Myra.Graphics2D.UI;
+using MouseButtons = GrappleFight.Input.MouseButtons;
 
 namespace AppleSceneEditor.UI
 {
@@ -104,15 +106,15 @@ namespace AppleSceneEditor.UI
                 Id = EntityButtonName,
                 HorizontalAlignment = HorizontalAlignment.Left
             };
-            
-            entityButton.Click += (_, _) =>
+
+            entityButton.Click += (a, r) =>
             {
                 if (_makeChildEntityName == id)
                 {
                     _makeChildEntityName = null;
                     return;
                 }
-                
+
                 if (_makeChildEntityName is null)
                 {
                     GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
@@ -130,6 +132,15 @@ namespace AppleSceneEditor.UI
                 }
 
                 _makeChildEntityName = null;
+            };
+            
+            //Set the camera's position to the selected entity on double click;
+            
+            entityButton.TouchDoubleClick += (_, _) =>
+            {
+                ref var camera = ref World.Get<Camera>();
+
+                camera.Position = entity.GetWorldMatrix().Translation;
             };
 
             Grid dropDownGrid = MyraExtensions.CreateDropDown(new VerticalStackPanel {Id = WidgetStackPanelName},

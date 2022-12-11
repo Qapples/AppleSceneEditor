@@ -44,7 +44,7 @@ namespace AppleSceneEditor
 
             scene.Compile();
             
-            //initialize world-wide components
+            //initialize world-wide components`
             scene.World.Set(new Camera
             {
                 Position = Vector3.Zero,
