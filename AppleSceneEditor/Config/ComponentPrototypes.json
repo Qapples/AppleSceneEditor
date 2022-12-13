@@ -68,6 +68,8 @@
       "$type": "CameraInfo",
       "positionOffset": "0 0 0",
       "viewport": "0 0 0 0",
+      "initialYawDegrees": 0.0,
+      "initialPitchDegrees": 0.0,
       "degreesFieldOfView": 0.0,
       "nearPlaneDistance": 0.0,
       "farPlaneDistance": 0.0,
