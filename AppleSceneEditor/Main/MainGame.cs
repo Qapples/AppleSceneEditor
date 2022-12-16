@@ -588,7 +588,7 @@ namespace AppleSceneEditor
                 var (width, height) = (x1 - x, _mainGrid.GridLinesY[0]);
                 int y = _mainMenu.Bounds.Size.Y;
 
-                _sceneViewport = new Viewport(x, y, width, height);
+                _sceneViewport = new Viewport(x, y, width, height - 15);
             }
 
             if (_drawSystems is not null)
@@ -600,6 +600,7 @@ namespace AppleSceneEditor
                 
                 //set the viewport so that the scene is drawn within the scene viewer
                 GraphicsDevice.Viewport = _sceneViewport;
+                GraphicsDevice.Clear(Color.CornflowerBlue);
                 
                 _drawSystems.Update(gameTime);
                 
