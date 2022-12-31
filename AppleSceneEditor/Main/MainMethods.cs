@@ -37,7 +37,7 @@ namespace AppleSceneEditor
         // Init methods
         //----------------
 
-        private Scene InitScene(string sceneDirectory)
+        internal Scene InitScene(string sceneDirectory)
         {
             Scene scene = new(sceneDirectory, GraphicsDevice, null, _spriteBatch, true);
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
@@ -98,6 +98,15 @@ namespace AppleSceneEditor
             
             SelectEntity(scene, "Base");
 
+            _currentScene = scene;
+            
+            _notHeldInputHandler?.Dispose();
+            _heldInputHandler?.Dispose();
+            
+            string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
+            _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
+            _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
+
             return scene;
         }
 
@@ -126,16 +135,9 @@ namespace AppleSceneEditor
                                     $"{error.ToErrorMessage()}");
                     return;
                 }
-
+                
                 _currentScene?.Dispose();
                 _currentScene = InitScene(folder);
-                
-                _notHeldInputHandler.Dispose();
-                _heldInputHandler.Dispose();
-
-                string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
-                _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
-                _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
             };
 
             return fileDialog;
@@ -161,13 +163,6 @@ namespace AppleSceneEditor
                 {
                     _currentScene?.Dispose();
                     _currentScene = InitScene(scenePath);
-
-                    _notHeldInputHandler.Dispose();
-                    _heldInputHandler.Dispose();
-
-                    string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
-                    _notHeldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, false);
-                    _heldInputHandler = new InputHandler(keybindPath, TryGetCommandFromFunctionName, true);
                 }
             };
 
@@ -289,12 +284,14 @@ namespace AppleSceneEditor
                 "undo" => new UndoCommand(_commands),
                 "redo" => new RedoCommand(_commands),
                 "unfocus" => new UnfocusCommand(_mainGrid),
+                "reload" when _currentScene is not null => new ReloadCommand(this, _currentScene.World,
+                    _currentScene!.ScenePath), //_currentScene should not be null. It is null checked here.
                 "engage_scene_viewer_camera_movement" => new ControlSceneCameraCommand(_mainGrid),
-                "move_camera_forward" when _currentScene is not null => 
+                "move_camera_forward" when _currentScene is not null =>
                     new MoveCameraCommand(MovementHelper.Direction.Forward, _currentScene.World),
-                "move_camera_backward" when _currentScene is not null => 
+                "move_camera_backward" when _currentScene is not null =>
                     new MoveCameraCommand(MovementHelper.Direction.Backwards, _currentScene.World),
-                "move_camera_left" when _currentScene is not null => 
+                "move_camera_left" when _currentScene is not null =>
                     new MoveCameraCommand(MovementHelper.Direction.Left, _currentScene.World),
                 "move_camera_right" when _currentScene is not null => 
                     new MoveCameraCommand(MovementHelper.Direction.Right, _currentScene.World),
