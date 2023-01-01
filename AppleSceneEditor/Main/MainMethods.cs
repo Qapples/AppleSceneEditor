@@ -39,7 +39,8 @@ namespace AppleSceneEditor
 
         internal Scene InitScene(string sceneDirectory)
         {
-            Scene scene = new(sceneDirectory, GraphicsDevice, null, _spriteBatch, true);
+            string globalContentDirectory = Path.Combine(sceneDirectory, "..", "..", "Global");
+            Scene scene = new(sceneDirectory, GraphicsDevice, globalContentDirectory, null, _spriteBatch, true);
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
 
             scene.Compile();
