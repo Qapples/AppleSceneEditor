@@ -83,7 +83,7 @@ namespace AppleSceneEditor.Systems
                         }
                     }
 
-                    animComponent.CleanActives();
+                    animComponent.ApplyDurationExceededBehavior();
                 }
                 else
                 {
