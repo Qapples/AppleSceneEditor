@@ -107,7 +107,7 @@ namespace AppleSceneEditor.UI
             
             _world.Set(new Camera(Vector3.Zero,
                 Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
-                    graphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), _hitboxDrawSection, 2f)
+                    graphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), _hitboxDrawSection, 2f, 0)
             {
                 LookAt = new Vector3(0f, 0f, 20f)
             });
