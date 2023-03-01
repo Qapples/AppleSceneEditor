@@ -22,6 +22,7 @@ using GrappleFight.Resource.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoSound;
 using Myra;
 using Myra.Assets;
 using Myra.Graphics2D.Brushes;
@@ -169,6 +170,7 @@ namespace AppleSceneEditor
         {
             base.LoadContent();
 
+            MonoSoundLibrary.Init();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             //paths

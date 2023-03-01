@@ -13,4 +13,5 @@ SingleHullInfo "GrappleFight.Resource.Info.SingleHullInfo, GrappleFight.Resource
 HitboxInfo "GrappleFight.Resource.Info.HitboxInfo, GrappleFight.Resource"
 ParentInfo "GrappleFight.Resource.Info.ParentInfo, GrappleFight.Resource"
 ComponentReferenceInfo "GrappleFight.Resource.Info.ComponentReferenceInfo, GrappleFight.Resource"
+AudioListenerInfo "GrappleFight.Resource.Info.AudioListenerInfo, GrappleFight.Resource"
 AnimationComponent "GrappleFight.Components.AnimationComponent, GrappleFight.Components"

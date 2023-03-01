@@ -12,6 +12,7 @@
         <PackageReference Include="FontStashSharp.MonoGame" Version="1.1.8" />
         <PackageReference Include="LiteNetLib" Version="1.0.0-rc.3" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+        <PackageReference Include="MonoSound" Version="1.6.2" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0023" />
         <PackageReference Include="System.CodeDom" Version="6.0.0-preview.6.21352.12" />
     </ItemGroup>
