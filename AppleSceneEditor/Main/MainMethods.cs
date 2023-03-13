@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Extensions;
@@ -13,6 +14,8 @@ using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.Exceptions;
 using AppleSceneEditor.Systems;
 using AppleSceneEditor.UI;
+using AppleSerialization;
+using AppleSerialization.Converters;
 using AppleSerialization.Json;
 using DefaultEcs;
 using DefaultEcs.System;
@@ -40,11 +43,13 @@ namespace AppleSceneEditor
         internal Scene InitScene(string sceneDirectory)
         {
             string globalContentDirectory = Path.Combine(sceneDirectory, "..", "..", "Global");
-            Scene scene = new(sceneDirectory, GraphicsDevice, globalContentDirectory, null, _spriteBatch, true);
+            
+            Scene scene = new(sceneDirectory, GraphicsDevice, _serializationSettings, globalContentDirectory, null,
+                _spriteBatch, true);
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
 
             scene.Compile();
-            
+
             //initialize world-wide components`
             scene.World.Set(new Camera
             {
@@ -224,8 +229,8 @@ namespace AppleSceneEditor
                     {
                         try
                         {
-                            _mainPanelHandler =
-                                new ComponentPanelHandler(_desktop, selectedJsonObject, propertyStackPanel, _commands);
+                            _mainPanelHandler = new ComponentPanelHandler(_desktop, selectedJsonObject,
+                                propertyStackPanel, _commands, _serializationSettings);
                         }
                         catch (ComponentsNotFoundException e)
                         {

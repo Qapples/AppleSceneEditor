@@ -50,15 +50,19 @@ namespace AppleSceneEditor.UI
         public JsonArray Components { get; private set; }
         
         public StackPanel PropertyStackPanel { get; set; }
+        
+        public SerializationSettings SerializationSettings { get; private set; }
 
         private CommandStream _commands;
         
         public ComponentPanelHandler(Desktop desktop, JsonObject rootObject, StackPanel propertyStackPanel,
-            CommandStream commands)
+            CommandStream commands, SerializationSettings serializationSettings)
         {
             //rootObject HAS to be set to last otherwise we will try building the UI when some fields have not
-            //initalized yet.
-            (Desktop, PropertyStackPanel, _commands, RootObject) = (desktop, propertyStackPanel, commands, rootObject);
+            //initalized yet.   
+            SerializationSettings = serializationSettings;
+            (Desktop, PropertyStackPanel, _commands, RootObject) = 
+                (desktop, propertyStackPanel, commands, rootObject);
         }
         
         //------------------
@@ -129,7 +133,7 @@ namespace AppleSceneEditor.UI
             }
         }
 
-        private static Panel? CreateComponentWidgets(JsonObject obj, CommandStream commands, Type? objectType = null)
+        private Panel? CreateComponentWidgets(JsonObject obj, CommandStream commands, Type? objectType = null)
         {
             const string methodName = nameof(ComponentPanelHandler) + "." + nameof(CreateComponentWidgets);
 
@@ -149,7 +153,7 @@ namespace AppleSceneEditor.UI
                     return null;
                 }
 
-                objectType = ConverterHelper.GetTypeFromString((string) typeProp.Value);
+                objectType = ConverterHelper.GetTypeFromString((string) typeProp.Value, SerializationSettings);
                 if (objectType is null)
                 {
                     Debug.WriteLine(
@@ -170,12 +174,12 @@ namespace AppleSceneEditor.UI
             //separator after nothing, we must account for whenever or not we have $type.
             bool hasProp = obj.Properties.Count > (typeProvided ? 0 : 1);
             var (hasChild, hasArray) = (obj.Children.Count > 0, obj.Arrays.Count > 0);
-            
+
             //properties to stack panel
             foreach (var (property, type) in from property in obj.Properties
-                from info in paramsInfo
-                where property.Name == info.Name
-                select (property, info.ParameterType))
+                     from info in paramsInfo
+                     where property.Name == info.Name
+                     select (property, info.ParameterType))
             {
                 stackPanel.AddChild(GenerateWidgetFromProperty(property, type));
             }
@@ -184,11 +188,13 @@ namespace AppleSceneEditor.UI
 
             //children/objects to stack panel
             foreach (var (child, t) in from child in obj.Children
-                from info in paramsInfo
-                where child.Name == info.Name
-                select (child, info.ParameterType))
+                     from info in paramsInfo
+                     where child.Name == info.Name
+                     select (child, info.ParameterType))
             {
-                Type? childType = t.IsTypeJsonSerializable() ? t : ConverterHelper.GetTypeFromObject(child);
+                Type? childType = t.IsTypeJsonSerializable()
+                    ? t
+                    : ConverterHelper.GetTypeFromObject(child, SerializationSettings);
 
                 stackPanel.AddChild(CreateComponentWidgets(child, commands, childType));
             }
@@ -293,7 +299,7 @@ namespace AppleSceneEditor.UI
             }
         };
 
-        private static TextButton CreateAddArrayElementButton(JsonArray array, IMultipleItemsContainer arrayWidgets,
+        private TextButton CreateAddArrayElementButton(JsonArray array, IMultipleItemsContainer arrayWidgets,
             CommandStream commands)
         {
 #if DEBUG

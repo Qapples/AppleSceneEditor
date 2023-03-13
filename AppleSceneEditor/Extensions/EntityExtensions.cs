@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using AppleSceneEditor.ComponentFlags;
+using AppleSerialization;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using DefaultEcs;
@@ -18,6 +19,8 @@ namespace AppleSceneEditor.Extensions
     /// </summary>
     public static class EntityExtensions
     {
+        public static SerializationSettings? SerializationSettings { get; set; }
+        
         private static readonly JsonReaderOptions DefaultJsonReaderOptions = new()
         {
             AllowTrailingCommas = true,
@@ -51,6 +54,12 @@ namespace AppleSceneEditor.Extensions
         public static Entity? GenerateEntity(this JsonObject rootObject, World world, string? entityPath = null,
             JsonReaderOptions? readerOptions = null, JsonSerializerOptions? serializerOptions = null)
         {
+            if (SerializationSettings is null)
+            {
+                Debug.WriteLine($"{nameof(GenerateEntity)}: SerializationSettings is null! Returning null.");
+                
+                return null;
+            }
             
             //if we have a selected entity flag, make sure that we transfer that flag over to the new entity
             bool isSelectedEntity = false;
@@ -79,8 +88,8 @@ namespace AppleSceneEditor.Extensions
 
             Utf8JsonReader reader =
                 new(Encoding.UTF8.GetBytes(objectContents), readerOptions ?? DefaultJsonReaderOptions);
-            EntityInfo? entityInfo =
-                EntityInfo.Deserialize(ref reader, serializerOptions ?? DefaultJsonSerializationOptions);
+            EntityInfo? entityInfo = Serializer.Deserialize<EntityInfo>(ref reader, SerializationSettings,
+                serializerOptions ?? DefaultJsonSerializationOptions);
 
             if (entityInfo is null)
             {

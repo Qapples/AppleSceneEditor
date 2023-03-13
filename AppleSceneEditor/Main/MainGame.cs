@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
 using AppleSceneEditor.Exceptions;
@@ -12,12 +14,14 @@ using AppleSceneEditor.Input;
 using AppleSceneEditor.Input.Commands;
 using AppleSceneEditor.UI;
 using AppleSerialization;
+using AppleSerialization.Converters;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
 using DefaultEcs;
 using DefaultEcs.System;
 using FontStashSharp;
 using GrappleFight.Components;
+using GrappleFight.Resource;
 using GrappleFight.Resource.Info;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -30,7 +34,6 @@ using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
 using Myra.Utility;
-using Environment = AppleSerialization.Environment;
 using Scene = GrappleFight.Runtime.Scene;
 
 namespace AppleSceneEditor
@@ -40,6 +43,7 @@ namespace AppleSceneEditor
 #nullable disable
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private SerializationSettings _serializationSettings;
 
         private Project _project;
         private Desktop _desktop;
@@ -130,31 +134,48 @@ namespace AppleSceneEditor
         {            
             MyraEnvironment.Game = this;
 
-            RawContentManager contentManager = new(GraphicsDevice, Content.RootDirectory);
+            string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
 
-            Environment.GraphicsDevice = GraphicsDevice;
-            Environment.ContentManager = contentManager; 
+            FontSystem defaultFontSystem = new();
+            foreach (string fontPaths in Directory.GetFiles(fontPath))
+            {
+                defaultFontSystem.AddFont(File.ReadAllBytes(fontPaths));
+            }
+            
+            JsonConverter[] converters =
+            {
+                new ColorJsonConverter(),
+                new RectangleJsonConverter(),
+                new Vector2JsonConverter(),
+                new Vector3JsonConverter(),
+                new EnumJsonConverter()
+            };
+
+            _serializationSettings = new SerializationSettings(converters, Content.RootDirectory,
+                new Dictionary<string, Type>(), new Dictionary<string, string>());
+            
+            _serializationSettings.AddConverter(new Texture2DJsonConverter(GraphicsDevice, _serializationSettings));
+            _serializationSettings.AddConverter(new FontSystemJsonConverter(_serializationSettings, defaultFontSystem));
             
             //Serialization types
-            AddExternalType(typeof(MeshInfo));
-            AddExternalType(typeof(TextureInfo));
-            AddExternalType(typeof(ScriptInfo));
-            AddExternalType(typeof(SingleScriptInfo));
-            AddExternalType(typeof(TransformInfo));
-            AddExternalType(typeof(PlayerPropertiesInfo));
-            AddExternalType(typeof(ValueInfo));
-            AddExternalType(typeof(CameraInfo));
-            AddExternalType(typeof(CollisionHullCollectionInfo));
-            AddExternalType(typeof(SingleHullInfo));
-            AddExternalType(typeof(HitboxInfo));
-            AddExternalType(typeof(ContentPath));
-            AddExternalType(typeof(ParentInfo));
-            AddExternalType(typeof(ComponentReferenceInfo));
+            AddExternalType(typeof(MeshInfo), _serializationSettings);
+            AddExternalType(typeof(TextureInfo), _serializationSettings);
+            AddExternalType(typeof(ScriptInfo), _serializationSettings);
+            AddExternalType(typeof(SingleScriptInfo), _serializationSettings);
+            AddExternalType(typeof(TransformInfo), _serializationSettings);
+            AddExternalType(typeof(PlayerPropertiesInfo), _serializationSettings);
+            AddExternalType(typeof(ValueInfo), _serializationSettings);
+            AddExternalType(typeof(CameraInfo), _serializationSettings);
+            AddExternalType(typeof(CollisionHullCollectionInfo), _serializationSettings);
+            AddExternalType(typeof(SingleHullInfo), _serializationSettings);
+            AddExternalType(typeof(HitboxInfo), _serializationSettings);
+            AddExternalType(typeof(ContentPath), _serializationSettings);
+            AddExternalType(typeof(ParentInfo), _serializationSettings);
+            AddExternalType(typeof(ComponentReferenceInfo), _serializationSettings);
+            AddExternalType(typeof(AudioListenerInfo), _serializationSettings);
             
-            string fontPath = Path.GetFullPath(Path.Combine(Content.RootDirectory, "Fonts", "Default"));
-            Environment.DefaultFontSystem = contentManager.LoadFactory(Directory.GetFiles(fontPath),
-                new FontSystem(), "Default");
-            
+            EntityExtensions.SerializationSettings = _serializationSettings;
+
             _jsonObjects = new List<JsonObject>();
 
             _graphics.PreferredBackBufferWidth = 1600;
@@ -178,6 +199,9 @@ namespace AppleSceneEditor
             string keybindPath = Path.Combine(_configPath, "Keybinds.txt");
             string prototypesPath = Path.Combine(_configPath, "ComponentPrototypes.json");
             string settingsMenuPath = Path.Combine(Content.RootDirectory, "Settings.xmmp");
+            
+            LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath), _serializationSettings);
+
 
             //ensure that these paths exist.
             string[] missingConfigFiles = (from file in new[] {typeAliasPath, keybindPath, prototypesPath}
@@ -190,7 +214,6 @@ namespace AppleSceneEditor
             }
 
             //inputhandler will be initialized later when a proper world is loaded and everything is set.
-            Environment.LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath));
             _prototypes = IOHelper.CreatePrototypesFromFile(prototypesPath);
 
             //load stylesheet
@@ -611,13 +634,23 @@ namespace AppleSceneEditor
             base.Draw(gameTime);
         }
         
-        private static void AddExternalType(Type type)
+        private static void AddExternalType(Type type, SerializationSettings settings)
         {
             if (type.AssemblyQualifiedName is null) return;
             
             string[] typeName = type.AssemblyQualifiedName.Split(", ");
 
-            AppleSerialization.Environment.ExternalTypes.Add($"{typeName[0]}, {typeName[1]}", type);
+            settings.ExternalTypes.Add($"{typeName[0]}, {typeName[1]}", type);
+        }
+        
+        public static void LoadTypeAliasFileContents(string fileContents, SerializationSettings settings)
+        {
+            foreach (Match match in Regex.Matches(fileContents, @"(\w+)\W+""([\w., ]+)"))
+            {
+                if (match.Groups.Count < 3) continue;
+
+                settings.TypeAliases.Add(match.Groups[1].Value, match.Groups[2].Value);
+            }
         }
     }
 }
