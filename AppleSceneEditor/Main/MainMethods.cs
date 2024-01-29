@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -44,13 +45,17 @@ namespace AppleSceneEditor
         {
             string globalContentDirectory = Path.Combine(sceneDirectory, "..", "..", "Global");
             
-            Scene scene = new(sceneDirectory, GraphicsDevice, _serializationSettings, globalContentDirectory, null,
-                _spriteBatch, true);
+            // We use typeof(string) here to get an assembly to pass through. We don't really need to load scripts.
+            // Might be a good idea to go back into the engine code to make it so that you don't have to pass an
+            // assembly.
+            Scene scene = new(sceneDirectory, globalContentDirectory, GraphicsDevice, typeof(string).Assembly,
+                _serializationSettings, true);
+            
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
 
             scene.Compile();
 
-            //initialize world-wide components`
+            //initialize world-wide components
             scene.World.Set(new Camera
             {
                 Position = Vector3.Zero,

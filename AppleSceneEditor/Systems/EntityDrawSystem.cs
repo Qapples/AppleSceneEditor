@@ -1,11 +1,8 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using AppleScene.Helpers;
+using System.Collections.Generic;
+using System.Linq;
 using AppleScene.Rendering;
-using AppleSceneEditor.Commands;
 using AppleSceneEditor.ComponentFlags;
-using AppleSceneEditor.Systems.Axis;
 using DefaultEcs;
 using DefaultEcs.System;
 using DefaultEcs.Threading;
@@ -13,10 +10,10 @@ using GrappleFight.Collision;
 using GrappleFight.Collision.Components;
 using GrappleFight.Collision.Hulls;
 using GrappleFight.Components;
-using GrappleFight.Components.Events;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using SharpGLTF.Schema2;
+using Camera = GrappleFight.Components.Camera;
 
 namespace AppleSceneEditor.Systems
 {
@@ -65,30 +62,28 @@ namespace AppleSceneEditor.Systems
 
                 if (entity.Has<AnimationComponent>())
                 {
-                    ref var animComponent = ref entity.Get<AnimationComponent>();
+                    var animComponent = entity.Get<AnimationComponent>();
                     animComponent.IncrementActives(gameTime.ElapsedGameTime);
 
-                    meshData.Draw(in entityWorldMatrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
-                        animComponent.ActiveAnimations, ReadOnlySpan<Matrix>.Empty, SolidState);
-
-                    //update events if they have one.
-                    if (entity.Has<AnimationEvents>())
+                    foreach (PrimitiveData primitive in meshData.Primitives)
                     {
-                        ref var events = ref entity.Get<AnimationEvents>();
+                        IEnumerable<(Animation, float)> animsQuery = from anim in animComponent.ActiveAnimations
+                            select (animComponent.Animations[anim.AnimationId],
+                                (float) anim.CurrentTime.TotalSeconds);
 
-                        foreach (ActiveAnimation actAnim in animComponent.ActiveAnimations)
-                        {
-                            ActiveAnimationWrapper wrapper = new() {ActiveAnimation = actAnim};
-                            events.Update(ref wrapper, in entity, World);
-                        }
+                        primitive.Draw(in entityWorldMatrix, worldCam.ViewMatrix, worldCam.ProjectionMatrix,
+                            animsQuery, ReadOnlySpan<Matrix>.Empty, meshData.Effect, SolidState);
                     }
+                    
+                    meshData.Draw(in entityWorldMatrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
+                        Array.Empty<(Animation, float)>(), ReadOnlySpan<Matrix>.Empty, SolidState);
 
                     animComponent.ApplyDurationExceededBehavior();
                 }
                 else
                 {
                     meshData.Draw(in entityWorldMatrix, worldCam.ViewMatrix, in worldCam.ProjectionMatrix,
-                        Array.Empty<ActiveAnimation>(), ReadOnlySpan<Matrix>.Empty, SolidState);
+                        Array.Empty<(Animation, float)>(), ReadOnlySpan<Matrix>.Empty, SolidState);
                 }
             }
 
