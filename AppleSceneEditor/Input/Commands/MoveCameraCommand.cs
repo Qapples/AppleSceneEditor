@@ -27,7 +27,7 @@ namespace AppleSceneEditor.Input.Commands
             var (yawDegrees, pitchDegrees, cameraSpeed) =
                 (properties.YawDegrees, properties.PitchDegrees, properties.CameraSpeed);
 
-            camera.Position += Direction is Direction.Up or Direction.Down
+            camera.LocalPosition += Direction is Direction.Up or Direction.Down
                 ? Direction == Direction.Up ? Vector3.Up * cameraSpeed : Vector3.Down * cameraSpeed
                 : MovementHelper.GenerateVectorFromDirection(yawDegrees, pitchDegrees, Direction,
                     (false, false, false), cameraSpeed);

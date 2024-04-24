@@ -140,7 +140,7 @@ namespace AppleSceneEditor.UI
             {
                 ref var camera = ref World.Get<Camera>();
 
-                camera.Position = entity.GetWorldMatrix().Translation;
+                camera.LocalPosition = entity.GetWorldMatrix().Translation;
             };
 
             Grid dropDownGrid = MyraExtensions.CreateDropDown(new VerticalStackPanel {Id = WidgetStackPanelName},

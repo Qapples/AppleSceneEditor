@@ -14,20 +14,20 @@ namespace AppleSceneEditor.Commands
         private JsonObject _obj;
         
         private Grid _uiGrid;
-        private IMultipleItemsContainer? _uiGridParent;
+        private Container? _uiGridParent;
 
         public RemoveComponentCommand(JsonObject obj, Grid uiGrid)
         {
             (_obj, _uiGrid, Disposed) = (obj, uiGrid, false);
 
-            if (_uiGrid.Parent is IMultipleItemsContainer parent)
+            if (_uiGrid.Parent is Container parent)
             {
                 _uiGridParent = parent;
             }
             else
             {
                 Debug.WriteLine($"{nameof(RemoveComponentCommand)}: parent of provided uiGrid does not have a " +
-                                $"parent that implements {nameof(IMultipleItemsContainer)}! Will not be able to undo.");
+                                $"parent that implements {nameof(Container)}! Will not be able to undo.");
             }
         }
 

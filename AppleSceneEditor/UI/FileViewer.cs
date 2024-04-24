@@ -17,7 +17,7 @@ using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.UI
 {
-    public sealed class FileViewer : SingleItemContainer<Grid>
+    public sealed class FileViewer : Grid
     {
         private string _currentDirectory;
 
@@ -52,11 +52,8 @@ namespace AppleSceneEditor.UI
             (_currentDirectory, ItemsPerRow, World, _fileIcons, _globalCommands) =
                 (directory, itemsPerRow, world, fileIcons, globalCommands);
 
-            InternalChild = new Grid
-            {
-                ColumnSpacing = 4,
-                RowSpacing = 4,
-            };
+            ColumnSpacing = 4;
+            RowSpacing = 4;
 
             if (style is not null)
             {
@@ -69,7 +66,7 @@ namespace AppleSceneEditor.UI
             for (int i = 0; i < ItemsPerRow; i++)
             {
                 //myra is wack. Proportions are over 3 instead of over 1.
-                InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 3f / ItemsPerRow));
+                ColumnsProportions.Add(new Proportion(ProportionType.Part, 3f / ItemsPerRow));
             }
 
             _fileContextMenu = CreateFileContextMenu();
@@ -127,7 +124,8 @@ namespace AppleSceneEditor.UI
                 {
                     _selectedItemName = itemName;
 
-                    Desktop.ShowContextMenu(isFolder ? _folderContextMenu : _fileContextMenu, Desktop.TouchPosition);
+                    Desktop.ShowContextMenu(isFolder ? _folderContextMenu : _fileContextMenu,
+                        Desktop.TouchPosition ?? Point.Zero);
                 }
             };
 
@@ -163,11 +161,11 @@ namespace AppleSceneEditor.UI
 
         private void BuildUI()
         {
-            InternalChild.Widgets.Clear();
+            Widgets.Clear();
 
             Widget backFolderWidget = CreateItemWidget("..", true);
             backFolderWidget.GridColumn = 0;
-            InternalChild.AddChild(backFolderWidget);
+            AddChild(backFolderWidget);
 
             int c = 1;
             int r = 0;
@@ -184,7 +182,7 @@ namespace AppleSceneEditor.UI
                     r++;
                 }
                 
-                InternalChild.AddChild(widget);
+                AddChild(widget);
             }
             
             foreach (string filePath in Directory.GetFiles(CurrentDirectory))
@@ -199,7 +197,7 @@ namespace AppleSceneEditor.UI
                     r++;
                 }
                 
-                InternalChild.AddChild(widget);
+                AddChild(widget);
             }
         }
 

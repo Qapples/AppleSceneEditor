@@ -35,7 +35,7 @@ namespace AppleSceneEditor.Extensions
         }
 
         public static Grid CreateDropDown<T>(T widgetsContainer, Widget header, string gridId)
-            where T : Widget, IMultipleItemsContainer
+            where T : Container
         {
             widgetsContainer.GridRow = 1;
             widgetsContainer.GridColumn = 1;

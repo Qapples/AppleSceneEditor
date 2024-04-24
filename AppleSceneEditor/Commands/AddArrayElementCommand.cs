@@ -8,12 +8,12 @@ namespace AppleSceneEditor.Commands
         public bool Disposed { get; private set; }
 
         private JsonArray _array;
-        private IMultipleItemsContainer _arrayWidgets;
+        private Container _arrayWidgets;
 
         private JsonObject _objToAdd;
         private Widget _objWidget;
 
-        public AddArrayElementCommand(JsonArray array, IMultipleItemsContainer arrayWidgets, JsonObject objToAdd,
+        public AddArrayElementCommand(JsonArray array, Container arrayWidgets, JsonObject objToAdd,
             Widget objWidget)
         {
             (_array, _arrayWidgets, _objToAdd, _objWidget, Disposed) =

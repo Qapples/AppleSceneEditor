@@ -1,10 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using AppleSceneEditor.Extensions;
@@ -13,7 +8,7 @@ using AppleSceneEditor.Input.Commands;
 using AppleSerialization;
 using DefaultEcs;
 using GrappleFight.Collision;
-using GrappleFight.Collision.Components;
+using GrappleFight.Collision.Hitbox;
 using GrappleFight.Collision.Hulls;
 using GrappleFight.Components;
 using Microsoft.Xna.Framework;
@@ -21,14 +16,13 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
-using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
 using Myra.Graphics2D.UI.Styles;
 
 namespace AppleSceneEditor.UI
 {
-    public class HitboxEditor : SingleItemContainer<Grid>, IDisposable
+    public class HitboxEditor : Grid, IDisposable
     {
         public string _hitboxFilePath;
 
@@ -50,14 +44,14 @@ namespace AppleSceneEditor.UI
             set
             {
                 _isPlaying = value;
-                _hitboxData.Active = value;
+                _hitboxCollection.IsActive = value;
             }
         }
 
-        private TextBox _opcodesTextBox;
+        private TextBox _commandsTextBox;
         private TextBox _hullsTextBox;
         
-        private ScrollViewer _opcodesScrollViewer;
+        private ScrollViewer _commandsScrollViewer;
         private ScrollViewer _hullScrollViewer;
 
         private FileDialog _openFileDialog;
@@ -73,7 +67,7 @@ namespace AppleSceneEditor.UI
         private BasicEffect _hitboxEffect;
         private VertexBuffer _vertexBuffer;
         
-        private HitboxData _hitboxData;
+        private HitboxCollection _hitboxCollection;
         
         /// <summary>
         /// Section of space on the entire screen where the hulls are actually drawn.
@@ -91,9 +85,6 @@ namespace AppleSceneEditor.UI
         {
             _world = new World();
 
-            CollisionHullPools.InitPools(_world);
-            CollisionHullPools.InitCollectionSet(_world, out _);
-
             _graphicsDevice = graphicsDevice;
             _hitboxEffect = new BasicEffect(graphicsDevice)
             {
@@ -104,7 +95,7 @@ namespace AppleSceneEditor.UI
             _vertexBuffer = new VertexBuffer(graphicsDevice, typeof(VertexPositionColor), 36, BufferUsage.WriteOnly);
 
             _hitboxDrawSection = new Viewport();
-            
+
             _world.Set(new Camera(Vector3.Zero,
                 Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
                     graphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), _hitboxDrawSection, 2f, 0)
@@ -126,21 +117,17 @@ namespace AppleSceneEditor.UI
                 ApplyWidgetStyle(style);
             }
 
-            InternalChild = new Grid
-            {
-                ColumnSpacing = 4,
-                RowSpacing = 1,
-                AcceptsKeyboardFocus = true
-            };
+            ColumnSpacing = 4;
+            RowSpacing = 1;
+            AcceptsKeyboardFocus = true;
             
-
-            InternalChild.ColumnsProportions.Add(new Proportion(ProportionType.Part, 2.5f));
-            //InternalChild.RowsProportions.Add(new Proportion(ProportionType.Part, 3f / 1f));
-            InternalChild.RowsProportions.Add(new Proportion(ProportionType.Auto));
+            ColumnsProportions.Add(new Proportion(ProportionType.Part, 2.5f));
+            //RowsProportions.Add(new Proportion(ProportionType.Part, 3f / 1f));
+            RowsProportions.Add(new Proportion(ProportionType.Auto));
             
             const int borderThickness = 1;
             
-            _opcodesTextBox = new TextBox
+            _commandsTextBox = new TextBox
             {
                 Multiline = true, 
                 TextVerticalAlignment = VerticalAlignment.Stretch, 
@@ -157,12 +144,12 @@ namespace AppleSceneEditor.UI
                 BorderThickness = new Thickness(borderThickness, 0, 0, 0),
                 AcceptsKeyboardFocus = true
             };
-            
-            _opcodesScrollViewer = new ScrollViewer
+
+            _commandsScrollViewer = new ScrollViewer
             {
-                GridColumn = 1, 
+                GridColumn = 1,
                 GridRow = 1,
-                Content = _opcodesTextBox
+                Content = _commandsTextBox
             };
             
             _hullScrollViewer = new ScrollViewer
@@ -196,7 +183,7 @@ namespace AppleSceneEditor.UI
                 }
             };
 
-            _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y - MenuBarHeight, InternalChild.GetColumnWidth(0),
+            _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y - MenuBarHeight, GetColumnWidth(0),
                 Bounds.Height - MenuBarHeight);
 
             _menuBar.FindMenuItemById("OpenMenuItem").Selected += (_, _) => _openFileDialog.ShowModal(Desktop);
@@ -205,16 +192,16 @@ namespace AppleSceneEditor.UI
 
             _openFileDialog.Closed += OpenFileDialogClosed;
             _saveFileDialog.Closed += SaveFileDialogClosed;
-
-            InternalChild.AddChild(_opcodesScrollViewer);
-            InternalChild.AddChild(_hullScrollViewer);
-            InternalChild.AddChild(_menuBar);
+            
+            AddChild(_commandsScrollViewer);
+            AddChild(_hullScrollViewer);
+            AddChild(_menuBar);
 
             if (Parent?.Height is not null)
             {
-                int height = Parent.Height.Value - InternalChild.ColumnSpacing;
+                int height = Parent.Height.Value - ColumnSpacing;
 
-                _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
+                _commandsTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
                 _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion);
             }
 
@@ -222,9 +209,9 @@ namespace AppleSceneEditor.UI
             {
                 if (Height is not null)
                 {
-                    int height = Height.Value - InternalChild.ColumnSpacing;
+                    int height = Height.Value - ColumnSpacing;
 
-                    _opcodesTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
+                    _commandsTextBox.MinHeight = (int) (height * OpcodesTextBoxProportion);
                     _hullsTextBox.MinHeight = (int) (height * HullTextBoxProportion) - 5;
                 }
             };
@@ -252,7 +239,7 @@ namespace AppleSceneEditor.UI
             using FileStream fs = File.Open(hitboxFilePath, FileMode.OpenOrCreate);
             using BinaryReader reader = new(fs, Encoding.UTF8, false);
 
-            StringBuilder opcodesTextBuilder = new();
+            StringBuilder commandsTextBuilder = new();
             StringBuilder hullsTextBuilder = new();
 
             //---------- LOAD HULLS ---------- 
@@ -277,49 +264,48 @@ namespace AppleSceneEditor.UI
                 hullsTextBuilder.Append('\n');
             }
 
-            //---------- LOAD OPCODES ----------
+            //---------- LOAD COMMANDS ----------
 
-            ushort opcodeCount = reader.ReadUInt16();
+            ushort commandCount = reader.ReadUInt16();
 
-            for (int i = 0; i < opcodeCount; i++)
+            for (int i = 0; i < commandCount; i++)
             {
                 float time = reader.ReadSingle();
-                HitboxOpcodes opcode = (HitboxOpcodes) reader.ReadByte();
-                ushort parametersLength = reader.ReadUInt16();
+                HitboxCommandType commandType = (HitboxCommandType) reader.ReadByte();
 
-                opcodesTextBuilder.Append($"{time} {opcode}\n");
+                commandsTextBuilder.Append($"{time} {commandType}\n");
 
                 byte hitboxId = reader.ReadByte();
-                opcodesTextBuilder.Append(hitboxId);
-                opcodesTextBuilder.Append('\n');
+                commandsTextBuilder.Append(hitboxId);
+                commandsTextBuilder.Append('\n');
 
-                switch (opcode)
+                switch (commandType)
                 {
                     //Act and Deact only have one parameter, which is just the hitboxId.
 
-                    case HitboxOpcodes.Alt:
-                    case HitboxOpcodes.Slt:
+                    case HitboxCommandType.Alt:
+                    case HitboxCommandType.Slt:
                         Vector3 translation = ReadVector3(reader);
-                        opcodesTextBuilder.Append($"{translation.X} {translation.Y} {translation.Z}\n");
+                        commandsTextBuilder.Append($"{translation.X} {translation.Y} {translation.Z}\n");
 
                         break;
 
-                    case HitboxOpcodes.Alrac:
-                    case HitboxOpcodes.Slrac:
+                    case HitboxCommandType.Alrac:
+                    case HitboxCommandType.Slrac:
                         Vector4 rotation = ReadVector4(reader);
-                        opcodesTextBuilder.Append($"{rotation.X} {rotation.Y} {rotation.Z} {rotation.W}\n");
+                        commandsTextBuilder.Append($"{rotation.X} {rotation.Y} {rotation.Z} {rotation.W}\n");
 
                         break;
                 }
 
-                opcodesTextBuilder.Append('\n');
+                commandsTextBuilder.Append('\n');
             }
 
             _hullsTextBox.Text = hullsTextBuilder.ToString();
-            _opcodesTextBox.Text = opcodesTextBuilder.ToString();
+            _commandsTextBox.Text = commandsTextBuilder.ToString();
         }
 
-        public void SaveHitboxFileContents(string fileLocation, string hullContents, string opcodeContents)
+        public void SaveHitboxFileContents(string fileLocation, string hullContents, string commandContents)
         {
             using FileStream fs = File.Open(fileLocation, FileMode.OpenOrCreate);
             using BinaryWriter writer = new(fs, Encoding.UTF8, false);
@@ -366,48 +352,48 @@ namespace AppleSceneEditor.UI
                 }
             }
 
-            // ------------- SAVE OPCODES -------------
+            // ------------- SAVE COMMANDS -------------
 
-            string[] opcodeContentLines = opcodeContents.Split('\n');
-            ushort opcodeCount = 0;
+            string[] commandContentLines = commandContents.Split('\n');
+            ushort commandCount = 0;
 
-            //skip two bytes for room for a ushort that will represent the number of opcodes
-            int opcodeCountPos = (int) writer.BaseStream.Position; //position of this ushort in the byte stream
+            //skip two bytes for room for a ushort that will represent the number of commands
+            int commandCountPos = (int) writer.BaseStream.Position; //position of this ushort in the byte stream
             writer.Seek(2, SeekOrigin.Current);
 
-            for (int lineI = 0; lineI < opcodeContentLines.Length; lineI++)
+            for (int lineI = 0; lineI < commandContentLines.Length; lineI++)
             {
-                if (string.IsNullOrWhiteSpace(opcodeContentLines[lineI]))
+                if (string.IsNullOrWhiteSpace(commandContentLines[lineI]))
                 {
                     continue;
                 }
 
-                string[] opcodeAndTimeSplitArr = opcodeContentLines[lineI++].Split(' ');
+                string[] commandAndTimeSplitArr = commandContentLines[lineI++].Split(' ');
 
                 int bufferIndex = 0;
 
-                float time = float.Parse(opcodeAndTimeSplitArr[0]);
-                HitboxOpcodes opcode = Enum.Parse<HitboxOpcodes>(opcodeAndTimeSplitArr[1]);
+                float time = float.Parse(commandAndTimeSplitArr[0]);
+                HitboxCommandType command = Enum.Parse<HitboxCommandType>(commandAndTimeSplitArr[1]);
 
                 writer.Write(time);
-                writer.Write((byte) opcode);
+                writer.Write((byte) command);
 
-                switch (opcode)
+                switch (command)
                 {
-                    case HitboxOpcodes.Act:
-                    case HitboxOpcodes.Deact:
+                    case HitboxCommandType.Act:
+                    case HitboxCommandType.Deact:
                         ushort parameterLength = 1;
 
                         writer.Write(parameterLength);
-                        writer.Write(byte.Parse(opcodeContentLines[lineI++]));
+                        writer.Write(byte.Parse(commandContentLines[lineI++]));
 
                         break;
 
-                    case HitboxOpcodes.Alt:
-                    case HitboxOpcodes.Slt:
+                    case HitboxCommandType.Alt:
+                    case HitboxCommandType.Slt:
                         parameterLength = 13;
-                        byte hullId = byte.Parse(opcodeContentLines[lineI++]);
-                        ParseHelper.TryParseVector3(opcodeContentLines[lineI++], out Vector3 translation);
+                        byte hullId = byte.Parse(commandContentLines[lineI++]);
+                        ParseHelper.TryParseVector3(commandContentLines[lineI++], out Vector3 translation);
 
                         writer.Write(parameterLength);
                         writer.Write(hullId);
@@ -415,11 +401,11 @@ namespace AppleSceneEditor.UI
 
                         break;
 
-                    case HitboxOpcodes.Alrac:
-                    case HitboxOpcodes.Slrac:
+                    case HitboxCommandType.Alrac:
+                    case HitboxCommandType.Slrac:
                         parameterLength = 17;
-                        hullId = byte.Parse(opcodeContentLines[lineI++]);
-                        ParseHelper.TryParseVector4(opcodeContentLines[lineI++], out Vector4 rotationVector4);
+                        hullId = byte.Parse(commandContentLines[lineI++]);
+                        ParseHelper.TryParseVector4(commandContentLines[lineI++], out Vector4 rotationVector4);
 
                         writer.Write(parameterLength);
                         writer.Write(hullId);
@@ -428,11 +414,11 @@ namespace AppleSceneEditor.UI
                         break;
                 }
 
-                opcodeCount++;
+                commandCount++;
             }
 
-            writer.Seek(opcodeCountPos, SeekOrigin.Begin);
-            writer.Write(opcodeCount);
+            writer.Seek(commandCountPos, SeekOrigin.Begin);
+            writer.Write(commandCount);
             writer.Seek(0, SeekOrigin.End);
             writer.Flush();
         }
@@ -440,8 +426,8 @@ namespace AppleSceneEditor.UI
         public void UpdateCamera(ref KeyboardState kbState, ref KeyboardState previousKbState,
             ref MouseState mouseState, ref MouseState previousMouseState)
         {
-            if (!Visible || !InternalChild.IsKeyboardFocused || _hullsTextBox.IsKeyboardFocused ||
-                _opcodesTextBox.IsKeyboardFocused)
+            if (!Visible || !IsKeyboardFocused || _hullsTextBox.IsKeyboardFocused ||
+                _commandsTextBox.IsKeyboardFocused)
             {
                 return;
             }
@@ -472,15 +458,15 @@ namespace AppleSceneEditor.UI
         {
             if (!_isHitboxDataInstantiated || !Visible)
             {
-                IsPlaying = false;
+                if (_isHitboxDataInstantiated) IsPlaying = false;
                 return; 
             }
 
             if (!IsPlaying) return;
 
-            _hitboxData.Update(in elapsedTime, true);
+            _hitboxCollection.Update(in elapsedTime, Vector3.Zero.GetHashCode());
 
-            if (!_hitboxData.Active)
+            if (!_hitboxCollection.IsActive)
             {
                 IsPlaying = false;
             }
@@ -492,24 +478,30 @@ namespace AppleSceneEditor.UI
 
             Viewport previousViewport = _graphicsDevice.Viewport;
             
-            _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y + MenuBarHeight, InternalChild.GetColumnWidth(0),
+            _hitboxDrawSection = new Viewport(Bounds.X, Bounds.Y + MenuBarHeight, GetColumnWidth(0),
                 Bounds.Height - MenuBarHeight);
             _graphicsDevice.Viewport = _hitboxDrawSection;
             
             Matrix identity = Matrix.Identity;
 
-            _hitboxData.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _world.Get<Camera>(),
-                WireframeState, _vertexBuffer);
+
+            foreach (ICollisionHull hull in _hitboxCollection.HullCollection.Hulls)
+            {
+                if (hull is ComplexBox box)
+                {
+                    box.Draw(_graphicsDevice, _hitboxEffect, Color.Blue, ref identity, ref _world.Get<Camera>(), WireframeState, _vertexBuffer);
+                }
+            }
 
             _graphicsDevice.Viewport = previousViewport;
         }
 
         public void Dispose()
         {
-            _opcodesTextBox = null!;
+            _commandsTextBox = null!;
             _hullsTextBox = null!;
 
-            _opcodesScrollViewer = null!;
+            _commandsScrollViewer = null!;
             _hullScrollViewer = null!;
 
             _openFileDialog = null!;
@@ -564,7 +556,9 @@ namespace AppleSceneEditor.UI
             }
 
             LoadHitboxFile(_openFileDialog.FilePath);
-            _hitboxData = new HitboxData(File.ReadAllBytes(_openFileDialog.FilePath), _world.CreateEntity());
+            HitboxCollection.CreateFromMarkupFileContents(File.ReadAllText(_openFileDialog.FilePath), null,
+                out _hitboxCollection);
+            _world.CreateEntity().Set(_hitboxCollection);
             _isHitboxDataInstantiated = true;
         }
 
@@ -575,8 +569,10 @@ namespace AppleSceneEditor.UI
                 return;
             }
 
-            SaveHitboxFileContents(_saveFileDialog.FilePath, _hullsTextBox.Text, _opcodesTextBox.Text);
-            _hitboxData = new HitboxData(File.ReadAllBytes(_saveFileDialog.FilePath), _world.CreateEntity());
+            SaveHitboxFileContents(_saveFileDialog.FilePath, _hullsTextBox.Text, _commandsTextBox.Text);
+            HitboxCollection.CreateFromMarkupFileContents(File.ReadAllText(_saveFileDialog.FilePath), null,
+                out _hitboxCollection);
+            _world.CreateEntity().Set(_hitboxCollection);
             _isHitboxDataInstantiated = true;
         }
 
@@ -599,6 +595,6 @@ namespace AppleSceneEditor.UI
             }) is not EmptyCommand;
 
         private static readonly RasterizerState WireframeState = new()
-            {FillMode = FillMode.WireFrame, CullMode = CullMode.None};
+            { FillMode = FillMode.WireFrame, CullMode = CullMode.None };
     }
 }

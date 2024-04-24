@@ -20,6 +20,8 @@ using AppleSerialization.Converters;
 using AppleSerialization.Json;
 using DefaultEcs;
 using DefaultEcs.System;
+using GrappleFight.Collision;
+using GrappleFight.Collision.Hulls;
 using GrappleFight.Components;
 using GrappleFight.Runtime;
 using Microsoft.Xna.Framework;
@@ -50,20 +52,17 @@ namespace AppleSceneEditor
             // assembly.
             Scene scene = new(sceneDirectory, globalContentDirectory, GraphicsDevice, typeof(string).Assembly,
                 _serializationSettings, true);
+
+            ComplexBox emptyRegion = new();
+            scene.World.Set(new OctreeNode(null, 0, ref emptyRegion));
             
             _jsonObjects = IOHelper.CreateJsonObjectsFromScene(sceneDirectory);
 
             scene.Compile();
 
             //initialize world-wide components
-            scene.World.Set(new Camera
-            {
-                Position = Vector3.Zero,
-                LookAt = new Vector3(0f, 0f, 20f),
-                ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
-                    GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f),
-                Sensitivity = 2f
-            });
+            scene.World.Set(new Camera(Vector3.Zero, Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
+                GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), GraphicsDevice.Viewport, 2f, 0));
                     
             scene.World.Set(new CameraProperties
             {
@@ -198,85 +197,84 @@ namespace AppleSceneEditor
         private void SelectEntity(Scene scene, string entityId)
         {
             const string methodName = nameof(MainGame) + "." + nameof(SelectEntity);
-            
-            _desktop.Root.ProcessWidgets(widget =>
+
+            foreach (Widget widget in _desktop.Root.GetChildren())
             {
-                if (widget.Id == "MainGrid")
+                if (widget.Id != "MainGrid") continue;
+
+                if (widget is not Grid grid || !EntityExtensions.TryGetEntityById(scene, entityId, out _))
                 {
-                    if (widget is not Grid grid) return false;
-                    if (!EntityExtensions.TryGetEntityById(scene, entityId, out _)) return false;
+                    continue;
+                }
 
-                    StackPanel? propertyStackPanel = grid.TryFindWidgetById<StackPanel>("PropertyStackPanel");
-                    if (propertyStackPanel is null) return false;
+                StackPanel? propertyStackPanel = grid.TryFindWidgetById<StackPanel>("PropertyStackPanel");
+                if (propertyStackPanel is null) continue;
 
-                    propertyStackPanel.AcceptsKeyboardFocus = true;
+                propertyStackPanel.AcceptsKeyboardFocus = true;
 
-                    //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
-                    //so we're gonna have to make a new ComponentPanelHandler on the spot.
-                    //epic linq gaming
-                    JsonObject? selectedJsonObject = (from obj in _jsonObjects
-                        from prop in obj.Properties
-                        where prop.Name.ToLower() == "id"
-                        where prop.ValueKind == JsonValueKind.String
-                        where string.Equals(prop.Value as string, entityId, StringComparison.CurrentCultureIgnoreCase)
-                        select obj).FirstOrDefault();
+                //MyraPad is stupid and trying to use PropertyGrids that are loaded through xml are pretty buggy,
+                //so we're gonna have to make a new ComponentPanelHandler on the spot.
+                //epic linq gaming
+                JsonObject? selectedJsonObject = (from obj in _jsonObjects
+                    from prop in obj.Properties
+                    where prop.Name.ToLower() == "id"
+                    where prop.ValueKind == JsonValueKind.String
+                    where string.Equals(prop.Value as string, entityId, StringComparison.CurrentCultureIgnoreCase)
+                    select obj).FirstOrDefault();
 
-                    if (selectedJsonObject is null)
+                if (selectedJsonObject is null)
+                {
+                    //nameof just in case the name of the method changes
+                    Debug.WriteLine($"{methodName}: Cannot find entity of Id {entityId} in _jsonObjects.");
+                    continue;
+                }
+
+                _currentJsonObject = selectedJsonObject;
+
+                if (_mainPanelHandler is null)
+                {
+                    try
                     {
-                        //nameof just in case the name of the method changes
-                        Debug.WriteLine($"{methodName}: Cannot find entity of Id {entityId} in _jsonObjects.");
-                        return false;
+                        _mainPanelHandler = new ComponentPanelHandler(_desktop, selectedJsonObject,
+                            propertyStackPanel, _commands, _serializationSettings);
                     }
-
-                    _currentJsonObject = selectedJsonObject;
-
-                    if (_mainPanelHandler is null)
+                    catch (ComponentsNotFoundException e)
                     {
-                        try
-                        {
-                            _mainPanelHandler = new ComponentPanelHandler(_desktop, selectedJsonObject,
-                                propertyStackPanel, _commands, _serializationSettings);
-                        }
-                        catch (ComponentsNotFoundException e)
-                        {
-                            Debug.WriteLine(e);
-                            return false;
-                        }
+                        Debug.WriteLine(e);
+                        continue;
                     }
-                    else
+                }
+                else
+                {
+                    try
                     {
-                        try
-                        {
-                            _mainPanelHandler.RootObject = selectedJsonObject;
-                        }
-                        catch (ComponentsNotFoundException e)
-                        {
-                            Debug.WriteLine(e);
-                            return false;
-                        }
+                        _mainPanelHandler.RootObject = selectedJsonObject;
                     }
-
-                    //highlight the entity in the entity viewer
-                    VerticalStackPanel? stackPanel =
-                        grid.TryFindWidgetById<VerticalStackPanel>("EntityStackPanel");
-                    if (stackPanel is null)
+                    catch (ComponentsNotFoundException e)
                     {
-                        Debug.WriteLine("Can't find VerticalStackPanel with ID of \"EntityStackPanel\".");
-                        return false;
-                    }
-
-                    foreach (Widget panelWidget in stackPanel.Widgets)
-                    {
-                        if (panelWidget is not TextButton button) continue;
-
-                        int entityIdIndex = button.Id.IndexOf('_') + 1;
-                        button.Background =
-                            new SolidBrush(button.Id[entityIdIndex..] == entityId ? Color.SkyBlue : Color.Gray);
+                        Debug.WriteLine(e);
+                        continue;
                     }
                 }
 
-                return true;
-            });
+                //highlight the entity in the entity viewer
+                VerticalStackPanel? stackPanel =
+                    grid.TryFindWidgetById<VerticalStackPanel>("EntityStackPanel");
+                if (stackPanel is null)
+                {
+                    Debug.WriteLine("Can't find VerticalStackPanel with ID of \"EntityStackPanel\".");
+                    continue;
+                }
+
+                foreach (Widget panelWidget in stackPanel.Widgets)
+                {
+                    if (panelWidget is not TextButton button) continue;
+
+                    int entityIdIndex = button.Id.IndexOf('_') + 1;
+                    button.Background =
+                        new SolidBrush(button.Id[entityIdIndex..] == entityId ? Color.SkyBlue : Color.Gray);
+                }
+            }
         }
 
         //------------------

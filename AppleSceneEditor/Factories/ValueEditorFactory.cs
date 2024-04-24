@@ -7,6 +7,7 @@ using System.Text.Json;
 using AppleSceneEditor.UI;
 using AppleSerialization;
 using AppleSerialization.Json;
+using Myra.Events;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.File;
 using Myra.Utility;
@@ -104,7 +105,7 @@ namespace AppleSceneEditor.Factories
             //property.Value should never be null under any circumstances but if it is set it to the default value of
             //an int which in this case is zero.
             property.Value ??= default(int);
-
+            
             SpinButton spinButton = new()
             {
                 Integer = valueType.IsNumericInteger(),
@@ -259,6 +260,22 @@ namespace AppleSceneEditor.Factories
             foreach (TextBox otherBox in boxes) valueBuilder.Append(otherBox.Text + " ");
             valueBuilder.Remove(valueBuilder.Length - 1, 1);
             property.Value = valueBuilder.ToString();
+        }
+
+        private static bool IsNullablePrimitive(this Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                   type.GenericTypeArguments[0].IsPrimitive;
+        }
+
+        private static bool IsNumericInteger(this Type t)
+        {
+            return Type.GetTypeCode(t) switch
+            {
+                TypeCode.Byte or TypeCode.SByte or TypeCode.UInt16 or TypeCode.UInt32 or TypeCode.UInt64
+                    or TypeCode.Int16 or TypeCode.Int32 or TypeCode.Int64 => true,
+                _ => false
+            };
         }
         
         

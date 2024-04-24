@@ -7,7 +7,6 @@ using DefaultEcs;
 using DefaultEcs.System;
 using DefaultEcs.Threading;
 using GrappleFight.Collision;
-using GrappleFight.Collision.Components;
 using GrappleFight.Collision.Hulls;
 using GrappleFight.Components;
 using Microsoft.Xna.Framework;
@@ -93,41 +92,38 @@ namespace AppleSceneEditor.Systems
                 
                 entityWorldMatrix.Decompose(out Vector3 _, out Quaternion rotation, out Vector3 position);
 
-                for (int layer = 0; layer < CollisionHullPools.LayerCount; layer++)
+                foreach (ICollisionHull hull in hulls.Hulls)
                 {
-                    Color hullColor = GetLayerColor(layer);
-                    
-                    foreach (ICollisionHull hull in hulls.GetEnumerator(layer))
+                    Color hullColor = GetLayerColor(hull.Layer);
+
+                    if (hull is ComplexBox box)
                     {
-                        if (hull is ComplexBox box)
+                        Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, Vector3.One, true);
+
+                        box.Draw(_graphicsDevice, _boxEffect, hullColor, ref drawWorldMatrix, ref worldCam, null,
+                            _boxVertexBuffer);
+                    }
+
+                    bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireSceneEditorRay);
+
+                    if (fireRayFlag)
+                    {
+                        //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer
+                        float? intercept = worldCam.FireRay(hull, position, rotation, _graphicsDevice.Viewport);
+
+                        if (intercept is not null)
                         {
-                            Matrix drawWorldMatrix = box.GetWorldMatrix(position, rotation, Vector3.One, true);
-
-                            box.Draw(_graphicsDevice, _boxEffect, hullColor, ref drawWorldMatrix, ref worldCam, null,
-                                _boxVertexBuffer);
-                        }
-
-                        bool fireRayFlag = GlobalFlag.IsFlagRaised(GlobalFlags.FireSceneEditorRay);
-
-                        if (fireRayFlag)
-                        {
-                            //Handle user selection. (i.e. when the user attempts to select an entity in the scene viewer
-                            float? intercept = worldCam.FireRay(hull, position, rotation, _graphicsDevice.Viewport);
-
-                            if (intercept is not null)
-                            {
-                                //raise a "selectedEntityFlag" by adding a component which let's everyone that has access to our
-                                //world know that we have selected an entity.
-                                World.Set(new SelectedEntityFlag(entity));
-                                GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
-                            }
+                            //raise a "selectedEntityFlag" by adding a component which let's everyone that has access to our
+                            //world know that we have selected an entity.
+                            World.Set(new SelectedEntityFlag(entity));
+                            GlobalFlag.SetFlag(GlobalFlags.EntitySelected, true);
                         }
                     }
                 }
             }
         }
 
-        private Color GetLayerColor(int layer) => layer switch
+        private static Color GetLayerColor(int layer) => layer switch
         {
             0 => Color.DeepSkyBlue,
             1 => Color.LightSkyBlue,

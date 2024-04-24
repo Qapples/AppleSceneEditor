@@ -270,9 +270,10 @@ namespace AppleSceneEditor.UI
             return null;
         }
 
-        private static Grid CreateDropDown<T>(T widgetsContrainer, string header, EventHandler? onRemoveClick = null) where T : Widget, IMultipleItemsContainer
+        private static Grid CreateDropDown<T>(T widgetsContrainer, string header, EventHandler? onRemoveClick = null)
+            where T : Container
         {
-            Label headerLabel = new(null) {Text = header};
+            Label headerLabel = new(null) { Text = header };
             headerLabel.ApplyLabelStyle(Stylesheet.Current.TreeStyle.LabelStyle);
            
             Grid dropDownGrid = MyraExtensions.CreateDropDown(widgetsContrainer, headerLabel, ComponentGridId);
@@ -299,7 +300,7 @@ namespace AppleSceneEditor.UI
             }
         };
 
-        private TextButton CreateAddArrayElementButton(JsonArray array, IMultipleItemsContainer arrayWidgets,
+        private TextButton CreateAddArrayElementButton(JsonArray array, Container arrayWidgets,
             CommandStream commands)
         {
 #if DEBUG

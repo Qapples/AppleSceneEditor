@@ -17,6 +17,7 @@ using AppleSerialization;
 using AppleSerialization.Converters;
 using AppleSerialization.Info;
 using AppleSerialization.Json;
+using AssetManagementBase;
 using DefaultEcs;
 using DefaultEcs.System;
 using FontStashSharp;
@@ -28,12 +29,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoSound;
 using Myra;
-using Myra.Assets;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.Properties;
 using Myra.Graphics2D.UI.Styles;
-using Myra.Utility;
 using Scene = GrappleFight.Runtime.Scene;
 
 namespace AppleSceneEditor
@@ -94,7 +93,7 @@ namespace AppleSceneEditor
             IsMouseVisible = true;
 
             _uiPath = Path.Combine(Content.RootDirectory, "Menu.xmmp");
-            _stylesheetPath = Path.Combine(Content.RootDirectory, "Stylesheets", "editor_ui_skin.xmms");
+            _stylesheetPath = Path.Combine("Stylesheets", "editor_ui_skin.xmms");
             _defaultWorldPath = Path.Combine(root, "Examples", "BasicWorld", "BasicWorld.world");
             _configPath = Path.Combine(root, "Config");
 
@@ -122,10 +121,10 @@ namespace AppleSceneEditor
                 }
             }
 
-            _uiPath = Path.GetFullPath(_uiPath);
-            _stylesheetPath = Path.GetFullPath(_stylesheetPath);
-            _defaultWorldPath = Path.GetFullPath(_defaultWorldPath);
-            _configPath = Path.GetFullPath(_configPath);
+            // _uiPath = Path.GetFullPath(_uiPath);
+            // _stylesheetPath = Path.GetFullPath(_stylesheetPath);
+            // _defaultWorldPath = Path.GetFullPath(_defaultWorldPath);
+            // _configPath = Path.GetFullPath(_configPath);
 
             _commands = new CommandStream();
         }
@@ -201,8 +200,7 @@ namespace AppleSceneEditor
             string settingsMenuPath = Path.Combine(Content.RootDirectory, "Settings.xmmp");
             
             LoadTypeAliasFileContents(File.ReadAllText(typeAliasPath), _serializationSettings);
-
-
+            
             //ensure that these paths exist.
             string[] missingConfigFiles = (from file in new[] {typeAliasPath, keybindPath, prototypesPath}
                 where !File.Exists(file)
@@ -220,13 +218,14 @@ namespace AppleSceneEditor
             string folder = Path.GetDirectoryName(Path.GetFullPath(_uiPath));
             PropertyGridSettings settings = new()
             {
-                AssetManager = new AssetManager(new FileAssetResolver(folder)),
+                AssetManager = AssetManager.CreateFileAssetManager(folder),
                 BasePath = folder
             };
 
             Stylesheet stylesheet = _stylesheetPath is null
                 ? Stylesheet.Current
-                : settings.AssetManager.Load<Stylesheet>(_stylesheetPath);
+                : settings.AssetManager.LoadStylesheet(_stylesheetPath);
+            stylesheet = Stylesheet.Current;
             Stylesheet.Current = stylesheet;
 
             _openFileDialog = CreateOpenFileDialog();
@@ -249,7 +248,7 @@ namespace AppleSceneEditor
             _hitboxEditorWindow = new Window
             {
                 Content = new HitboxEditor(GraphicsDevice, keybindPath)
-                    {Width = hitboxEditorWidth, Height = hitboxEditorHeight},
+                    { Width = hitboxEditorWidth, Height = hitboxEditorHeight },
                 Width = hitboxEditorWidth,
                 Height = hitboxEditorHeight + 25,
                 MaxWidth = hitboxEditorWidth,
@@ -263,17 +262,27 @@ namespace AppleSceneEditor
                 _hitboxEditor.Visible = false;
             };
 
+            Panel mainPanel = (Panel) _project.Root;
+            mainPanel.AcceptsKeyboardFocus = true;
+
+            if (mainPanel.FindWidgetById("AddComponentButton") is TextButton addComponent &&
+                mainPanel.FindWidgetById("AddEntityButton") is TextButton addEntity)
+            {
+                addComponent.Click += AddComponentButtonClick;
+                //addEntity.Click += AddEntityButtonClick;
+            }
+
             //handle specific widgets (adding extra functionality, etc.). if MainMenu, MainPanel, or MainGrid are not
             //found, then we can no longer continue running and we must fire an exception.
-            List<string> missingWidgets = new() {"MainMenu", "MainPanel", "MainGrid", "ToolMenu"};
+            List<string> missingWidgets = new() {"MainMenu", "MainGrid", "ToolMenu"};
 
-            _project.Root.ProcessWidgets(widget =>
+            foreach (Widget widget in mainPanel.GetChildren())
             {
                 switch (widget.Id)
                 {
                     case "MainMenu":
                     {
-                        if (widget is not HorizontalMenu menu) return false;
+                        if (widget is not HorizontalMenu menu) continue;
                         
                         MenuItem? fileItemOpen = menu.FindMenuItemById("MenuFileOpen");
                         MenuItem? fileItemNew = menu.FindMenuItemById("MenuFileNew");
@@ -292,23 +301,9 @@ namespace AppleSceneEditor
 
                         break;
                     }
-                    case "MainPanel":
-                    {
-                        if (widget is not Panel panel) return false;
-                        if (panel.FindWidgetById("AddComponentButton") is not TextButton addComponent ||
-                            panel.FindWidgetById("AddEntityButton") is not TextButton addEntity) return false;
-
-                        addComponent.Click += AddComponentButtonClick;
-                        //addEntity.Click += AddEntityButtonClick;
-
-                        panel.AcceptsKeyboardFocus = true;
-                        missingWidgets.Remove("MainPanel");
-                        
-                        break;
-                    }
                     case "MainGrid":
                     {
-                        if (widget is not Grid grid) return false;
+                        if (widget is not Grid grid) continue;
                         
                         _mainGrid = grid;
                         _mainGrid.AcceptsKeyboardFocus = true;
@@ -319,7 +314,7 @@ namespace AppleSceneEditor
                     }
                     case "ToolMenu":
                     {
-                        if (widget is not StackPanel toolPanel) return false;
+                        if (widget is not StackPanel toolPanel) continue;
 
                         ImageButton? moveToolButton = toolPanel.FindWidgetById("MoveToolButton") as ImageButton;
                         ImageButton? rotateToolButton = toolPanel.FindWidgetById("RotateToolButton") as ImageButton;
@@ -374,16 +369,13 @@ namespace AppleSceneEditor
                         break;
                     }
                 }
-
-                return true;
-            });
+            }
 
             if (missingWidgets.Count > 0)
             { 
                 throw new WidgetNotFoundException(missingWidgets.ToArray());
             }
-
-
+            
             string fileIconsPath = Path.Combine(Content.RootDirectory, "Textures", "FileIcons");
             string sceneIconsPath = Path.Combine(Content.RootDirectory, "Textures", "SceneIcons");
             string examplesPath = Path.Combine(Content.RootDirectory, "..", "Examples");
@@ -466,8 +458,8 @@ namespace AppleSceneEditor
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(
-                Keys.OemTilde)) Exit();
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.OemTilde)) Exit();
 
             KeyboardState kbState = Keyboard.GetState();
             MouseState mouseState = Mouse.GetState();

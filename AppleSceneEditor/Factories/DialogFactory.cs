@@ -117,8 +117,7 @@ namespace AppleSceneEditor.Factories
             //vital for the editor to run property and any error is to be known immediately.
             
             Project project = Project.LoadFromXml(File.ReadAllText(filePath));
-            Widget root = project.Root;
-            StackPanel mainPanel = (StackPanel) root.FindWidgetById("MainPanel");
+            StackPanel mainPanel = (StackPanel) project.Root;
             Window outWindow = new() {Content = mainPanel, MinWidth = 600, MinHeight = 600};
 
             foreach (Widget widget in mainPanel.Widgets)
@@ -130,7 +129,7 @@ namespace AppleSceneEditor.Factories
             }
 
             //add functionality for switching panels via the menu and initialize menus.
-            Menu panelSelectionMenu = (Menu) root.FindWidgetById("PanelSelectionMenu");
+            Menu panelSelectionMenu = (Menu) mainPanel.FindWidgetById("PanelSelectionMenu");
             foreach (var menuItem in panelSelectionMenu.Items)
             {
                 MenuItem item = (MenuItem) menuItem;
@@ -180,14 +179,14 @@ namespace AppleSceneEditor.Factories
         //There's probably a better name to be had with this method, but I can't come up with one. So, docs are going
         //to have to do for now.
         /// <summary>
-        /// Within a <see cref="IMultipleItemsContainer"/>, make all <see cref="Panel"/> instances invisible except
+        /// Within a <see cref="Container"/>, make all <see cref="Panel"/> instances invisible except
         /// for one specified panel.
         /// </summary>
         /// <remarks>This method performs a REFERENCE comparison, not an ID comparison!</remarks>
-        /// <param name="panelsContainer"><see cref="IMultipleItemsContainer"/> with the <see cref="Panel"/> instances to make
+        /// <param name="panelsContainer"><see cref="Container"/> with the <see cref="Panel"/> instances to make
         /// visibile/invisible</param>
         /// <param name="panel">The <see cref="Panel"/> to make visible while the other panels are invisible</param>
-        private static void UpdatePanelVisibility(IMultipleItemsContainer panelsContainer, Panel panel)
+        private static void UpdatePanelVisibility(Container panelsContainer, Panel panel)
         {
             (panel.Visible, panel.Enabled) = (true, true);
             
