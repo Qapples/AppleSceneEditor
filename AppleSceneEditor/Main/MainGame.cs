@@ -172,6 +172,9 @@ namespace AppleSceneEditor
             AddExternalType(typeof(ParentInfo), _serializationSettings);
             AddExternalType(typeof(ComponentReferenceInfo), _serializationSettings);
             AddExternalType(typeof(AudioListenerInfo), _serializationSettings);
+            AddExternalType(typeof(DrawOrderInfo), _serializationSettings);
+            AddExternalType(typeof(Vector2), _serializationSettings);
+            AddExternalType(typeof(Color), _serializationSettings);
             
             EntityExtensions.SerializationSettings = _serializationSettings;
 
