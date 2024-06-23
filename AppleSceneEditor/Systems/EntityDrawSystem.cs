@@ -56,6 +56,12 @@ namespace AppleSceneEditor.Systems
             if (entity.Has<MeshData>())
             {
                 var meshData = entity.Get<MeshData>();
+                
+                if (entity.Has<Texture2D>())
+                {
+                    dynamic meshEffect = meshData.Effect;
+                    meshEffect.Texture = entity.Get<Texture2D>();
+                }
 
                 //Note: CollectionsMarshal.AsSpan(List<T>) is unsafe and therefore the incoming list must not be edited.
 
