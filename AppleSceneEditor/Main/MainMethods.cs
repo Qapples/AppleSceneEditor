@@ -62,7 +62,7 @@ namespace AppleSceneEditor
 
             //initialize world-wide components
             scene.World.Set(new Camera(Vector3.Zero, Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(95f),
-                GraphicsDevice.DisplayMode.AspectRatio, 1f, 1000f), GraphicsDevice.Viewport, 2f, 0));
+                GraphicsDevice.DisplayMode.AspectRatio, 1f, 10000f), GraphicsDevice.Viewport, 2f, 0));
                     
             scene.World.Set(new CameraProperties
             {
